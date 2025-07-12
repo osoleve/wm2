@@ -4,7 +4,6 @@
 
 [build.environment]
   # Netlify will automatically use environment variables you set in the dashboard
-  # Just make sure your VITE_OPENROUTER_API_KEY is set in Netlify's environment variables
 
 [[headers]]
   for = "/*"
