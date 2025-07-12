@@ -1,15 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Message.css';
 
 const Message = ({ message, isUser }) => {
+  const [activePerspective, setActivePerspective] = useState('synthesis');
+  
+  const isPrismMessage = message.isPrism && message.perspectives;
+
+  const getDisplayContent = () => {
+    if (!isPrismMessage) {
+      return message.content;
+    }
+
+    if (activePerspective === 'synthesis') {
+      return message.synthesis || message.content;
+    }
+
+    const perspective = message.perspectives.find(p => p.perspective === activePerspective);
+    return perspective ? perspective.content : message.content;
+  };
+
+  const getDisplayTitle = () => {
+    if (!isPrismMessage) {
+      return isUser ? 'You' : 'AI';
+    }
+
+    if (activePerspective === 'synthesis') {
+      return 'AI Synthesis';
+    }
+
+    return activePerspective;
+  };
+
   return (
-    <div className={`message ${isUser ? 'message-user' : 'message-ai'}`}>
+    <div className={`message ${isUser ? 'message-user' : 'message-ai'} ${isPrismMessage ? 'message-prism' : ''}`}>
       <div className="message-content">
+        {isPrismMessage && (
+          <div className="prism-tabs">
+            <button 
+              className={`prism-tab ${activePerspective === 'synthesis' ? 'active' : ''}`}
+              onClick={() => setActivePerspective('synthesis')}
+            >
+              Synthesis ({message.perspectives.length})
+            </button>
+            {message.perspectives.map((perspective, index) => (
+              <button 
+                key={index}
+                className={`prism-tab ${activePerspective === perspective.perspective ? 'active' : ''}`}
+                onClick={() => setActivePerspective(perspective.perspective)}
+                title={perspective.perspective}
+              >
+                {perspective.perspective.length > 12 
+                  ? `${perspective.perspective.substring(0, 12)}...` 
+                  : perspective.perspective}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="message-text">
-          {message.content}
+          {getDisplayContent()}
         </div>
         <div className="message-role">
-          {isUser ? 'You' : 'AI'}
+          {getDisplayTitle()}
         </div>
       </div>
     </div>

@@ -184,13 +184,16 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
   async generatePrismResponses(userMessage, conversationHistory, model, selectedPrisms) {
     const responses = [];
     
+    // Create conversation history without system prompt for prism perspectives
+    const prismConversationHistory = conversationHistory.filter(msg => msg.role !== 'system');
+    
     for (const prismName of selectedPrisms) {
       try {
         const prismPrompt = await this.loadPrismPrompt(prismName);
         
-        // Create a conversation with the prism perspective as system prompt
+        // Create a conversation with ONLY the prism perspective as system prompt
         const prismSystemMessage = { role: 'system', content: prismPrompt };
-        const prismConversation = [prismSystemMessage, ...conversationHistory];
+        const prismConversation = [prismSystemMessage, ...prismConversationHistory];
         
         const response = await chatService.sendMessage(prismConversation, model);
         responses.push({
@@ -237,6 +240,36 @@ Keep your response under 500 words.`;
       console.error('Error synthesizing prism responses:', error);
       throw error;
     }
+  }
+
+  // Generate complete prism analysis with perspectives and synthesis
+  async generateCompletePrismResponse(userMessage, conversationHistory, model) {
+    const selectedPrisms = this.selectRandomPrisms(5, 10);
+    console.log('Selected prisms:', selectedPrisms);
+    
+    // Generate responses from each prism perspective (without general system prompt)
+    const prismResponses = await this.generatePrismResponses(
+      userMessage, 
+      conversationHistory, 
+      model, 
+      selectedPrisms
+    );
+    
+    // Synthesize all perspectives into a final response (with general system prompt)
+    const synthesizedResponse = await this.synthesizePrismResponses(
+      userMessage,
+      prismResponses,
+      conversationHistory[0]?.content || '', // Use the system prompt from conversation history
+      model
+    );
+
+    return {
+      role: 'assistant',
+      content: synthesizedResponse.content,
+      isPrism: true,
+      perspectives: prismResponses,
+      synthesis: synthesizedResponse.content
+    };
   }
 }
 

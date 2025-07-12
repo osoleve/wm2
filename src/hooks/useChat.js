@@ -26,22 +26,9 @@ export const useChat = () => {
 
       if (isPrismEnabled) {
         // Prism mode: Generate multi-perspective response
-        const selectedPrisms = prismService.selectRandomPrisms(5, 10);
-        console.log('Selected prisms:', selectedPrisms);
-        
-        // Generate responses from each prism perspective
-        const prismResponses = await prismService.generatePrismResponses(
-          content, 
-          [...messages, userMessage], 
-          model, 
-          selectedPrisms
-        );
-        
-        // Synthesize all perspectives into a final response
-        aiResponse = await prismService.synthesizePrismResponses(
+        aiResponse = await prismService.generateCompletePrismResponse(
           content,
-          prismResponses,
-          SYSTEM_PROMPT,
+          conversationHistory,
           model
         );
       } else {
