@@ -15,7 +15,7 @@
 @media (min-width: 769px) {
   .chat-container {
     height: calc(100vh - 2rem);
-    border-radius: 16px; /* Slightly more rounded */
+    border-radius: 16px; /* Slightly more rounded */ 
     box-shadow: var(--shadow-lg), var(--glow-subtle);
   }
 }
