@@ -3,6 +3,10 @@ import OpenAI from 'openai';
 // OpenRouter API service using OpenAI SDK
 class ChatService {
   constructor() {
+    // Debug logging for deployment
+    console.log('API Key exists:', !!import.meta.env.VITE_OPENROUTER_API_KEY);
+    console.log('Current origin:', window.location.origin);
+    
     this.client = new OpenAI({
       baseURL: "https://openrouter.ai/api/v1",
       apiKey: import.meta.env.VITE_OPENROUTER_API_KEY,
