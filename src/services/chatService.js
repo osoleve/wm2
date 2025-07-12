@@ -6,7 +6,10 @@ class ChatService {
     this.client = new OpenAI({
       baseURL: "https://openrouter.ai/api/v1",
       apiKey: import.meta.env.VITE_OPENROUTER_API_KEY,
-      dangerouslyAllowBrowser: true // Only for client-side usage
+      defaultHeaders: {
+        "HTTP-Referer": window.location.origin, // To identify your app
+        "X-Title": "React Chat App", // Optional: your app name
+      }
     });
   }
 
@@ -32,6 +35,8 @@ class ChatService {
       const response = await fetch('https://openrouter.ai/api/v1/models', {
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'React Chat App',
         },
       });
       const data = await response.json();
