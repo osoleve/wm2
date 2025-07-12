@@ -1,7 +1,8 @@
 {
-  "name": "wm2",
+  "name": "prism-perspective",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Multi-dimensional AI conversations with perspective analysis",
   "type": "module",
   "scripts": {
     "dev": "vite",

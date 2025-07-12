@@ -17,8 +17,11 @@ const ChatMessages = ({ messages, isLoading }) => {
     <div className="chat-messages">
       {messages.length === 0 ? (
         <div className="empty-state">
-          <h3>Welcome to ChatBot!</h3>
-          <p>Start a conversation by typing a message below.</p>
+          <h3>
+            The limits of your <span className="highlight">language</span>
+            <br />
+            are the limits of your <span className="highlight">world</span>
+          </h3>
         </div>
       ) : (
         messages.map((message, index) => (

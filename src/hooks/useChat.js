@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import chatService from '../services/chatService';
 import prismService from '../services/prismService';
+import loggingService from '../services/loggingService';
 import { SYSTEM_PROMPT } from '../utils/systemPrompt';
 
 export const useChat = () => {
@@ -37,6 +38,9 @@ export const useChat = () => {
       }
       
       setMessages(prev => [...prev, aiResponse]);
+      
+      // Log the message exchange
+      loggingService.logMessage(content, aiResponse, model, isPrismEnabled);
     } catch (err) {
       setError(err.message || 'Failed to send message');
       console.error('Chat error:', err);
@@ -48,6 +52,8 @@ export const useChat = () => {
   const clearChat = useCallback(() => {
     setMessages([]);
     setError(null);
+    // Start a new session when clearing chat
+    loggingService.clearCurrentSession();
   }, []);
 
   const togglePrism = useCallback(() => {

@@ -3,25 +3,39 @@ import { useChat } from '../hooks/useChat';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
 import PrismToggle from './PrismToggle';
+import LoggingDashboard from './LoggingDashboard';
 import './Chat.css';
 
 const Chat = () => {
   const { messages, isLoading, error, sendMessage, clearChat, isPrismEnabled, togglePrism } = useChat();
-  const [selectedModel, setSelectedModel] = useState('openai/gpt-3.5-turbo');
+  const [selectedModel, setSelectedModel] = useState('openai/gpt-4o');
+  const [isLoggingDashboardOpen, setIsLoggingDashboardOpen] = useState(false);
+
+  console.log('Chat render - isLoggingDashboardOpen:', isLoggingDashboardOpen);
 
   return (
     <div className="chat-container">
       <div className="chat-header">
         <div className="header-content">
-          <h1>AI Chat Assistant</h1>
-          <p>Powered by OpenRouter</p>
+          <h1>👁️</h1>
         </div>
         <div className="header-controls">
-          <PrismToggle 
-            isPrismEnabled={isPrismEnabled}
-            onToggle={togglePrism}
-            isLoading={isLoading}
-          />
+          {isPrismEnabled && (
+            <div className="prism-status-badge">
+              <div className="prism-icon-small">◊</div>
+              <span>Prism Active</span>
+            </div>
+          )}
+          <button 
+            onClick={() => {
+              console.log('History button clicked');
+              setIsLoggingDashboardOpen(true);
+            }} 
+            className="history-button"
+            title="View Session History"
+          >
+            📊 History
+          </button>
           <button 
             onClick={clearChat} 
             className="clear-button"
@@ -54,6 +68,12 @@ const Chat = () => {
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
         isPrismEnabled={isPrismEnabled}
+        togglePrism={togglePrism}
+      />
+
+      <LoggingDashboard 
+        isOpen={isLoggingDashboardOpen}
+        onClose={() => setIsLoggingDashboardOpen(false)}
       />
     </div>
   );

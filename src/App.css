@@ -8,11 +8,20 @@
   padding: 0;
   box-sizing: border-box;
   overflow: hidden;
+  /* Subtle ambient texture */
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(143, 166, 142, 0.01) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(230, 184, 125, 0.01) 0%, transparent 50%);
 }
 
 @media (min-width: 769px) {
   .app {
     padding: 1rem;
     align-items: center;
+    /* Enhanced ambient lighting for larger screens */
+    background-image: 
+      radial-gradient(circle at 20% 20%, rgba(143, 166, 142, 0.015) 0%, transparent 60%),
+      radial-gradient(circle at 80% 80%, rgba(230, 184, 125, 0.015) 0%, transparent 60%),
+      radial-gradient(circle at 50% 10%, rgba(244, 240, 232, 0.005) 0%, transparent 40%);
   }
 }

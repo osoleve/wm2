@@ -1,0 +1,211 @@
+/* Session Summary Card Styles */
+.session-summary-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.session-summary-card:hover {
+  border-color: var(--accent-color);
+  box-shadow: var(--glow-subtle);
+}
+
+.session-summary-card.selected {
+  border-color: var(--accent-color);
+  background: var(--bg-tertiary);
+  box-shadow: var(--glow-subtle);
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.session-title h4 {
+  margin: 0 0 4px 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.session-time {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.session-actions {
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.session-summary-card:hover .session-actions {
+  opacity: 1;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.action-button:hover {
+  background: var(--bg-tertiary);
+}
+
+.action-button.delete:hover {
+  background: rgba(212, 117, 107, 0.2);
+  color: var(--error-color);
+}
+
+.session-stats {
+  margin-bottom: 12px;
+}
+
+.stat-group {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.stat-value {
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.interaction-breakdown {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.interaction-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.interaction-stat.prism {
+  background: var(--tab-glow);
+  color: var(--tab-highlight);
+}
+
+.interaction-stat.regular {
+  background: rgba(143, 166, 142, 0.15);
+  color: var(--accent-color);
+}
+
+.prism-icon, .regular-icon {
+  font-size: 10px;
+}
+
+.models-used {
+  margin-bottom: 8px;
+}
+
+.models-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.models-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.model-tag {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.perspectives-used {
+  border-top: 1px solid var(--border-color);
+  padding-top: 8px;
+}
+
+.perspectives-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.perspectives-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.perspective-tag-small {
+  background: var(--tab-glow);
+  color: var(--tab-highlight);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.more-indicator {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .session-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .session-actions {
+    opacity: 1;
+    align-self: flex-end;
+  }
+
+  .stat-group {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .interaction-breakdown {
+    gap: 8px;
+  }
+}
