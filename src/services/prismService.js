@@ -243,9 +243,10 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
     const prismPromises = selectedPrisms.map(async (prismName) => {
       try {
         const prismPrompt = await this.loadPrismPrompt(prismName);
+        const extra_instructions = `Keep your response under 300 words, in a concise, clear, conversational style.`;
         
         // Create a conversation with ONLY the prism perspective as system prompt
-        const prismSystemMessage = { role: 'system', content: prismPrompt };
+        const prismSystemMessage = { role: 'system', content: prismPrompt + '\n\n' + extra_instructions };
         const prismConversation = [prismSystemMessage, ...prismConversationHistory];
         
         const response = await chatService.sendMessage(prismConversation, model);
@@ -282,9 +283,7 @@ ${response.content}
 
 `).join('')}
 
-These perspectives were chosen specifically for their relevance to the question. Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.
-
-Keep your response under 250 words.`;
+Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.`;
 
     try {
       const synthesisMessage = { role: 'system', content: synthesisPrompt };

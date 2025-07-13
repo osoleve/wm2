@@ -36,15 +36,30 @@ class ChatService {
 
   // Get available models (optional feature)
   async getAvailableModels() {
-    try {
-      const response = await fetch('https://openrouter.ai/api/v1/models');
-      const data = await response.json();
-      return data.data;
-    } catch (error) {
-      console.error('Error fetching models:', error);
-      throw error;
-    }
+  //   try {
+  //     const response = await fetch('https://openrouter.ai/api/v1/models?providers=groq,cerebras');
+  //     const data = await response.json();
+  //     return data.data;
+  //   } catch (error) {
+  //     console.error('Error fetching models:', error);
+  //     throw error;
+  //   }
+  // }
+  // Til I can figure out how to only list models from certain providers
+  if (this.isDevelopment) {
+  return [
+    { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B Instruct' },
+    { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3 8B Instruct' },
+    { id: 'openai/gpt-4.1', name: 'GPT-4.1' },
+    { id: 'openai/gpt-4.1-mini', name: 'GPT-4.1 Mini' },
+    { id: 'openai/gpt-4.1-nano', name: 'GPT-4.1 Nano' },
+    { id: 'anthropic/claude-3.5-haiku:beta', name: 'Claude 3.5 Haiku Beta' },
+    { id: 'google/gemma-2-9b-it', name: 'Gemini 2 9B IT' }
+  ]
+}
+  return [
+    { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B Instruct' }
+  ];
   }
 }
-
 export default new ChatService();
