@@ -143,7 +143,7 @@ class PrismService {
     ];
   }
 
-  // Randomly select 5-10 prism perspectives
+  // Randomly select 5-10 prism perspectives (backup method)
   selectRandomPrisms(min = 5, max = 10) {
     const count = Math.floor(Math.random() * (max - min + 1)) + min;
     const shuffled = [...this.prismFiles].sort(() => 0.5 - Math.random());
@@ -151,6 +151,59 @@ class PrismService {
     
     console.log(`🔍 Prism Analysis: Selected ${count} perspectives:`, selected);
     return selected;
+  }
+
+  // AI-driven prism selection based on user message
+  async selectAIPrisms(userMessage, conversationHistory, model, min = 5, max = 8) {
+    try {
+      const selectionPrompt = `You are a meta-analytical AI that selects the most relevant theoretical lenses for analyzing a given question or topic.
+
+Given the user's message: "${userMessage}"
+
+Available theoretical lenses:
+${this.prismFiles.join(', ')}
+
+Instructions:
+1. Select between ${min} and ${max} theoretical lenses that would provide the most insightful and diverse perspectives on this question
+2. Choose lenses that complement each other and offer different angles of analysis
+3. Prioritize lenses that are most relevant to the specific content and context of the question
+4. Consider both obvious and non-obvious connections that might yield surprising insights
+5. Respond with ONLY a JSON array of the selected lens names, exactly as they appear in the list
+
+Example response format:
+["Critical Race Theory", "Systems Theory", "Phenomenology", "Queer Theory", "Environmental Justice Framework"]
+
+Your response:`;
+
+      const selectionMessage = { role: 'system', content: selectionPrompt };
+      const selectionConversation = [selectionMessage, { role: 'user', content: userMessage }];
+      
+      const response = await chatService.sendMessage(selectionConversation, model);
+      
+      // Parse the JSON response
+      let selectedPrisms;
+      try {
+        selectedPrisms = JSON.parse(response.content.trim());
+      } catch (parseError) {
+        console.warn('Failed to parse AI prism selection, falling back to random selection:', parseError);
+        return this.selectRandomPrisms(min, max);
+      }
+      
+      // Validate that all selected prisms exist in our list
+      const validPrisms = selectedPrisms.filter(prism => this.prismFiles.includes(prism));
+      
+      if (validPrisms.length === 0) {
+        console.warn('No valid prisms in AI selection, falling back to random selection');
+        return this.selectRandomPrisms(min, max);
+      }
+      
+      console.log(`🤖 AI Selected ${validPrisms.length} prisms:`, validPrisms);
+      return validPrisms;
+      
+    } catch (error) {
+      console.error('Error in AI prism selection, falling back to random selection:', error);
+      return this.selectRandomPrisms(min, max);
+    }
   }
 
   // Load a specific prism prompt from the server
@@ -220,7 +273,7 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
 
 You have just received multiple analytical perspectives on the following user question: "${userMessage}"
 
-Here are the perspectives and their responses:
+These specific theoretical lenses were intelligently selected as the most relevant for analyzing this question:
 
 ${prismResponses.map(response => 
   `**${response.perspective} Perspective:**
@@ -228,7 +281,7 @@ ${response.content}
 
 `).join('')}
 
-Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.
+These perspectives were chosen specifically for their relevance to the question. Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.
 
 Keep your response under 500 words.`;
 
@@ -246,8 +299,12 @@ Keep your response under 500 words.`;
 
   // Generate complete prism analysis with perspectives and synthesis
   async generateCompletePrismResponse(userMessage, conversationHistory, model) {
-    const selectedPrisms = this.selectRandomPrisms(5, 10);
-    console.log('🔍 Selected prisms:', selectedPrisms);
+    console.log('🤖 Using AI to select most relevant prisms...');
+    
+    // Use AI to select the most relevant prisms instead of random selection
+    const selectedPrisms = await this.selectAIPrisms(userMessage, conversationHistory, model, 5, 8);
+    
+    console.log('🔍 AI selected prisms:', selectedPrisms);
     console.log('🚀 Generating prism perspectives in parallel...');
     
     // Generate responses from each prism perspective (without general system prompt) - in parallel
