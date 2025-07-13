@@ -6,6 +6,11 @@
   # Netlify will automatically use environment variables you set in the dashboard
   # Updated: Force clean rebuild
 
+[dev]
+  command = "npm run dev"
+  port = 5174
+  functions = "netlify/functions"
+
 [[headers]]
   for = "/*"
   [headers.values]

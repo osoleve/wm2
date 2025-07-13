@@ -1,5 +1,6 @@
 // Service for handling Prism functionality
 import chatService from './chatService';
+import { SYSTEM_PROMPT } from '../utils/systemPrompt';
 
 class PrismService {
   constructor() {
@@ -283,7 +284,7 @@ ${response.content}
 
 These perspectives were chosen specifically for their relevance to the question. Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.
 
-Keep your response under 500 words.`;
+Keep your response under 250 words.`;
 
     try {
       const synthesisMessage = { role: 'system', content: synthesisPrompt };
@@ -321,7 +322,7 @@ Keep your response under 500 words.`;
     const synthesizedResponse = await this.synthesizePrismResponses(
       userMessage,
       prismResponses,
-      conversationHistory[0]?.content || '', // Use the system prompt from conversation history
+      SYSTEM_PROMPT, // Use the imported system prompt directly
       model
     );
 

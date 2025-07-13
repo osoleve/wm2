@@ -8,7 +8,7 @@ import './Chat.css';
 
 const Chat = () => {
   const { messages, isLoading, error, sendMessage, clearChat, isPrismEnabled, togglePrism } = useChat();
-  const [selectedModel, setSelectedModel] = useState('openai/gpt-4o');
+  const [selectedModel, setSelectedModel] = useState('openai/gpt-4.1');
   const [isLoggingDashboardOpen, setIsLoggingDashboardOpen] = useState(false);
 
   console.log('Chat render - isLoggingDashboardOpen:', isLoggingDashboardOpen);
@@ -17,16 +17,16 @@ const Chat = () => {
     <div className="chat-container">
       <div className="chat-header">
         <div className="header-content">
-          <h1>👁️</h1>
+          <h1 className={isPrismEnabled ? 'prism-enabled' : ''}>{isPrismEnabled ? '( ͡°( ͡° ͜ʖ( ͡° ͜ʖ ͡°)ʖ ͡°) ͡°)' : '👁️'}</h1>
         </div>
         <div className="header-controls">
-          {isPrismEnabled && (
+          {/* {isPrismEnabled && (
             <div className="prism-status-badge">
-              <div className="prism-icon-small">◊</div>
-              <span>Prism Active</span>
-            </div>
-          )}
-          <button 
+              <div className="prism-icon-small">∆y</div>
+              {/* <span>Prism Active</span> */}
+            {/* </div> */}
+          
+          {/* <button 
             onClick={() => {
               console.log('History button clicked');
               setIsLoggingDashboardOpen(true);
@@ -35,7 +35,7 @@ const Chat = () => {
             title="View Session History"
           >
             📊 History
-          </button>
+          </button> */}
           <button 
             onClick={clearChat} 
             className="clear-button"

@@ -59,9 +59,9 @@ const Message = ({ message, isUser }) => {
         <div className="message-text">
           {getDisplayContent()}
         </div>
-        <div className="message-role">
+        {/* <div className="message-role">
           {getDisplayTitle()}
-        </div>
+        </div> */}
       </div>
     </div>
   );

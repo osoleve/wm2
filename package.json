@@ -1,11 +1,12 @@
 {
-  "name": "prism-perspective",
+  "name": "wm",
   "private": true,
   "version": "1.0.0",
-  "description": "Multi-dimensional AI conversations with perspective analysis",
+  "description": "Multi-perspective AI analysis",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:netlify": "netlify dev",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

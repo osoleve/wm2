@@ -18,9 +18,9 @@ const ChatMessages = ({ messages, isLoading }) => {
       {messages.length === 0 ? (
         <div className="empty-state">
           <h3>
-            The limits of your <span className="highlight">language</span>
-            <br />
-            are the limits of your <span className="highlight">world</span>
+            The <span className="highlight2">limits</span> of your <span className="highlight">language</span>
+            <br />are 
+            the <span className="highlight2">limits</span> of your <span className="highlight">world</span>
           </h3>
         </div>
       ) : (

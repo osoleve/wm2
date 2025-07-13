@@ -4,8 +4,8 @@ const client = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
   defaultHeaders: {
-    "HTTP-Referer": process.env.URL || "https://your-site.netlify.app",
-    "X-Title": "React Chat App",
+    "HTTP-Referer": process.env.URL,
+    "X-Title": "Wittgenstein's Monster",
   }
 });
 
@@ -35,7 +35,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { messages, model = "openai/gpt-3.5-turbo" } = JSON.parse(event.body);
+    const { messages, model = "openai/gpt-4.1" } = JSON.parse(event.body);
 
     const completion = await client.chat.completions.create({
       model: model,

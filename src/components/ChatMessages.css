@@ -10,6 +10,16 @@
   scrollbar-color: var(--border-light) transparent;
 }
 
+.highlight {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.highlight2 {
+  background: var(--tab-highlight);
+  color: var(--bg-secondary);
+}
+
 .chat-messages::-webkit-scrollbar {
   width: 8px;
 }

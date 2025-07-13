@@ -3,9 +3,10 @@ class ChatService {
   constructor() {
     // Use Netlify function instead of direct API calls
     this.apiUrl = '/.netlify/functions/chat';
+    this.isDevelopment = import.meta.env.DEV;
   }
 
-  async sendMessage(messages, model = "openai/gpt-3.5-turbo") {
+  async sendMessage(messages, model = "openai/gpt-4.1") {
     try {
       const response = await fetch(this.apiUrl, {
         method: 'POST',
@@ -19,6 +20,9 @@ class ChatService {
       });
 
       if (!response.ok) {
+        if (response.status === 404 && this.isDevelopment) {
+          throw new Error('Development server detected. Please run "npm run dev:netlify" instead of "npm run dev" to enable chat functionality.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 

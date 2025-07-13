@@ -74,15 +74,34 @@
 }
 
 .prism-toggle.enabled .prism-icon {
-  animation: prism-glow 3s ease-in-out infinite alternate;
+  animation: prism-glow 2s ease-in-out infinite alternate;
 }
 
 @keyframes prism-glow {
-  from {
-    filter: drop-shadow(0 0 2px currentColor);
+  0% {
+    filter: drop-shadow(0px 0px 2px red) invert(25%);
+    transform: scale(1);
+    
   }
-  to {
-    filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 12px rgba(230, 184, 125, 0.3));
+  20% {
+    filter: drop-shadow(0px 0px 2px orange) invert(25%);
+    transform: scale(1.025);
+  }
+  40% {
+    filter: drop-shadow(0px 0px 2px yellow) invert(25%);
+    transform: scale(1.05);
+  }
+  60% {
+    filter: drop-shadow(0px 0px 2px green) invert(25%);
+    transform: scale(1.075);
+  }
+  80% {
+    filter: drop-shadow(0px 0px 2px blue) invert(25%);
+    transform: scale(1.1);
+  }
+  100% {
+    filter: drop-shadow(0px 0px 2px purple) invert(25%);
+    transform: scale(1.125);
   }
 }
 

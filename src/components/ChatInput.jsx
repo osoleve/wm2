@@ -17,18 +17,19 @@ const ChatInput = ({ onSendMessage, isLoading, selectedModel, onModelChange, isP
         // Filter and format popular models for better UX
         const popularModels = availableModels.filter(model => {
           const id = model.id.toLowerCase();
-          return (
-            id.includes('gpt-4') ||
-            id.includes('gpt-3.5') ||
-            id.includes('claude-3') ||
-            id.includes('claude-2') ||
-            id.includes('llama-3') ||
-            id.includes('llama-2') ||
-            id.includes('gemini') ||
-            id.includes('mixtral') ||
-            id.includes('qwen') ||
-            id.includes('deepseek')
-          );
+          // return (
+          //   id.includes('gpt-4') ||
+          //   id.includes('gpt-3.5') ||
+          //   id.includes('claude-3') ||
+          //   id.includes('claude-2') ||
+          //   id.includes('llama-3') ||
+          //   id.includes('llama-2') ||
+          //   id.includes('gemini') ||
+          //   id.includes('mixtral') ||
+          //   id.includes('qwen') ||
+          //   id.includes('deepseek')
+          // );
+          return true;
         }).map(model => ({
           id: model.id,
           name: model.name || model.id.split('/').pop(),
@@ -39,16 +40,17 @@ const ChatInput = ({ onSendMessage, isLoading, selectedModel, onModelChange, isP
         const sortedModels = popularModels.sort((a, b) => {
           const getCategory = (id) => {
             const lower = id.toLowerCase();
-            if (lower.includes('gpt-4')) return 0;
-            if (lower.includes('claude-3')) return 1;
-            if (lower.includes('gemini')) return 2;
-            if (lower.includes('llama-3')) return 3;
-            if (lower.includes('mixtral')) return 4;
-            if (lower.includes('qwen')) return 5;
-            if (lower.includes('deepseek')) return 6;
-            if (lower.includes('gpt-3.5')) return 7;
-            if (lower.includes('claude-2')) return 8;
-            if (lower.includes('llama-2')) return 9;
+            // if (lower.includes('gpt-4')) return 0;
+            // if (lower.includes('claude-3')) return 1;
+            // if (lower.includes('gemini')) return 2;
+            // if (lower.includes('llama-3')) return 3;
+            // if (lower.includes('mixtral')) return 4;
+            // if (lower.includes('qwen')) return 5;
+            // if (lower.includes('deepseek')) return 6;
+            // if (lower.includes('gpt-3.5')) return 7;
+            // if (lower.includes('claude-2')) return 8;
+            // if (lower.includes('llama-2')) return 9;
+            if (lower.includes('free')) return 0;
             return 999;
           };
           
