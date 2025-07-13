@@ -180,14 +180,13 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
     }
   }
 
-  // Generate responses from multiple prism perspectives
+  // Generate responses from multiple prism perspectives (in parallel)
   async generatePrismResponses(userMessage, conversationHistory, model, selectedPrisms) {
-    const responses = [];
-    
     // Create conversation history without system prompt for prism perspectives
     const prismConversationHistory = conversationHistory.filter(msg => msg.role !== 'system');
     
-    for (const prismName of selectedPrisms) {
+    // Generate all prism responses in parallel
+    const prismPromises = selectedPrisms.map(async (prismName) => {
       try {
         const prismPrompt = await this.loadPrismPrompt(prismName);
         
@@ -196,18 +195,21 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
         const prismConversation = [prismSystemMessage, ...prismConversationHistory];
         
         const response = await chatService.sendMessage(prismConversation, model);
-        responses.push({
+        return {
           perspective: prismName,
           content: response.content
-        });
+        };
       } catch (error) {
         console.error(`Error generating response for ${prismName}:`, error);
-        responses.push({
+        return {
           perspective: prismName,
           content: `[Error generating ${prismName} perspective]`
-        });
+        };
       }
-    }
+    });
+    
+    // Wait for all prism responses to complete
+    const responses = await Promise.all(prismPromises);
     
     return responses;
   }
@@ -245,15 +247,18 @@ Keep your response under 500 words.`;
   // Generate complete prism analysis with perspectives and synthesis
   async generateCompletePrismResponse(userMessage, conversationHistory, model) {
     const selectedPrisms = this.selectRandomPrisms(5, 10);
-    console.log('Selected prisms:', selectedPrisms);
+    console.log('🔍 Selected prisms:', selectedPrisms);
+    console.log('🚀 Generating prism perspectives in parallel...');
     
-    // Generate responses from each prism perspective (without general system prompt)
+    // Generate responses from each prism perspective (without general system prompt) - in parallel
     const prismResponses = await this.generatePrismResponses(
       userMessage, 
       conversationHistory, 
       model, 
       selectedPrisms
     );
+    
+    console.log('✅ All prism perspectives generated, synthesizing response...');
     
     // Synthesize all perspectives into a final response (with general system prompt)
     const synthesizedResponse = await this.synthesizePrismResponses(
