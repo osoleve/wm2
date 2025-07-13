@@ -4,6 +4,7 @@
 
 [build.environment]
   # Netlify will automatically use environment variables you set in the dashboard
+  # Updated: Force clean rebuild
 
 [[headers]]
   for = "/*"
