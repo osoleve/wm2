@@ -1,28 +1,29 @@
-import OpenAI from 'openai';
-
-// OpenRouter API service using OpenAI SDK
+// OpenRouter API service using Netlify Functions
 class ChatService {
   constructor() {
-    this.client = new OpenAI({
-      baseURL: "https://openrouter.ai/api/v1",
-      apiKey: import.meta.env.VITE_OPENROUTER_API_KEY,
-      defaultHeaders: {
-        "HTTP-Referer": window.location.origin, // To identify your app
-        "X-Title": "React Chat App", // Optional: your app name
-      }
-    });
+    // Use Netlify function instead of direct API calls
+    this.apiUrl = '/.netlify/functions/chat';
   }
 
   async sendMessage(messages, model = "openai/gpt-3.5-turbo") {
     try {
-      const completion = await this.client.chat.completions.create({
-        model: model,
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 1000,
+      const response = await fetch(this.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: messages,
+          model: model
+        })
       });
 
-      return completion.choices[0].message;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;
@@ -32,13 +33,7 @@ class ChatService {
   // Get available models (optional feature)
   async getAvailableModels() {
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/models', {
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'React Chat App',
-        },
-      });
+      const response = await fetch('https://openrouter.ai/api/v1/models');
       const data = await response.json();
       return data.data;
     } catch (error) {
