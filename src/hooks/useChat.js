@@ -4,13 +4,15 @@ import prismService from '../services/prismService';
 import loggingService from '../services/loggingService';
 import { SYSTEM_PROMPT } from '../utils/systemPrompt';
 
+
 export const useChat = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isPrismEnabled, setIsPrismEnabled] = useState(false);
 
-  const sendMessage = useCallback(async (content, model) => {
+  // Accept both chat and prism models
+  const sendMessage = useCallback(async (content, model, prismModel) => {
     if (!content.trim()) return;
 
     const userMessage = { role: 'user', content };
@@ -30,7 +32,8 @@ export const useChat = () => {
         aiResponse = await prismService.generateCompletePrismResponse(
           content,
           conversationHistory,
-          model
+          prismModel || model, // Use prism model for prism steps
+          model // Use main chat model for synthesis
         );
       } else {
         // Standard mode: Direct response

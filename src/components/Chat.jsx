@@ -8,7 +8,10 @@ import './Chat.css';
 
 const Chat = () => {
   const { messages, isLoading, error, sendMessage, clearChat, isPrismEnabled, togglePrism } = useChat();
-  const [selectedModel, setSelectedModel] = useState('openai/gpt-4.1');
+  // Default chat model is Haiku
+  const [selectedModel, setSelectedModel] = useState('anthropic/claude-3-haiku');
+  // Default prism backend model is Llama 3.3 70B Instruct
+  const [selectedPrismModel, setSelectedPrismModel] = useState('meta-llama/llama-3.3-70b-instruct');
   const [isLoggingDashboardOpen, setIsLoggingDashboardOpen] = useState(false);
 
   console.log('Chat render - isLoggingDashboardOpen:', isLoggingDashboardOpen);
@@ -63,10 +66,12 @@ const Chat = () => {
       <ChatMessages messages={messages} isLoading={isLoading} />
       
       <ChatInput 
-        onSendMessage={sendMessage}
+        onSendMessage={(msg) => sendMessage(msg, selectedModel, selectedPrismModel)}
         isLoading={isLoading}
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
+        selectedPrismModel={selectedPrismModel}
+        onPrismModelChange={setSelectedPrismModel}
         isPrismEnabled={isPrismEnabled}
         togglePrism={togglePrism}
       />

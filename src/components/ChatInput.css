@@ -55,6 +55,28 @@
   color: var(--text-secondary);
   font-weight: 500;
   min-width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.model-label-text {
+  display: inline;
+}
+
+.model-label-mobile {
+  display: none;
+}
+
+.model-label-icon {
+  display: none;
+  color: var(--text-secondary);
+  cursor: help;
+}
+
+.model-label-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .model-select {
@@ -203,31 +225,57 @@
 
 @media (max-width: 768px) {
   .chat-input-container {
-    padding: 1rem;
+    padding: 0.75rem;
   }
   
   .input-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
   }
   
   .model-selector {
     width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 0.5rem;
   }
   
   .model-label {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
+    min-width: 50px;
+    flex-shrink: 0;
+  }
+  
+  /* Switch to mobile-specific label text */
+  .model-label-text {
+    display: none;
+  }
+  
+  .model-label-mobile {
+    display: inline;
+  }
+  
+  /* On mobile, when prism is enabled, hide main model selector and show prism selector */
+  .chat-input-container.prism-enabled .model-selector:not(.prism-model-selector) {
+    display: none;
+  }
+  
+  .chat-input-container.prism-enabled .prism-model-selector {
+    display: flex;
+  }
+  
+  /* When prism is disabled, hide prism model selector */
+  .chat-input-container:not(.prism-enabled) .prism-model-selector {
+    display: none;
   }
   
   .model-select {
-    width: 100%;
+    flex: 1;
     max-width: none;
     font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.5rem 0.75rem;
   }
   
   .chat-form {

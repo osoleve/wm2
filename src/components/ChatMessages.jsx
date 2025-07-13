@@ -1,5 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import Message from './Message';
+import { useChat } from '../hooks/useChat';
+
 import './ChatMessages.css';
 
 const ChatMessages = ({ messages, isLoading }) => {
@@ -40,7 +42,7 @@ const ChatMessages = ({ messages, isLoading }) => {
             <span></span>
             <span></span>
           </div>
-          <div className="typing-text">AI is typing...</div>
+          <div className="typing-text"></div>
         </div>
       )}
       

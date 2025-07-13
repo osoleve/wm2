@@ -283,7 +283,9 @@ ${response.content}
 
 `).join('')}
 
-Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.`;
+Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.
+
+Keep your response under 250 words, in a clear, conversational style directly addressing the user's question in your own words.`;
 
     try {
       const synthesisMessage = { role: 'system', content: synthesisPrompt };
@@ -298,33 +300,27 @@ Consider these perspectives as you formulate your unique, gestalt response to th
   }
 
   // Generate complete prism analysis with perspectives and synthesis
-  async generateCompletePrismResponse(userMessage, conversationHistory, model) {
+  async generateCompletePrismResponse(userMessage, conversationHistory, prismModel, synthesisModel) {
     console.log('🤖 Using AI to select most relevant prisms...');
-    
     // Use AI to select the most relevant prisms instead of random selection
-    const selectedPrisms = await this.selectAIPrisms(userMessage, conversationHistory, model, 5, 8);
-    
+    const selectedPrisms = await this.selectAIPrisms(userMessage, conversationHistory, prismModel, 5, 8);
     console.log('🔍 AI selected prisms:', selectedPrisms);
     console.log('🚀 Generating prism perspectives in parallel...');
-    
     // Generate responses from each prism perspective (without general system prompt) - in parallel
     const prismResponses = await this.generatePrismResponses(
-      userMessage, 
-      conversationHistory, 
-      model, 
+      userMessage,
+      conversationHistory,
+      prismModel,
       selectedPrisms
     );
-    
     console.log('✅ All prism perspectives generated, synthesizing response...');
-    
     // Synthesize all perspectives into a final response (with general system prompt)
     const synthesizedResponse = await this.synthesizePrismResponses(
       userMessage,
       prismResponses,
       SYSTEM_PROMPT, // Use the imported system prompt directly
-      model
+      synthesisModel || prismModel
     );
-
     return {
       role: 'assistant',
       content: synthesizedResponse.content,

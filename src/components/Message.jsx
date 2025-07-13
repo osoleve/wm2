@@ -48,10 +48,9 @@ const Message = ({ message, isUser }) => {
                 className={`prism-tab ${activePerspective === perspective.perspective ? 'active' : ''}`}
                 onClick={() => setActivePerspective(perspective.perspective)}
                 title={perspective.perspective}
+                style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
               >
-                {perspective.perspective.length > 12 
-                  ? `${perspective.perspective.substring(0, 12)}...` 
-                  : perspective.perspective}
+                {perspective.perspective}
               </button>
             ))}
           </div>

@@ -46,7 +46,7 @@ class ChatService {
   //   }
   // }
   // Til I can figure out how to only list models from certain providers
-  if (this.isDevelopment) {
+  // if (this.isDevelopment) {
   return [
     { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B Instruct' },
     { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3 8B Instruct' },
@@ -54,12 +54,13 @@ class ChatService {
     { id: 'openai/gpt-4.1-mini', name: 'GPT-4.1 Mini' },
     { id: 'openai/gpt-4.1-nano', name: 'GPT-4.1 Nano' },
     { id: 'anthropic/claude-3.5-haiku:beta', name: 'Claude 3.5 Haiku Beta' },
-    { id: 'google/gemma-2-9b-it', name: 'Gemini 2 9B IT' }
+    { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17b16e' },
+    { id: 'meta-llama/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17b128e' },
   ]
-}
-  return [
-    { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B Instruct' }
-  ];
+// }
+  // return [
+    // { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B Instruct' }
+  // ];
   }
 }
 export default new ChatService();

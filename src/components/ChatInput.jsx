@@ -1,9 +1,19 @@
+
 import React, { useState, useEffect } from 'react';
 import chatService from '../services/chatService';
 import PrismToggle from './PrismToggle';
 import './ChatInput.css';
 
-const ChatInput = ({ onSendMessage, isLoading, selectedModel, onModelChange, isPrismEnabled, togglePrism }) => {
+const ChatInput = ({
+  onSendMessage,
+  isLoading,
+  selectedModel,
+  onModelChange,
+  selectedPrismModel,
+  onPrismModelChange,
+  isPrismEnabled,
+  togglePrism
+}) => {
   const [message, setMessage] = useState('');
   const [models, setModels] = useState([]);
   const [modelsLoading, setModelsLoading] = useState(true);
@@ -105,14 +115,17 @@ const ChatInput = ({ onSendMessage, isLoading, selectedModel, onModelChange, isP
   };
 
   return (
-    <div className="chat-input-container">
+    <div className={`chat-input-container ${isPrismEnabled ? 'prism-enabled' : ''}`}>
       <div className="input-header">
         <div className="model-selector">
-          <label className="model-label">Model:</label>
+          <label className="model-label">
+            <span className="model-label-text">Model:</span>
+            <span className="model-label-mobile">{isPrismEnabled ? 'Prism:' : 'Model:'}</span>
+          </label>
           <select 
             value={selectedModel} 
             onChange={(e) => onModelChange(e.target.value)}
-            className="model-select"
+            className="model-select main-model-select"
             disabled={modelsLoading || isLoading}
           >
             {modelsLoading ? (
@@ -126,7 +139,30 @@ const ChatInput = ({ onSendMessage, isLoading, selectedModel, onModelChange, isP
             )}
           </select>
         </div>
-        
+        {isPrismEnabled && (
+          <div className="model-selector prism-model-selector">
+            <label className="model-label">
+              <span className="model-label-text">Prism Model:</span>
+              <span className="model-label-mobile">Prism:</span>
+            </label>
+            <select
+              value={selectedPrismModel}
+              onChange={e => onPrismModelChange(e.target.value)}
+              className="model-select prism-model-select"
+              disabled={modelsLoading || isLoading}
+            >
+              {modelsLoading ? (
+                <option>Loading models...</option>
+              ) : (
+                models.map(model => (
+                  <option key={model.id} value={model.id}>
+                    {model.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+        )}
         <PrismToggle 
           isPrismEnabled={isPrismEnabled}
           onToggle={togglePrism}
