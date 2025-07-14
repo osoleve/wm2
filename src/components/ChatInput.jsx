@@ -12,7 +12,8 @@ const ChatInput = ({
   selectedPrismModel,
   onPrismModelChange,
   isPrismEnabled,
-  togglePrism
+  togglePrism,
+  isMobileMenuOpen
 }) => {
   const [message, setMessage] = useState('');
   const [models, setModels] = useState([]);
@@ -163,11 +164,14 @@ const ChatInput = ({
             </select>
           </div>
         )}
-        <PrismToggle 
-          isPrismEnabled={isPrismEnabled}
-          onToggle={togglePrism}
-          isLoading={isLoading}
-        />
+        <div className="desktop-prism-toggle">        <div className="desktop-prism-toggle">
+          <PrismToggle 
+            isPrismEnabled={isPrismEnabled}
+            onToggle={togglePrism}
+            isLoading={isLoading}
+          />
+        </div>
+        </div>
       </div>
       
       <form onSubmit={handleSubmit} className="chat-form">

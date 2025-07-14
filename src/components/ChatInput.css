@@ -226,49 +226,15 @@
 @media (max-width: 768px) {
   .chat-input-container {
     padding: 0.75rem;
+    padding-bottom: 1rem; /* Add bottom padding to account for fixed position */
   }
   
   .input-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
+    display: none; /* Hide model selection on mobile */
   }
   
   .model-selector {
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .model-label {
-    font-size: 0.75rem;
-    min-width: 50px;
-    flex-shrink: 0;
-  }
-  
-  /* Switch to mobile-specific label text */
-  .model-label-text {
-    display: none;
-  }
-  
-  .model-label-mobile {
-    display: inline;
-  }
-  
-  /* On mobile, when prism is enabled, hide main model selector and show prism selector */
-  .chat-input-container.prism-enabled .model-selector:not(.prism-model-selector) {
-    display: none;
-  }
-  
-  .chat-input-container.prism-enabled .prism-model-selector {
-    display: flex;
-  }
-  
-  /* When prism is disabled, hide prism model selector */
-  .chat-input-container:not(.prism-enabled) .prism-model-selector {
-    display: none;
+    display: none; /* Hide model selection on mobile */
   }
   
   .model-select {
@@ -292,5 +258,9 @@
     width: 44px;
     height: 44px;
     padding: 0.75rem;
+  }
+
+  .desktop-prism-toggle {
+    display: none;
   }
 }
