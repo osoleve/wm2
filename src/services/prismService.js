@@ -270,7 +270,7 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
   }
 
   // Synthesize multiple prism responses into a final response
-  async synthesizePrismResponses(userMessage, prismResponses, baseSystemPrompt, model) {
+  async synthesizePrismResponses(userMessage, prismResponses, baseSystemPrompt, model, conversationHistory) {
     const synthesisPrompt = `${baseSystemPrompt}
 
 You have just received multiple analytical perspectives on the following user question: "${userMessage}"
@@ -289,7 +289,10 @@ Keep your response under 250 words, in a clear, conversational style directly ad
 
     try {
       const synthesisMessage = { role: 'system', content: synthesisPrompt };
-      const synthesisConversation = [synthesisMessage, { role: 'user', content: userMessage }];
+      
+      // Include conversation history for context, but filter out any existing system messages
+      const prismConversationHistory = conversationHistory.filter(msg => msg.role !== 'system');
+      const synthesisConversation = [synthesisMessage, ...prismConversationHistory];
       
       const synthesizedResponse = await chatService.sendMessage(synthesisConversation, model);
       return synthesizedResponse;
@@ -320,7 +323,8 @@ Keep your response under 250 words, in a clear, conversational style directly ad
       userMessage,
       prismResponses,
       systemPrompt, // Use the loaded system prompt
-      synthesisModel || prismModel
+      synthesisModel || prismModel,
+      conversationHistory // Pass conversation history to synthesis
     );
     return {
       role: 'assistant',
