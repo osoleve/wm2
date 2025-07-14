@@ -266,22 +266,52 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
     // Wait for all prism responses to complete
     const responses = await Promise.all(prismPromises);
     
+    // Debug the prism responses
+    console.log('🔍 PRISM RESPONSES DEBUG:');
+    responses.forEach((response, i) => {
+      console.log(`Response ${i}: ${response.perspective}`);
+      console.log(`Content length: ${response.content?.length || 0}`);
+      console.log(`Content preview: ${response.content?.substring(0, 100) + '...' || 'NO CONTENT'}`);
+      console.log('-'.repeat(40));
+    });
+    
     return responses;
   }
 
   // Synthesize multiple prism responses into a final response
   async synthesizePrismResponses(userMessage, prismResponses, baseSystemPrompt, model, conversationHistory) {
+    console.log('🔄 Synthesizing prism responses...');
+    console.log('📊 Prism responses received:', prismResponses.map(r => r.perspective));
+    
+    // Validate prism responses
+    const validPrismResponses = prismResponses.filter(r => r && r.perspective && r.content);
+    if (validPrismResponses.length === 0) {
+      console.error('⚠️ No valid prism responses to synthesize');
+      throw new Error('No valid prism responses provided for synthesis');
+    }
+    
+    console.log('✅ Valid prism responses:', validPrismResponses.length);
+    
+    // Build perspectives section
+    const perspectivesSection = validPrismResponses.map(response => 
+      `**${response.perspective} Perspective:**
+${response.content}
+
+`).join('');
+    
+    // Debug: Verify perspectives section is built correctly
+    console.log('🔍 PERSPECTIVES SECTION:');
+    console.log('='.repeat(80));
+    console.log(perspectivesSection);
+    console.log('='.repeat(80));
+    
     const synthesisPrompt = `${baseSystemPrompt}
 
 You have just received multiple analytical perspectives on the following user question: "${userMessage}"
 
 These specific theoretical lenses were intelligently selected as the most relevant for analyzing this question:
 
-${prismResponses.map(response => 
-  `**${response.perspective} Perspective:**
-${response.content}
-
-`).join('')}
+${perspectivesSection}
 
 Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.
 
@@ -290,9 +320,42 @@ Keep your response under 250 words, in a clear, conversational style directly ad
     try {
       const synthesisMessage = { role: 'system', content: synthesisPrompt };
       
-      // Include conversation history for context, but filter out any existing system messages
-      const prismConversationHistory = conversationHistory.filter(msg => msg.role !== 'system');
-      const synthesisConversation = [synthesisMessage, ...prismConversationHistory];
+      // Debug: Log the synthesis prompt to ensure perspectives are included
+      console.log('📋 Synthesis prompt length:', synthesisPrompt.length);
+      console.log('🔍 Synthesis prompt contains perspectives:', 
+        validPrismResponses.every(r => synthesisPrompt.includes(r.perspective))
+      );
+      console.log('📝 Perspectives section preview:', perspectivesSection.substring(0, 200) + '...');
+      
+      // MORE DETAILED DEBUGGING
+      console.log('🔍 DETAILED SYNTHESIS PROMPT:');
+      console.log('='.repeat(80));
+      console.log(synthesisPrompt);
+      console.log('='.repeat(80));
+      
+      // Include conversation history for context, but filter out system messages AND prism responses
+      // to avoid confusion between old and new perspectives
+      const cleanConversationHistory = conversationHistory.filter(msg => 
+        msg.role !== 'system' && !msg.isPrism
+      );
+      
+      const synthesisConversation = [synthesisMessage, ...cleanConversationHistory];
+      
+      console.log('🎯 Synthesis conversation structure:', synthesisConversation.map(m => ({ 
+        role: m.role, 
+        hasContent: !!m.content, 
+        contentLength: m.content?.length || 0,
+        isPrism: m.isPrism || false
+      })));
+      
+      console.log('🔍 FULL SYNTHESIS CONVERSATION:');
+      console.log('='.repeat(80));
+      synthesisConversation.forEach((msg, i) => {
+        console.log(`Message ${i}: ${msg.role}`);
+        console.log(msg.content.substring(0, 500) + '...');
+        console.log('-'.repeat(40));
+      });
+      console.log('='.repeat(80));
       
       const synthesizedResponse = await chatService.sendMessage(synthesisConversation, model);
       return synthesizedResponse;
@@ -317,6 +380,12 @@ Keep your response under 250 words, in a clear, conversational style directly ad
       selectedPrisms
     );
     console.log('✅ All prism perspectives generated, synthesizing response...');
+    console.log('📝 Prism responses summary:', prismResponses.map(r => ({
+      perspective: r.perspective,
+      contentLength: r.content?.length || 0,
+      contentPreview: r.content?.substring(0, 100) + '...'
+    })));
+    
     // Synthesize all perspectives into a final response (with general system prompt)
     const systemPrompt = await getSystemPrompt();
     const synthesizedResponse = await this.synthesizePrismResponses(
@@ -326,6 +395,11 @@ Keep your response under 250 words, in a clear, conversational style directly ad
       synthesisModel || prismModel,
       conversationHistory // Pass conversation history to synthesis
     );
+    
+    console.log('✨ Synthesis complete:', {
+      contentLength: synthesizedResponse.content?.length || 0,
+      contentPreview: synthesizedResponse.content?.substring(0, 100) + '...'
+    });
     return {
       role: 'assistant',
       content: synthesizedResponse.content,

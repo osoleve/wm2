@@ -107,17 +107,23 @@ class LoggingService {
       const session = sessions[this.currentSessionId];
       
       if (session) {
-        // Convert arrays back to Sets for internal use
+        // Convert arrays back to Sets for internal use, with proper validation
+        const modelsUsed = Array.isArray(session.modelsUsed) ? session.modelsUsed : [];
+        const perspectivesUsed = Array.isArray(session.perspectivesUsed) ? session.perspectivesUsed : [];
+        
         return {
           ...session,
-          modelsUsed: new Set(session.modelsUsed || []),
-          perspectivesUsed: new Set(session.perspectivesUsed || [])
+          modelsUsed: new Set(modelsUsed),
+          perspectivesUsed: new Set(perspectivesUsed)
         };
       }
       return null;
     } catch (error) {
       console.error('Error getting current session:', error);
-      return null;
+      // If there's an error, try to recover by clearing corrupted session data
+      this.clearCurrentSession();
+      this.initializeSession();
+      return this.getCurrentSession();
     }
   }
 
@@ -125,9 +131,28 @@ class LoggingService {
   getAllSessions() {
     try {
       const stored = localStorage.getItem(this.storageKey);
-      return stored ? JSON.parse(stored) : {};
+      const sessions = stored ? JSON.parse(stored) : {};
+      
+      // Validate and clean up session data
+      const validSessions = {};
+      Object.keys(sessions).forEach(sessionId => {
+        const session = sessions[sessionId];
+        if (session && typeof session === 'object') {
+          // Ensure required arrays exist and are arrays
+          validSessions[sessionId] = {
+            ...session,
+            modelsUsed: Array.isArray(session.modelsUsed) ? session.modelsUsed : [],
+            perspectivesUsed: Array.isArray(session.perspectivesUsed) ? session.perspectivesUsed : [],
+            messages: Array.isArray(session.messages) ? session.messages : []
+          };
+        }
+      });
+      
+      return validSessions;
     } catch (error) {
       console.error('Error loading sessions:', error);
+      // Clear corrupted data
+      localStorage.removeItem(this.storageKey);
       return {};
     }
   }

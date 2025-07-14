@@ -48,8 +48,12 @@ export const useChat = () => {
       
       setMessages(prev => [...prev, aiResponse]);
       
-      // Log the message exchange
-      loggingService.logMessage(content, aiResponse, model, isPrismEnabled);
+      // Log the message exchange (with error handling)
+      try {
+        loggingService.logMessage(content, aiResponse, model, isPrismEnabled);
+      } catch (loggingError) {
+        console.error('Logging error (non-fatal):', loggingError);
+      }
     } catch (err) {
       setError(err.message || 'Failed to send message');
       console.error('Chat error:', err);
