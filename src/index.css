@@ -12,22 +12,53 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Thoughtful Minimalism - Night Edition */
-  --bg-primary: #1C1B1A;           /* Warm dark gray - like aged black paper */
-  --bg-secondary: #252423;         /* Message bubble - subtle charcoal */
-  --bg-tertiary: #2A2928;          /* Slightly lighter message bubble variation */
-  --bg-input: #2A2928;             /* Input background */
-  --bg-message-user: #8FA68E;      /* User messages - muted sage */
-  --bg-message-ai: #252423;        /* AI messages - charcoal */
-  --text-primary: #8FA68E;         /* Muted saege */
-  --text-secondary: #E6DDD4;       /* Slightly dimmed cream */
-  --text-muted: #a3a5b8;           /* Muted warm beige */
+  /* Enhanced color palette with more depth */
+  --bg-primary: #1A1918;           /* Slightly warmer, less flat */
+  --bg-secondary: #242321;         /* Warmer undertone */
+  --bg-tertiary: #2D2B29;          /* Better contrast */
+  --bg-input: #2F2D2B;             /* Warmer input fields */
+  
+  /* Refined message colors */
+  --bg-message-user: #7A8F79;      /* Deeper sage for better contrast */
+  --bg-message-ai: #2A2826;        /* Warmer AI messages */
+  
+  /* Enhanced text colors */
+  --text-primary: #A4B5A3;         /* Softer sage primary */
+  --text-secondary: #E8E0D6;       /* Warmer cream */
+  --text-muted: #9B9D8F;           /* Better muted tone */
+  
+  /* Refined accent colors */
+  --accent-color: #8FA68E;         /* Original sage */
+  --accent-hover: #A4B5A3;         /* Lighter sage hover */
+  --tab-highlight: #E6B87D;        /* Warm amber */
+  --tab-glow: rgba(230, 184, 125, 0.2);
+  
+  /* New gradient variables for depth */
+  --gradient-sage: linear-gradient(135deg, #8FA68E, #7A8F79);
+  --gradient-amber: linear-gradient(135deg, #E6B87D, #D4A574);
+  --gradient-dark: linear-gradient(135deg, #2A2826, #242321);
+  
+  /* Enhanced shadows */
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow-sage: 0 0 20px rgba(143, 166, 142, 0.15);
+  --shadow-glow-amber: 0 0 20px rgba(230, 184, 125, 0.15);
+  
+  /* Animation duration variables for easy tweaking */
+  --animation-fast: 0.2s;
+  --animation-normal: 0.3s;
+  --animation-slow: 0.6s;
+  --animation-very-slow: 1.2s;
+  
+  /* Animation easing functions */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-back: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* Legacy variables for compatibility */
   --border-color: #3A3938;         /* Hairline borders */
   --border-light: #4A4847;         /* Slightly lighter borders */
-  --accent-color: #8FA68E;         /* Muted sage accent */
-  --accent-hover: #9DB2A0;         /* Slightly brighter sage */
-  --tab-highlight: #E6B87D;        /* Warm amber for selected tabs */
-  --tab-glow: rgba(230, 184, 125, 0.15); /* Soft underglow for tabs */
   --error-color: #D4756B;          /* Muted red */
   --success-color: #8FA68E;        /* Use sage for success too */
   --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
@@ -40,6 +71,7 @@ a {
   font-weight: 500;
   color: var(--accent-color);
   text-decoration: inherit;
+  transition: color 0.3s ease;
 }
 a:hover {
   color: var(--accent-hover);
@@ -90,6 +122,22 @@ button:focus-visible {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Add smooth transitions to common interactive elements */
+input, textarea, select {
+  transition: all 0.3s ease;
+}
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Remove light mode styles */

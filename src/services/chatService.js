@@ -39,7 +39,7 @@ class ChatService {
     // Til I can figure out how to only list models from certain providers
     if (this.isDevelopment) {
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/models?providers=groq,cerebras');
+      const response = await fetch('https://openrouter.ai/api/v1/models');
       const data = await response.json();
       return data.data;
     } catch (error) {
