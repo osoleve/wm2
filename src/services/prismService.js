@@ -305,32 +305,41 @@ ${response.content}
     console.log(perspectivesSection);
     console.log('='.repeat(80));
     
-    const synthesisPrompt = `${baseSystemPrompt}
+    const synthesisSystemPrompt = `${baseSystemPrompt}
 
-You have just received multiple analytical perspectives on the following user question: "${userMessage}"
+You will receive multiple analytical perspectives on a user question. Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.
+
+Keep your response under 250 words, in a clear, conversational style directly addressing the user's question in your own words.`;
+
+    const perspectivesPrompt = `Here are multiple analytical perspectives on the user question: "${userMessage}"
 
 These specific theoretical lenses were intelligently selected as the most relevant for analyzing this question:
 
 ${perspectivesSection}
 
-Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.
-
-Keep your response under 250 words, in a clear, conversational style directly addressing the user's question in your own words.`;
+Now, considering these perspectives, please provide your synthesized response to the user's question.`;
 
     try {
-      const synthesisMessage = { role: 'system', content: synthesisPrompt };
+      const synthesisSystemMessage = { role: 'system', content: synthesisSystemPrompt };
+      const perspectivesMessage = { role: 'user', content: perspectivesPrompt };
       
-      // Debug: Log the synthesis prompt to ensure perspectives are included
-      console.log('📋 Synthesis prompt length:', synthesisPrompt.length);
-      console.log('🔍 Synthesis prompt contains perspectives:', 
-        validPrismResponses.every(r => synthesisPrompt.includes(r.perspective))
+      // Debug: Log the synthesis prompts to ensure perspectives are included
+      console.log('📋 Synthesis system prompt length:', synthesisSystemPrompt.length);
+      console.log('� Perspectives prompt length:', perspectivesPrompt.length);
+      console.log('🔍 Perspectives prompt contains perspectives:', 
+        validPrismResponses.every(r => perspectivesPrompt.includes(r.perspective))
       );
       console.log('📝 Perspectives section preview:', perspectivesSection.substring(0, 200) + '...');
       
       // MORE DETAILED DEBUGGING
-      console.log('🔍 DETAILED SYNTHESIS PROMPT:');
+      console.log('🔍 DETAILED SYNTHESIS SYSTEM PROMPT:');
       console.log('='.repeat(80));
-      console.log(synthesisPrompt);
+      console.log(synthesisSystemPrompt);
+      console.log('='.repeat(80));
+      
+      console.log('🔍 DETAILED PERSPECTIVES PROMPT:');
+      console.log('='.repeat(80));
+      console.log(perspectivesPrompt);
       console.log('='.repeat(80));
       
       // Include conversation history for context, but filter out system messages AND prism responses
@@ -339,19 +348,30 @@ Keep your response under 250 words, in a clear, conversational style directly ad
         msg.role !== 'system' && !msg.isPrism
       );
       
-      const synthesisConversation = [synthesisMessage, ...cleanConversationHistory];
+      const synthesisConversation = [
+        synthesisSystemMessage, 
+        ...cleanConversationHistory,
+        perspectivesMessage
+      ];
       
       console.log('🎯 Synthesis conversation structure:', synthesisConversation.map(m => ({ 
         role: m.role, 
         hasContent: !!m.content, 
         contentLength: m.content?.length || 0,
-        isPrism: m.isPrism || false
+        isPrism: m.isPrism || false,
+        isSystemMessage: m.role === 'system',
+        isPerspectivesMessage: m.content?.includes('analytical perspectives')
       })));
       
       console.log('🔍 FULL SYNTHESIS CONVERSATION:');
       console.log('='.repeat(80));
       synthesisConversation.forEach((msg, i) => {
         console.log(`Message ${i}: ${msg.role}`);
+        if (msg.role === 'system') {
+          console.log('[SYSTEM PROMPT]');
+        } else if (msg.content?.includes('analytical perspectives')) {
+          console.log('[PERSPECTIVES MESSAGE]');
+        }
         console.log(msg.content.substring(0, 500) + '...');
         console.log('-'.repeat(40));
       });
