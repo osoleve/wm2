@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import chatService from '../services/chatService';
 import prismService from '../services/prismService';
 import loggingService from '../services/loggingService';
-import { SYSTEM_PROMPT } from '../utils/systemPrompt';
+import { getSystemPrompt } from '../utils/systemPrompt';
 
 
 export const useChat = () => {
@@ -21,9 +21,15 @@ export const useChat = () => {
     setError(null);
 
     try {
+      // Get system prompt asynchronously
+      const systemPrompt = await getSystemPrompt();
+      console.log('System prompt loaded:', systemPrompt.substring(0, 100) + '...');
+      
       // Create conversation history with system prompt
-      const systemMessage = { role: 'system', content: SYSTEM_PROMPT };
+      const systemMessage = { role: 'system', content: systemPrompt };
       const conversationHistory = [systemMessage, ...messages, userMessage];
+      
+      console.log('Conversation history:', conversationHistory.map(m => ({ role: m.role, content: m.content?.substring(0, 50) + '...' })));
 
       let aiResponse;
 

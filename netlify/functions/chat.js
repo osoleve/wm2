@@ -37,12 +37,19 @@ exports.handler = async (event, context) => {
   try {
     const { messages, model = "openai/gpt-4.1" } = JSON.parse(event.body);
 
+    // Log the incoming messages for debugging
+    console.log('Incoming messages:', JSON.stringify(messages, null, 2));
+    console.log('Model:', model);
+
     const completion = await client.chat.completions.create({
       model: model,
       messages: messages,
       temperature: 0.7,
       max_tokens: 1000,
     });
+
+    // Log the response for debugging
+    console.log('OpenRouter response:', JSON.stringify(completion.choices[0].message, null, 2));
 
     return {
       statusCode: 200,

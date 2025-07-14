@@ -1,6 +1,6 @@
 // Service for handling Prism functionality
 import chatService from './chatService';
-import { SYSTEM_PROMPT } from '../utils/systemPrompt';
+import { getSystemPrompt } from '../utils/systemPrompt';
 
 class PrismService {
   constructor() {
@@ -315,10 +315,11 @@ Keep your response under 250 words, in a clear, conversational style directly ad
     );
     console.log('✅ All prism perspectives generated, synthesizing response...');
     // Synthesize all perspectives into a final response (with general system prompt)
+    const systemPrompt = await getSystemPrompt();
     const synthesizedResponse = await this.synthesizePrismResponses(
       userMessage,
       prismResponses,
-      SYSTEM_PROMPT, // Use the imported system prompt directly
+      systemPrompt, // Use the loaded system prompt
       synthesisModel || prismModel
     );
     return {
