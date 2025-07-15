@@ -22,6 +22,8 @@ const ChatInput = ({
   const [modelsLoading, setModelsLoading] = useState(true);
   const textareaRef = useRef(null);
   const maxLength = 4000;
+  const longPressTimeoutRef = useRef(null);
+  const [isLongPressing, setIsLongPressing] = useState(false);
 
   // Fetch available models on provider change
   useEffect(() => {
@@ -96,6 +98,26 @@ const ChatInput = ({
     if (newValue.length <= maxLength) {
       setMessage(newValue);
     }
+  };
+
+  const handlePressStart = () => {
+    setIsLongPressing(false);
+    longPressTimeoutRef.current = setTimeout(() => {
+      setIsLongPressing(true);
+      togglePrism();
+      // Haptic feedback for long press
+      if (window.navigator.vibrate) {
+        window.navigator.vibrate(50);
+      }
+    }, 500); // 500ms for long press
+  };
+
+  const handlePressEnd = (e) => {
+    clearTimeout(longPressTimeoutRef.current);
+    if (isLongPressing) {
+      e.preventDefault(); // Prevent form submission on long press release
+    }
+    setIsLongPressing(false);
   };
 
   return (
@@ -181,8 +203,18 @@ const ChatInput = ({
           
           <button 
             type="submit" 
-            className={`send-button ${message.trim() ? 'ready' : ''}`}
+            className={`send-button ${message.trim() ? 'ready' : ''} ${isLongPressing ? 'long-pressing' : ''}`}
             disabled={!message.trim() || isLoading}
+            onMouseDown={handlePressStart}
+            onMouseUp={handlePressEnd}
+            onMouseLeave={handlePressEnd}
+            onTouchStart={handlePressStart}
+            onTouchEnd={handlePressEnd}
+            onClick={(e) => {
+              if (isLongPressing) {
+                e.preventDefault();
+              }
+            }}
           >
             {isLoading ? (
               <div className="loading-spinner"></div>
