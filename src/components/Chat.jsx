@@ -3,6 +3,7 @@ import { useChat } from '../hooks/useChat';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
 import PrismToggle from './PrismToggle';
+import SystemPromptToggle from './SystemPromptToggle';
 import LoggingDashboard from './LoggingDashboard';
 import chatService from '../services/chatService';
 import './Chat.css';
@@ -14,6 +15,7 @@ const Chat = () => {
   const [selectedModel, setSelectedModel] = useState('moonshotai/kimi-k2-instruct');
   // Default prism backend model is Kimi K2
   const [selectedPrismModel, setSelectedPrismModel] = useState('moonshotai/kimi-k2-instruct');
+  const [isSystemPromptEnabled, setIsSystemPromptEnabled] = useState(true);
   
   // Update selectedModel when switching providers
   useEffect(() => {
@@ -168,6 +170,10 @@ const Chat = () => {
               }}
             >GROQ</button>
           </div>
+          <SystemPromptToggle
+            isEnabled={isSystemPromptEnabled}
+            onToggle={() => setIsSystemPromptEnabled(prev => !prev)}
+          />
           <button 
             className="mobile-model-indicator"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -331,6 +337,12 @@ const Chat = () => {
                   isLoading={isLoading}
                 />
               </div>
+              <div className="mobile-prism-section">
+                <SystemPromptToggle
+                  isEnabled={isSystemPromptEnabled}
+                  onToggle={() => setIsSystemPromptEnabled(prev => !prev)}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -353,12 +365,12 @@ const Chat = () => {
       <ChatMessages 
         messages={messages} 
         isLoading={isLoading} 
-        onSendMessage={(msg) => sendMessage(msg, selectedModel, selectedPrismModel)}
+        onSendMessage={(msg) => sendMessage(msg, selectedModel, selectedPrismModel, isSystemPromptEnabled)}
         selectedModel={selectedModel}
       />
       
       <ChatInput 
-        onSendMessage={(msg) => sendMessage(msg, selectedModel, selectedPrismModel)}
+        onSendMessage={(msg) => sendMessage(msg, selectedModel, selectedPrismModel, isSystemPromptEnabled)}
         isLoading={isLoading}
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
@@ -369,6 +381,8 @@ const Chat = () => {
         isMobileMenuOpen={isMobileMenuOpen}
         provider={provider}
         setProvider={setProvider}
+        isSystemPromptEnabled={isSystemPromptEnabled}
+        onSystemPromptToggle={() => setIsSystemPromptEnabled(prev => !prev)}
       />
 
       <LoggingDashboard 

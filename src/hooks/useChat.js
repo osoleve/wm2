@@ -12,7 +12,7 @@ export const useChat = () => {
   const [isPrismEnabled, setIsPrismEnabled] = useState(false);
 
   // Accept both chat and prism models
-  const sendMessage = useCallback(async (content, model, prismModel) => {
+  const sendMessage = useCallback(async (content, model, prismModel, isSystemPromptEnabled) => {
     if (!content.trim()) return;
 
     const userMessage = { role: 'user', content };
@@ -21,13 +21,17 @@ export const useChat = () => {
     setError(null);
 
     try {
-      // Get system prompt asynchronously
-      const systemPrompt = await getSystemPrompt();
-      console.log('System prompt loaded:', systemPrompt.substring(0, 100) + '...');
+      let conversationHistory = [...messages, userMessage];
       
-      // Create conversation history with system prompt
-      const systemMessage = { role: 'system', content: systemPrompt };
-      const conversationHistory = [systemMessage, ...messages, userMessage];
+      if (isSystemPromptEnabled) {
+        // Get system prompt asynchronously
+        const systemPrompt = await getSystemPrompt();
+        console.log('System prompt loaded:', systemPrompt.substring(0, 100) + '...');
+
+        // Create conversation history with system prompt
+        const systemMessage = { role: 'system', content: systemPrompt };
+        conversationHistory = [systemMessage, ...conversationHistory];
+      }
       
       console.log('Conversation history:', conversationHistory.map(m => ({ role: m.role, content: m.content?.substring(0, 50) + '...' })));
 
@@ -39,7 +43,8 @@ export const useChat = () => {
           content,
           conversationHistory,
           prismModel || model, // Use prism model for prism steps
-          model // Use main chat model for synthesis
+          model, // Use main chat model for synthesis
+          isSystemPromptEnabled
         );
       } else {
         // Standard mode: Direct response

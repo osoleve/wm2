@@ -389,7 +389,7 @@ In a conversational style, without listing out the perspectives, respond to the 
   }
 
   // Generate complete prism analysis with perspectives and synthesis
-  async generateCompletePrismResponse(userMessage, conversationHistory, prismModel, synthesisModel) {
+  async generateCompletePrismResponse(userMessage, conversationHistory, prismModel, synthesisModel, isSystemPromptEnabled) {
     console.log('🤖 Using AI to select most relevant prisms...');
     // Use AI to select the most relevant prisms instead of random selection
     const selectedPrisms = await this.selectAIPrisms(userMessage, conversationHistory, prismModel, 5, 8);
@@ -410,7 +410,7 @@ In a conversational style, without listing out the perspectives, respond to the 
     })));
     
     // Synthesize all perspectives into a final response (with general system prompt)
-    const systemPrompt = await getSystemPrompt();
+    const systemPrompt = isSystemPromptEnabled ? await getSystemPrompt() : '';
     const synthesizedResponse = await this.synthesizePrismResponses(
       userMessage,
       prismResponses,
