@@ -243,10 +243,11 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
     const prismPromises = selectedPrisms.map(async (prismName) => {
       try {
         const prismPrompt = await this.loadPrismPrompt(prismName);
-        const extra_instructions = `Keep your response under 300 words, in a concise, clear, conversational style.`;
+        const extra_instructions = ``;
+        // const extra_instructions = `Keep your response under 300 words, in a concise, clear, conversational style.`;
         
         // Create a conversation with ONLY the prism perspective as system prompt
-        const prismSystemMessage = { role: 'system', content: prismPrompt + '\n\n' + extra_instructions };
+        const prismSystemMessage = { role: 'system', content: prismPrompt + extra_instructions };
         const prismConversation = [prismSystemMessage, ...prismConversationHistory];
         
         const response = await chatService.sendMessage(prismConversation, model, { temperature: 0.9 });
@@ -309,15 +310,17 @@ ${response.content}
 
 ---
 
-You are now in synthesis mode. Your task is to synthesize the multiple prism perspectives into your gestalt, bespoke response to the user.`;
+You are now in PRISM mode. Your task is to synthesize the multiple prism perspectives into your gestalt, bespoke response to the user.`;
 
-    const perspectivesPrompt = `Here are multiple analytical perspectives on the user question: "${userMessage}"
+    const perspectivesPrompt = `The user said: "${userMessage}"
 
-These specific theoretical lenses were intelligently selected as the most relevant for analyzing this question:
+## Perspectives Selected
 
 ${perspectivesSection}
 
-Now, considering these perspectives, please provide your synthesized response to the user's question.`;
+## Instruction
+
+In a conversational style, without listing out the perspectives, respond to the user, and casually remind them that they can access the individual perspectives in the UI using the tabs at the top.`;
 
     try {
       const synthesisSystemMessage = { role: 'system', content: synthesisSystemPrompt };

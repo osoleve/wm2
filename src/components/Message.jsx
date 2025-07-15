@@ -21,7 +21,7 @@ const Message = ({ message, isUser }) => {
 
   const getDisplayTitle = () => {
     if (!isPrismMessage) {
-      return isUser ? 'You' : 'AI';
+      return isUser ? 'User' : 'AI';
     }
 
     if (activePerspective === 'synthesis') {

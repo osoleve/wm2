@@ -64,6 +64,14 @@ const ChatInput = ({
             // if (lower.includes('claude-2')) return 8;
             // if (lower.includes('llama-2')) return 9;
             if (lower.includes('free')) return 0;
+            if (lower.includes('moonshot')) return 1; // Moonshot models first
+            if (lower.includes('anthropic')) return 2; // Anthropic models next
+            if (lower.includes('openai')) return 3; // OpenAI models next
+            if (lower.includes('gemini')) return 4; // Gemini models next
+            if (lower.includes('meta')) return 5; // Meta models next
+            if (lower.includes('tral')) return 6; // Mitral models next
+
+
             return 999;
           };
           
@@ -115,6 +123,10 @@ const ChatInput = ({
     if (message.trim() && !isLoading) {
       onSendMessage(message, selectedModel);
       setMessage('');
+      // Keep focus on textarea after sending
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
     }
   };
 

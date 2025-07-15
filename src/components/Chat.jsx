@@ -10,7 +10,7 @@ import './Chat.css';
 const Chat = () => {
   const { messages, isLoading, error, sendMessage, clearChat, isPrismEnabled, togglePrism } = useChat();
   // Default chat model is Haiku
-  const [selectedModel, setSelectedModel] = useState('anthropic/claude-3-haiku');
+  const [selectedModel, setSelectedModel] = useState('anthropic/claude-3-5-haiku');
   // Default prism backend model is Llama 3.3 70B Instruct
   const [selectedPrismModel, setSelectedPrismModel] = useState('meta-llama/llama-3.3-70b-instruct');
   const [isLoggingDashboardOpen, setIsLoggingDashboardOpen] = useState(false);
@@ -49,13 +49,9 @@ const Chat = () => {
       } catch (error) {
         console.error('Error fetching models:', error);
         const fallbackModels = [
-          { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku' },
-          { id: 'anthropic/claude-3-sonnet', name: 'Claude 3 Sonnet' },
-          { id: 'anthropic/claude-3-opus', name: 'Claude 3 Opus' },
-          { id: 'openai/gpt-4', name: 'GPT-4' },
-          { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
+          { id: 'anthropic/claude-3-5-haiku', name: 'Claude 3.5 Haiku' },
           { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B' },
-          { id: 'meta-llama/llama-3.1-70b-instruct', name: 'Llama 3.1 70B' },
+          { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3.1 8B' },
         ];
         setModels(fallbackModels);
       } finally {

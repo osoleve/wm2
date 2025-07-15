@@ -38,7 +38,7 @@ const ChatMessages = ({ messages, isLoading, onSendMessage, selectedModel }) => 
             </h3>
             
             <p className="tagline">
-              Enable Prism mode to explore questions through multiple theoretical lenses
+              Enable Prism mode to gain new perspectives
             </p>
             
             <div className="example-prompts">

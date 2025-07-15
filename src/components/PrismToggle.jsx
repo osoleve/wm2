@@ -31,8 +31,8 @@ const PrismToggle = ({ isPrismEnabled, onToggle, isLoading }) => {
         >
           <div className="toggle-track">
             <div className="toggle-labels">
-              <span className="label-off">Single</span>
-              <span className="label-on">Prism</span>
+              <span className="label-off">-</span>
+              <span className="label-on">💎</span>
             </div>
             <div className="toggle-thumb">
               {isPrismEnabled ? (
@@ -66,7 +66,7 @@ const PrismToggle = ({ isPrismEnabled, onToggle, isLoading }) => {
         {showTooltip && (
           <div className="prism-tooltip">
             <div className="tooltip-arrow"></div>
-            Prism mode analyzes your question through multiple theoretical perspectives for deeper insights
+            Analyzes your question through multiple theoretical perspectives for deeper insights
           </div>
         )}
       </div>
