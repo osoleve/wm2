@@ -9,7 +9,7 @@ const ChatMessages = ({ messages, isLoading, onSendMessage, selectedModel }) => 
 
   const examplePrompts = [
     "How do we deal with food stamp fraud without harming the vulnerable?",
-    "ELI5 'Data structures as algorithms'",
+    "What are the implications of LLMs on entrenched interests in the US?",
   ];
 
   const scrollToBottom = () => {
@@ -31,11 +31,11 @@ const ChatMessages = ({ messages, isLoading, onSendMessage, selectedModel }) => 
           </div>
           
           <div className="empty-state-content">
-            <h3>
+            <h2>
               The <span className="highlight2">limits</span> of your <span className="highlight">language</span>
               <br />are 
               the <span className="highlight2">limits</span> of your <span className="highlight">world</span>
-            </h3>
+            </h2>
             
             <p className="tagline">
               Enable Prism mode to gain new perspectives
@@ -68,7 +68,6 @@ const ChatMessages = ({ messages, isLoading, onSendMessage, selectedModel }) => 
       {isLoading && (
         <div className="typing-indicator">
           <div className="typing-dots">
-            <span></span>
             <span></span>
             <span></span>
           </div>

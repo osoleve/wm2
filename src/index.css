@@ -13,37 +13,48 @@
   -moz-osx-font-smoothing: grayscale;
 
   /* Enhanced color palette with more depth */
-  --bg-primary: #1A1918;           /* Slightly warmer, less flat */
-  --bg-secondary: #242321;         /* Warmer undertone */
-  --bg-tertiary: #2D2B29;          /* Better contrast */
+  --bg-primary: #1E1D1C;           /* Warmer base, less harsh black */
+  --bg-secondary: #282624;         /* Richer brown undertones */
+  --bg-tertiary: #32302D;          /* Better depth progression */
   --bg-input: #2F2D2B;             /* Warmer input fields */
   
   /* Refined message colors */
-  --bg-message-user: #7A8F79;      /* Deeper sage for better contrast */
-  --bg-message-ai: #2A2826;        /* Warmer AI messages */
+  --bg-message-user: linear-gradient(135deg, #82977D, #758C71);  /* Subtle gradient */
+  --bg-message-ai: linear-gradient(135deg, #2E2C2A, #252321);   /* Richer gradient */
   
   /* Enhanced text colors */
-  --text-primary: #A4B5A3;         /* Softer sage primary */
-  --text-secondary: #E8E0D6;       /* Warmer cream */
-  --text-muted: #9B9D8F;           /* Better muted tone */
+  --text-primary: #B8C7B7;         /* Lighter sage for WCAG AA compliance */
+  --text-secondary: #F2E8DD;     /* Brighter cream for better readability */
+  --text-muted: #A8A99B;          /* Slightly darker muted tone */
   
-  /* Refined accent colors */
-  --accent-color: #8FA68E;         /* Original sage */
-  --accent-hover: #A4B5A3;         /* Lighter sage hover */
-  --tab-highlight: #E6B87D;        /* Warm amber */
-  --tab-glow: rgba(230, 184, 125, 0.2);
+  /* Enhanced sage colors - earthier and richer */
+  --accent-color: #9BAF92;         /* Sage with hint of gold */
+  --accent-hover: #A9BBA0;         /* Natural sage progression */
+  --tab-highlight: #E6B266;        /* Golden amber */
+  --tab-glow: rgba(230, 178, 102, 0.3);  /* Stronger, warmer glow */
   
-  /* New gradient variables for depth */
-  --gradient-sage: linear-gradient(135deg, #8FA68E, #7A8F79);
-  --gradient-amber: linear-gradient(135deg, #E6B87D, #D4A574);
+  /* Add sage variations for different states */
+  --sage-light: #AABcA3;           /* For highlights/glows */
+  --sage-dark: #6B7D67;            /* For shadows/borders */
+  --sage-muted: #A8B5A5;           /* For disabled states */
+  --sage-vibrant: #8FAA7F;         /* For active/focused states */
+  
+  /* Enhanced amber variations */
+  --amber-light: #F0C584;          /* For hover states */
+  --amber-dark: #C99552;           /* For pressed states */
+  --amber-muted: #E5C4A0;          /* For disabled states */
+  
+  /* Updated gradient variables for depth */
+  --gradient-sage: linear-gradient(135deg, #95A88C, #7F917A);
+  --gradient-amber: linear-gradient(135deg, #E8B572, #D9A362);  /* Richer gradient */
   --gradient-dark: linear-gradient(135deg, #2A2826, #242321);
   
-  /* Enhanced shadows */
-  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-glow-sage: 0 0 20px rgba(143, 166, 142, 0.15);
-  --shadow-glow-amber: 0 0 20px rgba(230, 184, 125, 0.15);
+  /* Enhanced shadows with new palette */
+  --shadow-soft: 0 1px 4px rgba(0, 0, 0, 0.15);
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.25);
+  --shadow-large: 0 8px 40px rgba(0, 0, 0, 0.35);
+  --shadow-glow-sage: 0 0 24px rgba(155, 175, 146, 0.2);
+  --shadow-glow-amber: 0 0 24px rgba(230, 178, 102, 0.25);
   
   /* Animation duration variables for easy tweaking */
   --animation-fast: 0.2s;
@@ -65,6 +76,16 @@
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
   --glow-subtle: 0 0 8px rgba(143, 166, 142, 0.02); /* Barely-there halo */
   --glow-warm: 0 0 12px rgba(230, 184, 125, 0.03); /* Warm amber glow */
+
+  /* Interactive states */
+  --sage-focus: #A3B89A;           /* Focus state with more saturation */
+  --sage-active: #8FA085;          /* Active/pressed state */
+  --sage-disabled: #7A8577;         /* Disabled but still visible */
+  
+  /* Status colors with sage integration */
+  --success-color: #8FA68E;         /* Sage-based success */
+  --warning-color: #C9A86A;        /* Amber-based warning */
+  --error-color: #B8736F;           /* Muted red with sage undertone */
 }
 
 a {

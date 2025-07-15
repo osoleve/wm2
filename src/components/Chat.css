@@ -2,6 +2,7 @@
 :root {
   --header-height: 76px;
   --safe-area-top: env(safe-area-inset-top, 0px);
+  --header-total-height: calc(var(--header-height) + var(--safe-area-top));
 }
 
 @media (max-width: 768px) {
@@ -15,13 +16,80 @@
   flex-direction: column;
   height: 100vh;
   width: 100%;
-  max-width: 900px;
+  max-width: 1200px; /* Increase from 900px */
   margin: 0 auto;
   background: var(--bg-secondary);
   border-radius: 0;
   box-shadow: var(--shadow);
   overflow: hidden;
   border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.chat-container.prism-active {
+  border-color: var(--amber-dark);
+  box-shadow: 
+    var(--shadow-lg),
+    0 0 30px rgba(232, 181, 114, 0.15),
+    inset 0 0 80px rgba(232, 181, 114, 0.03);
+  animation: prismPulse 4s ease-in-out infinite;
+}
+
+.chat-container.prism-active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    conic-gradient(
+      from 45deg at 30% 30%,
+      transparent,
+      rgba(232, 181, 114, 0.05) 60deg,
+      transparent 120deg
+    ),
+    conic-gradient(
+      from 225deg at 70% 70%,
+      transparent,
+      rgba(149, 168, 140, 0.05) 60deg,
+      transparent 120deg
+    );
+  animation: prismRefract 20s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes prismPulse {
+  0%, 100% {
+    box-shadow: 
+      var(--shadow-lg),
+      0 0 30px rgba(232, 181, 114, 0.15),
+      inset 0 0 80px rgba(232, 181, 114, 0.03);
+  }
+  50% {
+    box-shadow: 
+      var(--shadow-lg),
+      0 0 40px rgba(232, 181, 114, 0.25),
+      inset 0 0 100px rgba(232, 181, 114, 0.05);
+  }
+}
+
+@keyframes prismRefract {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 1400px) {
+  .chat-container {
+    max-width: 1400px;
+  }
 }
 
 @media (min-width: 769px) {
@@ -84,20 +152,34 @@
   font-weight: 500; /* Lighter for dark mode */
   color: var(--text-primary);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  transition: all 0.25s ease;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   /* text-align: center; */
 }
 
 .header-content h1.prism-enabled {
-  animation: title-prism-glow 0.5s linear infinite alternate;
+  letter-spacing: 0.05em;
+  text-shadow: 
+    0 0 20px rgba(232, 181, 114, 0.5),
+    0 0 40px rgba(232, 181, 114, 0.3);
+  background: linear-gradient(
+    45deg,
+    var(--sage-vibrant),
+    var(--amber-light),
+    var(--sage-vibrant)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: auto;
+  animation: shimmerText 3s linear infinite;
 }
 
-@keyframes title-prism-glow {
-  from {
-    text-shadow: 0 0 12px rgba(225, 139, 11, 0.5);
+@keyframes shimmerText {
+  0% {
+    background-position: 0% 50%;
   }
-  to {
-    text-shadow: 0 0 16px rgba(173, 168, 17, 0.9);
+  100% {
+    background-position: 200% 50%;
   }
 }
 
