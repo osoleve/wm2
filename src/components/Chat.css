@@ -119,9 +119,16 @@
   margin-right: 16px;
 }
 
+.desktop-system-prompt-toggle {
+  display: block;
+}
+
 @media (max-width: 768px) {
   .provider-toggle {
     display: none !important;
+  }
+  .desktop-system-prompt-toggle {
+    display: none;
   }
 }
 
