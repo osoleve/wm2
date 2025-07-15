@@ -235,6 +235,11 @@
   transform: translateY(-1px) scale(1.02);
 }
 
+.send-button.long-pressing {
+  transform: scale(1.1);
+  background-color: #005f99;
+}
+
 .send-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
