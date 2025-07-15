@@ -170,10 +170,12 @@ const Chat = () => {
               }}
             >GROQ</button>
           </div>
-          <SystemPromptToggle
-            isEnabled={isSystemPromptEnabled}
-            onToggle={() => setIsSystemPromptEnabled(prev => !prev)}
-          />
+          <div className="desktop-system-prompt-toggle">
+            <SystemPromptToggle
+              isEnabled={isSystemPromptEnabled}
+              onToggle={() => setIsSystemPromptEnabled(prev => !prev)}
+            />
+          </div>
           <button 
             className="mobile-model-indicator"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
