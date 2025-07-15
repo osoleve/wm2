@@ -113,7 +113,9 @@ const ChatInput = ({
   };
 
   const handlePressEnd = (e) => {
-    clearTimeout(longPressTimeoutRef.current);
+    if (longPressTimeoutRef.current) {
+      clearTimeout(longPressTimeoutRef.current);
+    }
     if (isLongPressing) {
       e.preventDefault(); // Prevent form submission on long press release
     }
