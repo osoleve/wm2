@@ -12,7 +12,9 @@ const ChatInput = ({
   onPrismModelChange,
   isPrismEnabled,
   togglePrism,
-  isMobileMenuOpen
+  isMobileMenuOpen,
+  provider,
+  setProvider
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -21,94 +23,46 @@ const ChatInput = ({
   const textareaRef = useRef(null);
   const maxLength = 4000;
 
-  // Fetch available models on component mount
+  // Fetch available models on provider change
   useEffect(() => {
+    chatService.setProvider(provider);
     const fetchModels = async () => {
       try {
         const availableModels = await chatService.getAvailableModels();
-        
-        // Filter and format popular models for better UX
-        const popularModels = availableModels.filter(model => {
-          const id = model.id.toLowerCase();
-          // return (
-          //   id.includes('gpt-4') ||
-          //   id.includes('gpt-3.5') ||
-          //   id.includes('claude-3') ||
-          //   id.includes('claude-2') ||
-          //   id.includes('llama-3') ||
-          //   id.includes('llama-2') ||
-          //   id.includes('gemini') ||
-          //   id.includes('mixtral') ||
-          //   id.includes('qwen') ||
-          //   id.includes('deepseek')
-          // );
-          return true;
-        }).map(model => ({
+        const popularModels = availableModels.filter(model => true).map(model => ({
           id: model.id,
           name: model.name || model.id.split('/').pop(),
           context_length: model.context_length
         }));
-
-        // Sort by popularity/preference with better organization
-        const sortedModels = popularModels.sort((a, b) => {
-          const getCategory = (id) => {
-            const lower = id.toLowerCase();
-            // if (lower.includes('gpt-4')) return 0;
-            // if (lower.includes('claude-3')) return 1;
-            // if (lower.includes('gemini')) return 2;
-            // if (lower.includes('llama-3')) return 3;
-            // if (lower.includes('mixtral')) return 4;
-            // if (lower.includes('qwen')) return 5;
-            // if (lower.includes('deepseek')) return 6;
-            // if (lower.includes('gpt-3.5')) return 7;
-            // if (lower.includes('claude-2')) return 8;
-            // if (lower.includes('llama-2')) return 9;
-            if (lower.includes('free')) return 0;
-            if (lower.includes('moonshot')) return 1; // Moonshot models first
-            if (lower.includes('anthropic')) return 2; // Anthropic models next
-            if (lower.includes('openai')) return 3; // OpenAI models next
-            if (lower.includes('gemini')) return 4; // Gemini models next
-            if (lower.includes('meta')) return 5; // Meta models next
-            if (lower.includes('tral')) return 6; // Mitral models next
-
-
-            return 999;
-          };
-          
-          const catA = getCategory(a.id);
-          const catB = getCategory(b.id);
-          
-          if (catA !== catB) return catA - catB;
-          return a.name.localeCompare(b.name);
-        });
-
-        setModels(sortedModels);
+        setModels(popularModels);
         
-        // Set default model if current selection isn't available
-        if (sortedModels.length > 0 && !sortedModels.find(m => m.id === selectedModel)) {
-          onModelChange(sortedModels[0].id);
+        // Set default model based on provider when switching
+        if (provider === 'groq' && popularModels.length > 0) {
+          // Set Kimi K2 as default for GROQ
+          const kimiModel = popularModels.find(m => m.id === 'moonshotai/kimi-k2');
+          if (kimiModel && !popularModels.find(m => m.id === selectedModel)) {
+            onModelChange('moonshotai/kimi-k2');
+          } else if (!popularModels.find(m => m.id === selectedModel)) {
+            onModelChange(popularModels[0].id);
+          }
+        } else if (provider === 'openrouter' && popularModels.length > 0) {
+          // Set Claude Haiku as default for OpenRouter
+          const claudeModel = popularModels.find(m => m.id === 'anthropic/claude-3-5-haiku');
+          if (claudeModel && !popularModels.find(m => m.id === selectedModel)) {
+            onModelChange('anthropic/claude-3-5-haiku');
+          } else if (!popularModels.find(m => m.id === selectedModel)) {
+            onModelChange(popularModels[0].id);
+          }
         }
       } catch (error) {
-        console.error('Failed to fetch models, using fallback:', error);
-        // Fallback models if API fails
-        const fallbackModels = [
-          { id: 'openai/gpt-4o', name: 'GPT-4o' },
-          { id: 'openai/gpt-4-turbo', name: 'GPT-4 Turbo' },
-          { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
-          { id: 'anthropic/claude-3-5-sonnet', name: 'Claude 3.5 Sonnet' },
-          { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku' },
-          { id: 'meta-llama/llama-3-70b-instruct', name: 'Llama 3 70B' },
-          { id: 'meta-llama/llama-3-8b-instruct', name: 'Llama 3 8B' },
-          { id: 'google/gemini-pro', name: 'Gemini Pro' },
-        ];
-        setModels(fallbackModels);
+        setModels([]);
       } finally {
         setModelsLoading(false);
       }
     };
-
     fetchModels();
-  }, [selectedModel, onModelChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [provider]);
 
   // Auto-resize textarea
   useEffect(() => {

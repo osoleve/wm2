@@ -1,8 +1,10 @@
 // OpenRouter API service using Netlify Functions
+
 class ChatService {
   constructor() {
-    // Use Netlify function instead of direct API calls
+    this.provider = 'openrouter'; // 'openrouter' or 'groq'
     this.apiUrl = '/.netlify/functions/chat';
+    this.groqApiUrl = '/.netlify/functions/groq';
     this.isDevelopment = import.meta.env.DEV;
   }
 
@@ -19,7 +21,8 @@ class ChatService {
         model: model,
         ...options // Spread sampling params (e.g., temperature, top_p, etc.)
       };
-      const response = await fetch(this.apiUrl, {
+      const url = this.provider === 'groq' ? this.groqApiUrl : this.apiUrl;
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,52 +45,87 @@ class ChatService {
     }
   }
 
+  setProvider(provider) {
+    this.provider = provider;
+  }
+
+  getProvider() {
+    return this.provider;
+  }
+
   // Get available models (optional feature)
   async getAvailableModels() {
-    // Til I can figure out how to only list models from certain providers
-    if (this.isDevelopment) {
-    try {
-      const response = await fetch('https://openrouter.ai/api/v1/models');
-      const models = [
-      { id: 'moonshotai/kimi-k2', name: 'Kimi K2' },
-      { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B Instruct' },
-      { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3 8B Instruct' },
-      { id: 'openai/gpt-4.1', name: 'GPT-4.1' },
-      { id: 'openai/gpt-4.1-mini', name: 'GPT-4.1 Mini' },
-      { id: 'openai/gpt-4.1-nano', name: 'GPT-4.1 Nano' },
-      { id: 'anthropic/claude-3.5-haiku', name: 'Claude 3.5 Haiku' },
-      { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4' },
-      { id: 'anthropic/claude-opus-4', name: 'Claude Opus 4' },
-      { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17b16e' },
-      { id: 'meta-llama/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17b128e' }
-    ];
-
-      const data = await response.json();
-      const availableModels = data.data || models;
-      return availableModels.map(model => ({
-        id: model.id,
-        name: model.name || model.id.split('/').pop(),
-        context_length: model.context_length
-      }));
-    } catch (error) {
-      console.error('Error fetching models:', error);
-      throw error;
+    // Return models for the selected provider
+    if (this.provider === 'groq') {
+      try {
+        const response = await fetch('/.netlify/functions/groq-models');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const availableModels = data.data || [];
+        
+        return availableModels.map(model => ({
+          id: model.id,
+          name: model.name || model.id.split('/').pop(),
+          context_length: model.context_length
+        }));
+      } catch (error) {
+        console.error('Error fetching GROQ models:', error);
+        // Fallback GROQ models - use actual GROQ model as default
+        return [
+          { id: 'moonshotai/kimi-k2-instruct', name: 'Kimi K2', context_length: 200000 },
+          { id: 'llama3-70b-8192', name: 'Llama 3 70B', context_length: 8192 },
+          { id: 'llama3-8b-8192', name: 'Llama 3 8B', context_length: 8192 },
+          { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B', context_length: 32768 },
+          { id: 'gemma-7b-it', name: 'Gemma 7B IT', context_length: 8192 },
+          { id: 'gemma2-9b-it', name: 'Gemma 2 9B IT', context_length: 8192 }
+        ];
+      }
     }
-  } else {
-    return [
-      { id: 'moonshotai/kimi-k2', name: 'Kimi K2' },
-      { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B Instruct' },
-      { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3 8B Instruct' },
-      { id: 'openai/gpt-4.1', name: 'GPT-4.1' },
-      { id: 'openai/gpt-4.1-mini', name: 'GPT-4.1 Mini' },
-      { id: 'openai/gpt-4.1-nano', name: 'GPT-4.1 Nano' },
-      { id: 'anthropic/claude-3.5-haiku', name: 'Claude 3.5 Haiku' },
-      { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4' },
-      { id: 'anthropic/claude-opus-4', name: 'Claude Opus 4' },
-      { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17b16e' },
-      { id: 'meta-llama/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17b128e' }
-    ];
-  }
+    // OpenRouter (default)
+    if (this.isDevelopment) {
+      try {
+        const response = await fetch('https://openrouter.ai/api/v1/models');
+        const models = [
+          { id: 'moonshotai/kimi-k2', name: 'Kimi K2' },
+          { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B Instruct' },
+          { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3 8B Instruct' },
+          { id: 'openai/gpt-4.1', name: 'GPT-4.1' },
+          { id: 'openai/gpt-4.1-mini', name: 'GPT-4.1 Mini' },
+          { id: 'openai/gpt-4.1-nano', name: 'GPT-4.1 Nano' },
+          { id: 'anthropic/claude-3.5-haiku', name: 'Claude 3.5 Haiku' },
+          { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4' },
+          { id: 'anthropic/claude-opus-4', name: 'Claude Opus 4' },
+          { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17b16e' },
+          { id: 'meta-llama/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17b128e' }
+        ];
+        const data = await response.json();
+        const availableModels = data.data || models;
+        return availableModels.map(model => ({
+          id: model.id,
+          name: model.name || model.id.split('/').pop(),
+          context_length: model.context_length
+        }));
+      } catch (error) {
+        console.error('Error fetching models:', error);
+        throw error;
+      }
+    } else {
+      return [
+        { id: 'moonshotai/kimi-k2', name: 'Kimi K2' },
+        { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B Instruct' },
+        { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3 8B Instruct' },
+        { id: 'openai/gpt-4.1', name: 'GPT-4.1' },
+        { id: 'openai/gpt-4.1-mini', name: 'GPT-4.1 Mini' },
+        { id: 'openai/gpt-4.1-nano', name: 'GPT-4.1 Nano' },
+        { id: 'anthropic/claude-3.5-haiku', name: 'Claude 3.5 Haiku' },
+        { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4' },
+        { id: 'anthropic/claude-opus-4', name: 'Claude Opus 4' },
+        { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17b16e' },
+        { id: 'meta-llama/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17b128e' }
+      ];
+    }
   }
 }
 

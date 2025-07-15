@@ -10,9 +10,19 @@ import './Chat.css';
 const Chat = () => {
   const { messages, isLoading, error, sendMessage, clearChat, isPrismEnabled, togglePrism } = useChat();
   // Default chat model is Haiku
-  const [selectedModel, setSelectedModel] = useState('anthropic/claude-3-5-haiku');
-  // Default prism backend model is Llama 3.3 70B Instruct
-  const [selectedPrismModel, setSelectedPrismModel] = useState('meta-llama/llama-3.3-70b-instruct');
+  const [provider, setProvider] = useState('groq'); // Start with GROQ as default
+  const [selectedModel, setSelectedModel] = useState('moonshotai/kimi-k2-instruct');
+  // Default prism backend model is Kimi K2
+  const [selectedPrismModel, setSelectedPrismModel] = useState('moonshotai/kimi-k2-instruct');
+  
+  // Update selectedModel when switching providers
+  useEffect(() => {
+    if (provider === 'groq') {
+      setSelectedModel('moonshotai/kimi-k2-instruct'); // Default to Kimi K2 for GROQ
+    } else {
+      setSelectedModel('moonshotai/kimi-k2'); // Default to Kimi K2 for OpenRouter
+    }
+  }, [provider]);
   const [isLoggingDashboardOpen, setIsLoggingDashboardOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [models, setModels] = useState([]);
@@ -20,6 +30,7 @@ const Chat = () => {
 
   // Fetch available models
   useEffect(() => {
+    chatService.setProvider(provider);
     const fetchModels = async () => {
       try {
         const availableModels = await chatService.getAvailableModels();
@@ -46,6 +57,42 @@ const Chat = () => {
         });
 
         setModels(sortedModels);
+        
+        // Set default model based on provider when switching
+        if (provider === 'groq' && sortedModels.length > 0) {
+          // Set Kimi K2 as default for GROQ
+          const kimiModel = sortedModels.find(m => m.id === 'moonshotai/kimi-k2-instruct');
+          if (kimiModel) {
+            setSelectedModel('moonshotai/kimi-k2-instruct');
+            setSelectedPrismModel('moonshotai/kimi-k2-instruct');
+          } else {
+            // Fallback to first model if Kimi K2 not available
+            setSelectedModel(sortedModels[0].id);
+            setSelectedPrismModel(sortedModels[0].id);
+          }
+        } else if (provider === 'openrouter' && sortedModels.length > 0) {
+          // Set Kimi K2 as default for OpenRouter
+          const kimiModel = sortedModels.find(m => m.id === 'moonshotai/kimi-k2');
+          if (kimiModel) {
+            setSelectedModel('moonshotai/kimi-k2');
+          } else {
+            // Fallback to Claude Haiku if Kimi K2 not available
+            const claudeModel = sortedModels.find(m => m.id === 'anthropic/claude-3-5-haiku');
+            if (claudeModel) {
+              setSelectedModel('anthropic/claude-3-5-haiku');
+            } else {
+              setSelectedModel(sortedModels[0].id);
+            }
+          }
+          
+          // Set Llama 3.3 70B as default prism model for OpenRouter
+          const llamaModel = sortedModels.find(m => m.id === 'meta-llama/llama-3.3-70b-instruct');
+          if (llamaModel) {
+            setSelectedPrismModel('meta-llama/llama-3.3-70b-instruct');
+          } else {
+            setSelectedPrismModel(sortedModels[0].id);
+          }
+        }
       } catch (error) {
         console.error('Error fetching models:', error);
         const fallbackModels = [
@@ -60,7 +107,7 @@ const Chat = () => {
     };
 
     fetchModels();
-  }, []);
+  }, [provider]);
 
   // Close mobile menu when pressing Escape and prevent body scroll
   useEffect(() => {
@@ -89,9 +136,38 @@ const Chat = () => {
     <div className="chat-container">
       <div className="chat-header">
         <div className="header-content">
-          <h1 className={isPrismEnabled ? 'prism-enabled' : ''}>{isPrismEnabled ? '( ͡°( ͡° ͜ʖ( ͡° ͜ʖ ͡°)ʖ ͡°) ͡°)' : '( ͡° ͜ʖ ͡°)'}</h1>
+          <h1 className={isPrismEnabled ? 'prism-enabled' : ''}>{isPrismEnabled ? 'Prism' : 'W.M.'}</h1>
         </div>
         <div className="header-controls">
+          <div className="provider-toggle">
+            <span style={{ fontSize: '0.9rem', color: '#666' }}>Provider:</span>
+            <button
+              onClick={() => setProvider('openrouter')}
+              style={{ 
+                fontWeight: provider === 'openrouter' ? 'bold' : 'normal',
+                background: provider === 'openrouter' ? '#007acc' : 'transparent',
+                color: provider === 'openrouter' ? 'white' : '#666',
+                border: '1px solid #ddd',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.8rem'
+              }}
+            >OpenRouter</button>
+            <button
+              onClick={() => setProvider('groq')}
+              style={{ 
+                fontWeight: provider === 'groq' ? 'bold' : 'normal',
+                background: provider === 'groq' ? '#007acc' : 'transparent',
+                color: provider === 'groq' ? 'white' : '#666',
+                border: '1px solid #ddd',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.8rem'
+              }}
+            >GROQ</button>
+          </div>
           <button 
             className="mobile-model-indicator"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -157,6 +233,50 @@ const Chat = () => {
             </div>
             
             <div className="mobile-menu-content">
+              <div className="model-section">
+                <label className="model-label">
+                  Provider
+                </label>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                  <button
+                    onClick={() => {
+                      setProvider('openrouter');
+                      if (window.navigator.vibrate) {
+                        window.navigator.vibrate(10);
+                      }
+                    }}
+                    style={{ 
+                      flex: 1,
+                      fontWeight: provider === 'openrouter' ? 'bold' : 'normal',
+                      background: provider === 'openrouter' ? '#007acc' : 'transparent',
+                      color: provider === 'openrouter' ? 'white' : '#666',
+                      border: '1px solid #ddd',
+                      padding: '8px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >OpenRouter</button>
+                  <button
+                    onClick={() => {
+                      setProvider('groq');
+                      if (window.navigator.vibrate) {
+                        window.navigator.vibrate(10);
+                      }
+                    }}
+                    style={{ 
+                      flex: 1,
+                      fontWeight: provider === 'groq' ? 'bold' : 'normal',
+                      background: provider === 'groq' ? '#007acc' : 'transparent',
+                      color: provider === 'groq' ? 'white' : '#666',
+                      border: '1px solid #ddd',
+                      padding: '8px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >GROQ</button>
+                </div>
+              </div>
+              
               <div className="model-section">
                 <label className="model-label">
                   Chat Model
@@ -247,6 +367,8 @@ const Chat = () => {
         isPrismEnabled={isPrismEnabled}
         togglePrism={togglePrism}
         isMobileMenuOpen={isMobileMenuOpen}
+        provider={provider}
+        setProvider={setProvider}
       />
 
       <LoggingDashboard 
