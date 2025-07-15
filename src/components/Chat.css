@@ -16,7 +16,7 @@
   flex-direction: column;
   height: 100vh;
   width: 100%;
-  max-width: 1200px; /* Increase from 900px */
+  max-width: 1000px; /* Reduce from 1400px */
   margin: 0 auto;
   background: var(--bg-secondary);
   border-radius: 0;
@@ -479,8 +479,8 @@
 }
 
 .mobile-menu-panel {
-  width: 85%;
-  max-width: 320px;
+  width: 80%;
+  max-width: 300px;
   height: 100%;
   background: var(--bg-secondary);
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
@@ -542,6 +542,19 @@
 }
 
 @media (max-width: 768px) {
+  .chat-messages {
+    padding-top: calc(var(--header-height) + env(safe-area-inset-top) + 1rem);
+    padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* Account for input */
+  }
+
+  .chat-input-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   .chat-container {
     height: 100vh;
     border-radius: 0;

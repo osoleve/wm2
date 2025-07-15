@@ -26,7 +26,7 @@
 
 /* Refined message content with better depth */
 .message-content {
-  max-width: 75%;
+  max-width: 70%; /* Reduce from 75% */
   padding: 1rem 1.25rem;
   border-radius: 1.5rem;
   position: relative;
@@ -109,7 +109,7 @@
 
 /* Enhanced Prism message styling */
 .message-prism .message-content {
-  max-width: 85%;
+  max-width: 80%; /* Reduce from 85% */
   background: linear-gradient(
     135deg,
     rgba(42, 40, 38, 0.95),
