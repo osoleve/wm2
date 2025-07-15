@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import chatService from '../services/chatService';
 import PrismToggle from './PrismToggle';
 import './ChatInput.css';
@@ -16,8 +15,11 @@ const ChatInput = ({
   isMobileMenuOpen
 }) => {
   const [message, setMessage] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const [models, setModels] = useState([]);
   const [modelsLoading, setModelsLoading] = useState(true);
+  const textareaRef = useRef(null);
+  const maxLength = 4000;
 
   // Fetch available models on component mount
   useEffect(() => {
@@ -100,6 +102,14 @@ const ChatInput = ({
     fetchModels();
   }, [selectedModel, onModelChange]);
 
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [message]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
@@ -115,8 +125,15 @@ const ChatInput = ({
     }
   };
 
+  const handleChange = (e) => {
+    const newValue = e.target.value;
+    if (newValue.length <= maxLength) {
+      setMessage(newValue);
+    }
+  };
+
   return (
-    <div className={`chat-input-container ${isPrismEnabled ? 'prism-enabled' : ''}`}>
+    <div className={`chat-input-container ${isPrismEnabled ? 'prism-enabled' : ''} ${isFocused ? 'focused' : ''}`}>
       <div className="input-header">
         <div className="model-selector">
           <label className="model-label">
@@ -164,30 +181,41 @@ const ChatInput = ({
             </select>
           </div>
         )}
-        <div className="desktop-prism-toggle">        <div className="desktop-prism-toggle">
+        <div className="desktop-prism-toggle">
           <PrismToggle 
             isPrismEnabled={isPrismEnabled}
             onToggle={togglePrism}
             isLoading={isLoading}
           />
         </div>
-        </div>
       </div>
       
       <form onSubmit={handleSubmit} className="chat-form">
         <div className="input-wrapper">
           <textarea
+            ref={textareaRef}
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleChange}
             onKeyPress={handleKeyPress}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             placeholder={isPrismEnabled ? "Ask a question for multi-perspective analysis..." : "Type your message here..."}
             className="message-input"
             rows={1}
             disabled={isLoading}
           />
+          
+          {message.length > 0 && (
+            <div className="input-indicators">
+              <span className={`char-counter ${message.length > maxLength * 0.9 ? 'warning' : ''}`}>
+                {message.length}/{maxLength}
+              </span>
+            </div>
+          )}
+          
           <button 
             type="submit" 
-            className="send-button"
+            className={`send-button ${message.trim() ? 'ready' : ''}`}
             disabled={!message.trim() || isLoading}
           >
             {isLoading ? (

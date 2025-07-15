@@ -21,6 +21,11 @@
   );
 }
 
+.chat-input-container.focused {
+  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+}
+
 .input-row {
   display: flex;
   flex-direction: column;
@@ -121,6 +126,15 @@
   position: relative;
 }
 
+.input-indicators {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .message-input {
   flex: 1;
   padding: 0.875rem 1.125rem;
@@ -173,6 +187,12 @@
   cursor: not-allowed;
 }
 
+/* Auto-resize animation */
+.message-input:focus {
+  box-shadow: 0 0 0 2px rgba(143, 166, 142, 0.2), 
+              inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .send-button {
   padding: 0.875rem;
   background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
@@ -189,6 +209,19 @@
   flex-shrink: 0;
   box-shadow: 0 2px 12px rgba(143, 166, 142, 0.3), var(--glow-subtle);
   font-weight: 500;
+}
+
+.send-button.ready {
+  animation: readyPulse 2s ease-in-out infinite;
+}
+
+@keyframes readyPulse {
+  0%, 100% {
+    box-shadow: 0 2px 12px rgba(143, 166, 142, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 20px rgba(143, 166, 142, 0.5);
+  }
 }
 
 .send-button:hover:not(:disabled) {
@@ -221,6 +254,33 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.char-counter {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+
+.char-counter.warning {
+  color: var(--tab-highlight);
+  font-weight: 500;
+}
+
+/* Keyboard shortcut hint */
+.chat-form::after {
+  content: "↵ Send • ⇧↵ New line";
+  position: absolute;
+  bottom: -20px;
+  right: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.chat-input-container.focused .chat-form::after {
+  opacity: 0.5;
 }
 
 @media (max-width: 768px) {
@@ -258,6 +318,19 @@
     width: 44px;
     height: 44px;
     padding: 0.75rem;
+  }
+
+  .input-indicators {
+    right: 3rem;
+    bottom: 0.375rem;
+  }
+  
+  .char-counter {
+    font-size: 0.6875rem;
+  }
+  
+  .chat-form::after {
+    display: none;
   }
 
   .desktop-prism-toggle {

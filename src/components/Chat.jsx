@@ -93,9 +93,21 @@ const Chat = () => {
     <div className="chat-container">
       <div className="chat-header">
         <div className="header-content">
-          <h1 className={isPrismEnabled ? 'prism-enabled' : ''}>{isPrismEnabled ? '( ͡°( ͡° ͜ʖ( ͡° ͜ʖ ͡°)ʖ ͡°) ͡°)' : '👁️'}</h1>
+          <h1 className={isPrismEnabled ? 'prism-enabled' : ''}>{isPrismEnabled ? '( ͡°( ͡° ͜ʖ( ͡° ͜ʖ ͡°)ʖ ͡°) ͡°)' : '( ͡° ͜ʖ ͡°)'}</h1>
         </div>
         <div className="header-controls">
+          <button 
+            className="mobile-model-indicator"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <span className="model-name">
+              {models.find(m => m.id === selectedModel)?.name.split(' ')[0] || 'Model'}
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+          
           <button 
             className="mobile-menu-button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -134,74 +146,69 @@ const Chat = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="mobile-menu" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="mobile-menu-content" onClick={(e) => e.stopPropagation()}>
+        <div className="mobile-menu-overlay" onClick={() => setIsMobileMenuOpen(false)}>
+          <div className="mobile-menu-panel" onClick={(e) => e.stopPropagation()}>
             <div className="mobile-menu-header">
-              <h3>Model Selection</h3>
+              <h3>Model Settings</h3>
               <button 
                 className="mobile-menu-close"
                 onClick={() => setIsMobileMenuOpen(false)}
-                aria-label="Close menu"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 6L6 18M6 6l12 12"/>
                 </svg>
               </button>
             </div>
-            <div className="mobile-menu-body">
-              <div className="mobile-model-selection">
-                <label className="mobile-model-label">
-                  {isPrismEnabled ? 'Primary Model:' : 'Chat Model:'}
+            
+            <div className="mobile-menu-content">
+              <div className="model-section">
+                <label className="model-label">
+                  Chat Model
                 </label>
                 <select 
                   value={selectedModel} 
                   onChange={(e) => {
                     setSelectedModel(e.target.value);
-                    setIsMobileMenuOpen(false); // Close menu after selection
+                    // Add haptic feedback if available
+                    if (window.navigator.vibrate) {
+                      window.navigator.vibrate(10);
+                    }
                   }}
-                  className="mobile-model-select"
-                  disabled={modelsLoading}
+                  className="model-select-mobile"
                 >
-                  {modelsLoading ? (
-                    <option>Loading models...</option>
-                  ) : (
-                    models.map(model => (
-                      <option key={model.id} value={model.id}>
-                        {model.name}
-                      </option>
-                    ))
-                  )}
+                  {models.map(model => (
+                    <option key={model.id} value={model.id}>
+                      {model.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               
               {isPrismEnabled && (
-                <div className="mobile-model-selection">
-                  <label className="mobile-model-label">
-                    Prism Backend Model:
+                <div className="model-section">
+                  <label className="model-label">
+                    Prism Analysis Model
                   </label>
                   <select 
                     value={selectedPrismModel} 
                     onChange={(e) => {
                       setSelectedPrismModel(e.target.value);
-                      setIsMobileMenuOpen(false); // Close menu after selection
+                      if (window.navigator.vibrate) {
+                        window.navigator.vibrate(10);
+                      }
                     }}
-                    className="mobile-model-select"
-                    disabled={modelsLoading}
+                    className="model-select-mobile"
                   >
-                    {modelsLoading ? (
-                      <option>Loading models...</option>
-                    ) : (
-                      models.map(model => (
-                        <option key={model.id} value={model.id}>
-                          {model.name}
-                        </option>
-                      ))
-                    )}
+                    {models.map(model => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               )}
               
-              <div className="mobile-prism-toggle">
+              <div className="mobile-prism-section">
                 <PrismToggle 
                   isPrismEnabled={isPrismEnabled}
                   onToggle={togglePrism}
@@ -227,7 +234,12 @@ const Chat = () => {
         </div>
       )}
 
-      <ChatMessages messages={messages} isLoading={isLoading} />
+      <ChatMessages 
+        messages={messages} 
+        isLoading={isLoading} 
+        onSendMessage={(msg) => sendMessage(msg, selectedModel, selectedPrismModel)}
+        selectedModel={selectedModel}
+      />
       
       <ChatInput 
         onSendMessage={(msg) => sendMessage(msg, selectedModel, selectedPrismModel)}

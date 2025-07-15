@@ -249,7 +249,7 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
         const prismSystemMessage = { role: 'system', content: prismPrompt + '\n\n' + extra_instructions };
         const prismConversation = [prismSystemMessage, ...prismConversationHistory];
         
-        const response = await chatService.sendMessage(prismConversation, model);
+        const response = await chatService.sendMessage(prismConversation, model, { temperature: 0.9 });
         return {
           perspective: prismName,
           content: response.content
@@ -267,13 +267,13 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
     const responses = await Promise.all(prismPromises);
     
     // Debug the prism responses
-    console.log('🔍 PRISM RESPONSES DEBUG:');
-    responses.forEach((response, i) => {
-      console.log(`Response ${i}: ${response.perspective}`);
-      console.log(`Content length: ${response.content?.length || 0}`);
-      console.log(`Content preview: ${response.content?.substring(0, 100) + '...' || 'NO CONTENT'}`);
-      console.log('-'.repeat(40));
-    });
+    // console.log('🔍 PRISM RESPONSES DEBUG:');
+    // responses.forEach((response, i) => {
+    //   console.log(`Response ${i}: ${response.perspective}`);
+    //   console.log(`Content length: ${response.content?.length || 0}`);
+    //   console.log(`Content preview: ${response.content?.substring(0, 100) + '...' || 'NO CONTENT'}`);
+    //   console.log('-'.repeat(40));
+    // });
     
     return responses;
   }
@@ -290,14 +290,14 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
       throw new Error('No valid prism responses provided for synthesis');
     }
     
-    console.log('✅ Valid prism responses:', validPrismResponses.length);
+    // console.log('✅ Valid prism responses:', validPrismResponses.length);
     
     // Build perspectives section
     const perspectivesSection = validPrismResponses.map(response => 
       `**${response.perspective} Perspective:**
 ${response.content}
 
-`).join('');
+`).join('\n\n---\n\n');
     
     // Debug: Verify perspectives section is built correctly
     console.log('🔍 PERSPECTIVES SECTION:');
@@ -307,9 +307,9 @@ ${response.content}
     
     const synthesisSystemPrompt = `${baseSystemPrompt}
 
-You will receive multiple analytical perspectives on a user question. Consider these perspectives as you formulate your unique, gestalt response to the user inquiry, but don't feel constrained by them.
+---
 
-Keep your response under 250 words, in a clear, conversational style directly addressing the user's question in your own words.`;
+You are now in synthesis mode. Your task is to synthesize the multiple prism perspectives into your gestalt, bespoke response to the user.`;
 
     const perspectivesPrompt = `Here are multiple analytical perspectives on the user question: "${userMessage}"
 

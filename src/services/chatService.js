@@ -6,17 +6,25 @@ class ChatService {
     this.isDevelopment = import.meta.env.DEV;
   }
 
-  async sendMessage(messages, model = "openai/gpt-4.1") {
+  /**
+   * Send a message to the chat provider.
+   * @param {Array} messages - The chat history/messages.
+   * @param {string} model - The model to use.
+   * @param {Object} options - Optional sampling parameters (e.g., temperature, top_p, etc.)
+   */
+  async sendMessage(messages, model = "openai/gpt-4.1", options = {}) {
     try {
+      const body = {
+        messages: messages,
+        model: model,
+        ...options // Spread sampling params (e.g., temperature, top_p, etc.)
+      };
       const response = await fetch(this.apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messages: messages,
-          model: model
-        })
+        body: JSON.stringify(body)
       });
 
       if (!response.ok) {

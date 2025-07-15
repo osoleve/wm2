@@ -9,6 +9,7 @@ This is a React chat application that integrates with OpenRouter API using the O
 - OpenAI SDK configured for OpenRouter API
 - Modern ES6+ JavaScript
 - CSS modules or styled components for styling
+- Netlify for deployment
 
 ## Project Structure
 - `/src/components/` - React components for the chat interface
@@ -29,3 +30,4 @@ This is a React chat application that integrates with OpenRouter API using the O
 - Follow React best practices
 - Ensure responsive design principles
 - Handle API errors gracefully
+- Check if a dev server is running before launching one
