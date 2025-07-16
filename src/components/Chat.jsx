@@ -9,7 +9,22 @@ import chatService from '../services/chatService';
 import './Chat.css';
 
 const Chat = () => {
-  const { messages, isLoading, error, sendMessage, clearChat, isPrismEnabled, togglePrism } = useChat();
+  const { 
+    messages, 
+    isLoading, 
+    error, 
+    sendMessage, 
+    clearChat, 
+    isPrismEnabled, 
+    togglePrism,
+    editMessage,
+    regenerateMessage,
+    navigateToBranch,
+    getBranchInfo,
+    copyMessage,
+    getMessageVersions,
+    switchToVersion
+  } = useChat();
   // Default chat model is Haiku
   const [provider, setProvider] = useState('groq'); // Start with GROQ as default
   const [selectedModel, setSelectedModel] = useState('moonshotai/kimi-k2-instruct');
@@ -369,6 +384,14 @@ const Chat = () => {
         isLoading={isLoading} 
         onSendMessage={(msg) => sendMessage(msg, selectedModel, selectedPrismModel, isSystemPromptEnabled)}
         selectedModel={selectedModel}
+        isPrismMode={isPrismEnabled}
+        onEditMessage={editMessage}
+        onRegenerateMessage={regenerateMessage}
+        onCopyMessage={copyMessage}
+        onNavigateBranch={navigateToBranch}
+        getBranchInfo={getBranchInfo}
+        getMessageVersions={getMessageVersions}
+        onSwitchToVersion={switchToVersion}
       />
       
       <ChatInput 

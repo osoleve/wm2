@@ -1,10 +1,22 @@
 import React, { useRef, useEffect } from 'react';
 import Message from './Message';
-import { useChat } from '../hooks/useChat';
-
 import './ChatMessages.css';
 
-const ChatMessages = ({ messages, isLoading, onSendMessage, selectedModel }) => {
+const ChatMessages = ({ 
+  messages, 
+  isLoading, 
+  onSendMessage, 
+  selectedModel,
+  isPrismMode, 
+  prismResponses,
+  onEditMessage,
+  onRegenerateMessage,
+  onCopyMessage,
+  onNavigateBranch,
+  getBranchInfo,
+  getMessageVersions,
+  onSwitchToVersion
+}) => {
   const messagesEndRef = useRef(null);
 
   const examplePrompts = [
@@ -58,9 +70,21 @@ const ChatMessages = ({ messages, isLoading, onSendMessage, selectedModel }) => 
       ) : (
         messages.map((message, index) => (
           <Message
-            key={index}
+            key={message.id || index}
             message={message}
             isUser={message.role === 'user'}
+            isLast={index === messages.length - 1}
+            onEdit={onEditMessage}
+            onRegenerate={onRegenerateMessage}
+            onCopy={onCopyMessage}
+            onNavigateBranch={onNavigateBranch}
+            getBranchInfo={getBranchInfo}
+            getMessageVersions={getMessageVersions}
+            onSwitchToVersion={onSwitchToVersion}
+            isPrismMode={isPrismMode}
+            prismResponses={isPrismMode && message.role === 'assistant' 
+              ? prismResponses?.[message.id] 
+              : null}
           />
         ))
       )}

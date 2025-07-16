@@ -1,0 +1,114 @@
+/* BranchNavigation.module.css */
+.branchNavigation {
+  position: relative;
+  display: inline-block;
+}
+
+.branchButton {
+  background: rgba(42, 40, 38, 0.8);
+  border: 1px solid rgba(230, 184, 125, 0.3);
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--animation-fast) ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 2rem;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.branchButton:hover {
+  background: rgba(230, 184, 125, 0.15);
+  border-color: var(--tab-highlight);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(230, 184, 125, 0.2);
+}
+
+.branchButton:active {
+  transform: translateY(0);
+}
+
+.branchMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  background: linear-gradient(
+    135deg,
+    rgba(42, 40, 38, 0.95),
+    rgba(36, 35, 33, 0.95)
+  );
+  border: 1px solid rgba(143, 166, 142, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  z-index: 100;
+  min-width: 120px;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(143, 166, 142, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: branchMenuSlide var(--animation-fast) var(--ease-out-expo);
+}
+
+@keyframes branchMenuSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.branchOption {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: all var(--animation-fast) ease;
+  font-family: inherit;
+}
+
+.branchOption:hover {
+  background: rgba(143, 166, 142, 0.1);
+  color: var(--text-primary);
+}
+
+.branchOption.active {
+  background: var(--gradient-sage);
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(143, 166, 142, 0.3);
+}
+
+.branchOption.active:hover {
+  background: var(--gradient-sage);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .branchMenu {
+    min-width: 100px;
+    right: 0;
+    left: auto;
+  }
+  
+  .branchOption {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+  }
+}
