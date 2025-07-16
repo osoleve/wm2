@@ -69,6 +69,7 @@ const ChatMessages = ({
         </div>
       ) : (
         messages.map((message, index) => (
+          // In ChatMessages.jsx, remove the prismResponses prop since it's no longer needed:
           <Message
             key={message.id || index}
             message={message}
@@ -81,10 +82,7 @@ const ChatMessages = ({
             getBranchInfo={getBranchInfo}
             getMessageVersions={getMessageVersions}
             onSwitchToVersion={onSwitchToVersion}
-            isPrismMode={isPrismMode}
-            prismResponses={isPrismMode && message.role === 'assistant' 
-              ? prismResponses?.[message.id] 
-              : null}
+            isPrismMode={message.isPrism || false}
           />
         ))
       )}

@@ -1,5 +1,5 @@
+// src/components/Message.jsx - Update the message display logic
 import React, { useState } from 'react';
-import { PrismTabs } from './PrismTabs';
 import { EditModal } from './EditModal';
 import { BranchNavigation } from './BranchNavigation';
 import { VersionHistory } from './VersionHistory';
@@ -22,6 +22,7 @@ const Message = ({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [activeTab, setActiveTab] = useState('synthesis');
   
   const branchInfo = getBranchInfo?.(message.id);
   const isPrismMessage = message.isPrism && message.perspectives;
@@ -40,13 +41,26 @@ const Message = ({
   const handleCopy = async () => {
     const success = await onCopy(message.id);
     if (success) {
-      // Show brief success feedback
       setShowControls(false);
     }
   };
 
   const handleShowVersions = () => {
     setShowVersionHistory(true);
+  };
+
+  // Get the content to display based on active tab
+  const getDisplayContent = () => {
+    if (!isPrismMessage) {
+      return message.content;
+    }
+
+    if (activeTab === 'synthesis') {
+      return message.synthesis || message.content;
+    }
+
+    const perspective = message.perspectives.find(p => p.perspective === activeTab);
+    return perspective?.content || message.content;
   };
 
   return (
@@ -57,8 +71,31 @@ const Message = ({
     >
       <div className="message-content">
         {message.isEdited && <span className="edited-label">(edited)</span>}
+        
+        {/* Prism tabs at the top of the message */}
+        {isPrismMessage && (
+          <div className="prism-tabs">
+            <button
+              className={`prism-tab ${activeTab === 'synthesis' ? 'active' : ''}`}
+              onClick={() => setActiveTab('synthesis')}
+            >
+              Synthesis
+            </button>
+            
+            {message.perspectives.map((perspective, index) => (
+              <button
+                key={index}
+                className={`prism-tab ${activeTab === perspective.perspective ? 'active' : ''}`}
+                onClick={() => setActiveTab(perspective.perspective)}
+              >
+                {perspective.perspective}
+              </button>
+            ))}
+          </div>
+        )}
+        
         <div className="message-text">
-          {message.content}
+          {getDisplayContent()}
         </div>
         
         {showControls && (
@@ -111,10 +148,6 @@ const Message = ({
           </div>
         )}
       </div>
-
-      {isPrismMode && message.role === 'assistant' && prismResponses && (
-        <PrismTabs responses={prismResponses} />
-      )}
 
       {showEditModal && (
         <EditModal
