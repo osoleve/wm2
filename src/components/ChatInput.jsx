@@ -21,7 +21,7 @@ const ChatInput = ({
   const [models, setModels] = useState([]);
   const [modelsLoading, setModelsLoading] = useState(true);
   const textareaRef = useRef(null);
-  const maxLength = 4000;
+  const maxLength = 16384;
   const longPressTimeoutRef = useRef(null);
   const [isLongPressing, setIsLongPressing] = useState(false);
 
