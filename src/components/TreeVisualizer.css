@@ -1,0 +1,74 @@
+/* TreeVisualizer.css */
+.tree-visualizer {
+  width: 100%;
+  height: 400px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.tree-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.tree-controls button {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tree-controls button:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-color);
+}
+
+.tree-visualizer svg {
+  cursor: grab;
+  width: 100%;
+  height: 100%;
+}
+
+.tree-visualizer svg.panning {
+  cursor: grabbing;
+}
+
+.tree-node {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tree-node:hover {
+  transform: scale(1.05);
+}
+
+.tree-node.selected rect {
+  filter: drop-shadow(0 0 8px var(--accent-color));
+}
+
+.tree-node.current rect {
+  stroke-width: 3;
+  stroke: var(--tab-highlight);
+  filter: drop-shadow(0 0 12px var(--tab-highlight));
+}
+
+.links line {
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.links line:hover {
+  opacity: 1;
+  stroke-width: 3;
+}
