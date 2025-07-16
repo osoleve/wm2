@@ -67,6 +67,57 @@ export const useChat = () => {
     }
   }, [messages, isPrismEnabled]);
 
+  const regenerateMessage = useCallback(async (messageIndex, model, prismModel, isSystemPromptEnabled) => {
+    const userMessage = messages[messageIndex - 1];
+    if (!userMessage || userMessage.role !== 'user') return;
+
+    const historyToRegenerate = messages.slice(0, messageIndex - 1);
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      let conversationHistory = [...historyToRegenerate, userMessage];
+
+      if (isSystemPromptEnabled) {
+        const systemPrompt = await getSystemPrompt();
+        const systemMessage = { role: 'system', content: systemPrompt };
+        conversationHistory = [systemMessage, ...conversationHistory];
+      }
+
+      let aiResponse;
+
+      if (isPrismEnabled) {
+        aiResponse = await prismService.generateCompletePrismResponse(
+          userMessage.content,
+          conversationHistory,
+          prismModel || model,
+          model,
+          isSystemPromptEnabled
+        );
+      } else {
+        aiResponse = await chatService.sendMessage(conversationHistory, model);
+      }
+
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[messageIndex] = aiResponse;
+        return newMessages;
+      });
+
+      try {
+        loggingService.logMessage(userMessage.content, aiResponse, model, isPrismEnabled);
+      } catch (loggingError) {
+        console.error('Logging error (non-fatal):', loggingError);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to regenerate message');
+      console.error('Chat error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [messages, isPrismEnabled]);
+
   const clearChat = useCallback(() => {
     setMessages([]);
     setError(null);
@@ -85,6 +136,7 @@ export const useChat = () => {
     sendMessage,
     clearChat,
     isPrismEnabled,
-    togglePrism
+    togglePrism,
+    regenerateMessage
   };
 };

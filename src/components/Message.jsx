@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Message.css';
 
-const Message = ({ message, isUser }) => {
+const Message = ({ message, isUser, onRegenerate }) => {
   const [activePerspective, setActivePerspective] = useState('synthesis');
   
   const isPrismMessage = message.isPrism && message.perspectives;
@@ -58,9 +58,18 @@ const Message = ({ message, isUser }) => {
         <div className="message-text">
           {getDisplayContent()}
         </div>
-        {/* <div className="message-role">
-          {getDisplayTitle()}
-        </div> */}
+        {!isUser && (
+          <div className="message-actions">
+            <button onClick={onRegenerate} className="regenerate-button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                <path d="M21 3v5h-5"/>
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                <path d="M3 21v-5h5"/>
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

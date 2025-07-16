@@ -4,7 +4,7 @@ import { useChat } from '../hooks/useChat';
 
 import './ChatMessages.css';
 
-const ChatMessages = ({ messages, isLoading, onSendMessage, selectedModel }) => {
+const ChatMessages = ({ messages, isLoading, onSendMessage, onRegenerateMessage, selectedModel }) => {
   const messagesEndRef = useRef(null);
 
   const examplePrompts = [
@@ -61,6 +61,7 @@ const ChatMessages = ({ messages, isLoading, onSendMessage, selectedModel }) => 
             key={index}
             message={message}
             isUser={message.role === 'user'}
+            onRegenerate={() => onRegenerateMessage(index)}
           />
         ))
       )}

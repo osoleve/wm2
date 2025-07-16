@@ -242,3 +242,32 @@
   color: var(--text-muted);
 }
 
+.message-actions {
+  position: absolute;
+  bottom: -10px;
+  right: 10px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out, bottom 0.2s ease-in-out;
+}
+
+.message-ai:hover .message-actions {
+  opacity: 1;
+  bottom: 5px;
+}
+
+.regenerate-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+}
+
+.regenerate-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
