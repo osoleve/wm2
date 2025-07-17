@@ -1,18 +1,18 @@
 .system-prompt-toggle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: 6px;
+  font-size: 0.675rem;
   color: var(--text-muted);
 }
 
 .system-prompt-toggle .switch {
   position: relative;
   display: inline-block;
-  width: 40px;
-  height: 20px;
+  width: 30px;
+  height: 15px;
   background-color: var(--border-light);
-  border-radius: 20px;
+  border-radius: 15px;
   border: none;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -26,13 +26,13 @@
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   background-color: var(--text-secondary);
   border-radius: 50%;
   transition: transform 0.2s;
 }
 
 .system-prompt-toggle .switch.on .slider {
-  transform: translateX(20px);
+  transform: translateX(15px);
 }
