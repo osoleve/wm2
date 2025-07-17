@@ -68,47 +68,67 @@ npm run lint
    - Tree structure maintained in Map for efficient operations
    - Event-driven updates trigger UI re-renders
 
-### Message Management Features
-- **Branching**: Edit messages to create alternate conversation paths
-- **Version History**: Track all edits with timestamps
-- **Navigation**: Move between conversation branches
-- **Unique IDs**: Every message has a UUID
+### Key Development Considerations
 
-### Development Notes
+1. **Environment Setup**
+   - API Keys required: `VITE_OPENROUTER_API_KEY`, `VITE_GROQ_API_KEY`
+   - Use `npm run dev:netlify` for full API functionality
+   - Character limit: 16,384 per message
 
-1. **API Keys**: Environment variables required
-   - `VITE_OPENROUTER_API_KEY`
-   - `VITE_GROQ_API_KEY`
+2. **TypeScript Configuration**
+   - Strict mode enabled with comprehensive linting
+   - Path aliases: `@/*` maps to `src/*`
+   - Use `npm run type-check` before commits
+   - Migration from JavaScript to TypeScript in progress
 
-2. **Character Limit**: 16,384 per message
-
-3. **CSS Architecture**: 
+3. **CSS Architecture & Theming**
+   - Enhanced sage/amber color palette with rich depth
+   - CSS custom properties for dynamic theming
    - Mobile-first responsive design (320px to 4K)
-   - Dark theme with sage/amber palette
-   - 60fps animation target
+   - Glass morphism effects with backdrop-filter
+   - 60fps animation performance target
 
-4. **Code Style**:
-   - Functional components only
-   - Typescript only
-   - CSS Modules for component styling
-   - Avoid inline styles
+4. **Prism Mode Workflow** (Critical Understanding)
+   - Never modify files in `public/prism/` - these are curated theoretical perspectives
+   - Prism processing: AI selects → parallel generates → synthesizes → displays
+   - Perspective selection happens in `prismService` using AI reasoning
+   - Each query triggers new perspective selection (not cached)
 
-5. **Testing**: No test framework configured yet
+## Data Flow Architecture
 
-## File Structure
+### Message Processing Pipeline
+1. **Input** → ChatInput component captures user message
+2. **Tree Update** → Message added to conversation tree structure  
+3. **API Routing** → Request routed to OpenRouter or GROQ based on model selection
+4. **Prism Analysis** (if enabled) → AI selects perspectives → parallel processing → synthesis
+5. **Response Storage** → AI response stored in tree with relationships
+6. **UI Update** → React state updates trigger re-render of message components
+
+### Conversation Tree Management
+- **Node Structure**: Each message is a node with parent/child relationships
+- **Branch Creation**: Editing any message creates a new branch from that point
+- **Path Tracking**: Active conversation path maintained for current view
+- **Persistence**: Entire tree serialized to localStorage automatically
+
+## Component Architecture
 
 ```
-src/
-├── components/     # UI components
-├── hooks/         # Custom React hooks
-├── services/      # API and business logic
-└── utils/         # Utilities
-
-netlify/functions/ # Serverless API proxies
-public/prism/      # 498 theoretical perspective text files, ignore
+App.tsx
+└── Chat.tsx (Main container with header/model selection)
+    ├── ChatMessages.tsx (Tree traversal and message rendering)
+    │   └── Message.tsx (Individual message with edit/regenerate controls)
+    │       ├── PrismTabs.tsx (Perspective display)
+    │       └── VersionHistory.tsx (Edit history modal)
+    ├── ChatInput.tsx (Input with model/provider selection)
+    ├── PrismToggle.tsx (Enable/disable multi-perspective mode)
+    ├── SystemPromptToggle.tsx (System prompt visibility)
+    └── BranchNavigation.tsx (Tree navigation controls)
 ```
 
-## Recent Changes
-- Enhanced message state control system
-- Migrate to typescript
-- System prompt toggle functionality
+## Key Files to Understand
+
+- `src/hooks/useChat.ts` - Central state management and tree operations
+- `src/services/chatService.ts` - API integration with error handling  
+- `src/services/prismService.ts` - Multi-perspective analysis workflow
+- `src/components/ChatMessages.tsx` - Tree traversal and rendering logic
+- `public/prism/` - 498 theoretical perspective files (read-only)
