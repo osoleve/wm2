@@ -70,11 +70,16 @@ export const useChat = () => {
   // Initialize from saved tree on mount
   useEffect(() => {
     const tree = conversationTreeService.getCurrentTree();
-    if (tree && tree.rootNodes.length > 0) {
-      // Load the first root node's branch by default
-      const firstRootNode = tree.rootNodes[0];
-      const branch = conversationTreeService.loadBranch(firstRootNode);
-      setMessages(branch);
+    if (tree) {
+      if (tree.rootNodes.length > 0) {
+        // Load the first root node's branch by default
+        const firstRootNode = tree.rootNodes[0];
+        const branch = conversationTreeService.loadBranch(firstRootNode);
+        setMessages(branch);
+      } else {
+        // Load empty conversation
+        setMessages([]);
+      }
       setCurrentTreeId(tree.id);
     }
   }, []);
@@ -368,11 +373,17 @@ export const useChat = () => {
   const loadTree = useCallback((treeId: string) => {
     if (conversationTreeService.switchTree(treeId)) {
       const tree = conversationTreeService.getCurrentTree();
-      if (tree && tree.rootNodes.length > 0) {
-        const firstRootNode = tree.rootNodes[0];
-        const branch = conversationTreeService.loadBranch(firstRootNode);
-        setMessages(branch);
+      if (tree) {
+        if (tree.rootNodes.length > 0) {
+          const firstRootNode = tree.rootNodes[0];
+          const branch = conversationTreeService.loadBranch(firstRootNode);
+          setMessages(branch);
+        } else {
+          // Load empty conversation
+          setMessages([]);
+        }
         setCurrentTreeId(treeId);
+        setError(null); // Clear any existing errors
       }
     }
   }, []);
@@ -560,6 +571,40 @@ export const useChat = () => {
     return conversationTreeService.deleteTree(treeId);
   }, []);
 
+  // Save current conversation with a custom title
+  const saveConversation = useCallback((title: string) => {
+    const tree = conversationTreeService.getCurrentTree();
+    if (tree) {
+      const trees = conversationTreeService.getAllTrees();
+      const updatedTree = {
+        ...tree,
+        title,
+        lastModified: new Date().toISOString()
+      };
+      trees[tree.id] = updatedTree;
+      localStorage.setItem('prism-conversation-trees', JSON.stringify(
+        Object.fromEntries(
+          Object.entries(trees).map(([id, t]) => [
+            id, 
+            {
+              ...t,
+              nodes: Array.from(t.nodes instanceof Map ? t.nodes : new Map(t.nodes))
+            }
+          ])
+        )
+      ));
+    }
+  }, []);
+
+  // Create a new conversation
+  const createNewConversation = useCallback((title: string = 'New Conversation') => {
+    const newTreeId = conversationTreeService.createNewTree(title);
+    setMessages([]);
+    setCurrentTreeId(newTreeId);
+    setError(null);
+    return newTreeId;
+  }, []);
+
   return {
     messages,
     isLoading,
@@ -582,6 +627,8 @@ export const useChat = () => {
     exportTree,
     importTree,
     deleteTree,
-    currentTreeId
+    currentTreeId,
+    saveConversation,
+    createNewConversation
   };
 };

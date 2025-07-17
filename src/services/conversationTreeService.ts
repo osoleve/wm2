@@ -148,6 +148,10 @@ class ConversationTreeService {
       Object.keys(trees).forEach(treeId => {
         if (Array.isArray(trees[treeId].nodes)) {
           trees[treeId].nodes = new Map(trees[treeId].nodes);
+        } else if (trees[treeId].nodes && typeof trees[treeId].nodes === 'object' && !(trees[treeId].nodes instanceof Map)) {
+          // Handle case where nodes is stored as an object but needs to be a Map
+          const nodeEntries = Object.entries(trees[treeId].nodes);
+          trees[treeId].nodes = new Map(nodeEntries);
         }
       });
       
@@ -415,7 +419,9 @@ class ConversationTreeService {
     const tree = treeId ? this.getAllTrees()[treeId] : this.getCurrentTree();
     if (!tree) return null;
 
-    const nodes = Array.from(tree.nodes.values());
+    // Ensure nodes is a Map
+    const nodesMap = tree.nodes instanceof Map ? tree.nodes : new Map(tree.nodes);
+    const nodes = Array.from(nodesMap.values()) as TreeNode[];
     const userMessages = nodes.filter(n => n.role === 'user').length;
     const aiMessages = nodes.filter(n => n.role === 'assistant').length;
     const prismMessages = nodes.filter(n => n.isPrism).length;
@@ -492,7 +498,9 @@ class ConversationTreeService {
     Object.values(trees).forEach(tree => {
       const matches: SearchMatch[] = [];
       
-      tree.nodes.forEach((node, nodeId) => {
+      // Ensure nodes is a Map
+      const nodesMap = tree.nodes instanceof Map ? tree.nodes : new Map(tree.nodes);
+      (nodesMap as Map<string, TreeNode>).forEach((node: TreeNode, nodeId: string) => {
         if (node.content && node.content.toLowerCase().includes(query.toLowerCase())) {
           matches.push({
             nodeId,

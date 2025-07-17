@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { PrismTabs } from './PrismTabs'
+import { describe, it, expect } from 'vitest'
+// import { PrismTabs } from './PrismTabs'
 
 describe('PrismTabs Component Logic Tests', () => {
   const mockResponses = {
@@ -112,7 +112,7 @@ describe('PrismTabs Component Logic Tests', () => {
           return responses.synthesis || responses.content
         }
         
-        const perspective = responses.perspectives?.find(p => p.perspective === activeTab)
+        const perspective = responses.perspectives?.find((p: any) => p.perspective === activeTab)
         return perspective?.content
       }
 
@@ -126,7 +126,7 @@ describe('PrismTabs Component Logic Tests', () => {
           return responses.synthesis || responses.content
         }
         
-        const perspective = responses.perspectives?.find(p => p.perspective === activeTab)
+        const perspective = responses.perspectives?.find((p: any) => p.perspective === activeTab)
         return perspective?.content
       }
 
@@ -148,7 +148,7 @@ describe('PrismTabs Component Logic Tests', () => {
           return responses.synthesis || responses.content
         }
         
-        const perspective = responses.perspectives?.find(p => p.perspective === activeTab)
+        const perspective = responses.perspectives?.find((p: any) => p.perspective === activeTab)
         return perspective?.content
       }
 
@@ -162,7 +162,7 @@ describe('PrismTabs Component Logic Tests', () => {
           return responses.synthesis || responses.content
         }
         
-        const perspective = responses.perspectives?.find(p => p.perspective === activeTab)
+        const perspective = responses.perspectives?.find((p: any) => p.perspective === activeTab)
         return perspective?.content
       }
 

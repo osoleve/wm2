@@ -1,0 +1,270 @@
+/* ExportButton.css */
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--surface-color);
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.export-button:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.export-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.export-button:disabled:hover {
+  background: var(--surface-color);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+/* Export Modal Styles (reused from ConversationBrowser but scoped) */
+.export-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.export-modal {
+  background: var(--surface-color);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.export-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-color);
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.export-modal-header h3 {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.close-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.export-modal-content {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.export-format-selection {
+  flex-shrink: 0;
+  min-height: 0;
+}
+
+.export-label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.format-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.format-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--surface-color);
+}
+
+.format-option:hover {
+  background: var(--hover-color);
+  border-color: var(--primary-color);
+}
+
+.format-option input[type="radio"]:checked + .format-details {
+  font-weight: 500;
+}
+
+.format-option input[type="radio"] {
+  margin-top: 2px;
+}
+
+.format-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.format-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.format-description {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.export-options {
+  flex-shrink: 0;
+  min-height: 0;
+}
+
+.option-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.option-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.option-checkbox:hover {
+  background: var(--hover-color);
+}
+
+.export-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+  background: var(--surface-color);
+  margin-top: auto;
+}
+
+.cancel-button {
+  padding: 10px 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--surface-color);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.cancel-button:hover {
+  background: var(--hover-color);
+  border-color: var(--text-muted);
+}
+
+.export-confirm-button {
+  padding: 10px 20px;
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
+  background: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.export-confirm-button:hover {
+  background: var(--primary-color-dark, #0056b3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .export-modal {
+    margin: 10px;
+    max-width: none;
+    min-height: 400px;
+  }
+  
+  .export-modal-header {
+    padding: 16px;
+  }
+  
+  .export-modal-content {
+    padding: 16px;
+    gap: 20px;
+  }
+  
+  .export-modal-actions {
+    padding: 16px;
+  }
+  
+  .format-option {
+    padding: 12px;
+  }
+  
+  .export-button {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+  }
+  
+  .cancel-button,
+  .export-confirm-button {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+}

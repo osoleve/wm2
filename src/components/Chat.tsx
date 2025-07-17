@@ -5,6 +5,8 @@ import ChatInput from './ChatInput';
 import PrismToggle from './PrismToggle';
 import SystemPromptToggle from './SystemPromptToggle';
 import LoggingDashboard from './LoggingDashboard';
+import ConversationBrowser from './ConversationBrowser';
+import ExportButton from './ExportButton';
 import chatService from '../services/chatService';
 import { Model, Provider, BranchInfo } from '../types';
 import './Chat.css';
@@ -24,7 +26,9 @@ const Chat: React.FC = () => {
     getBranchInfo,
     copyMessage,
     getMessageVersions,
-    switchToVersion
+    switchToVersion,
+    loadTree,
+    currentTreeId
   } = useChat();
   
   // Default chat model is Haiku
@@ -45,6 +49,7 @@ const Chat: React.FC = () => {
   
   const [isLoggingDashboardOpen, setIsLoggingDashboardOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isConversationBrowserOpen, setIsConversationBrowserOpen] = useState<boolean>(false);
   const [models, setModels] = useState<Model[]>([]);
   const [_modelsLoading, setModelsLoading] = useState<boolean>(true); // used in fetchModels useEffect
 
@@ -215,6 +220,23 @@ const Chat: React.FC = () => {
               <path d="M3 12h18M3 6h18M3 18h18"/>
             </svg>
           </button>
+          
+          <button 
+            onClick={() => setIsConversationBrowserOpen(true)}
+            className="conversation-browser-button"
+            title="Browse conversations"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10,9 9,9 8,9"/>
+            </svg>
+            Browse
+          </button>
+          
+          <ExportButton treeId={currentTreeId} />
           
           <button 
             onClick={clearChat} 
@@ -398,6 +420,16 @@ const Chat: React.FC = () => {
       <LoggingDashboard 
         isOpen={isLoggingDashboardOpen}
         onClose={() => setIsLoggingDashboardOpen(false)}
+      />
+      
+      <ConversationBrowser
+        isOpen={isConversationBrowserOpen}
+        onClose={() => setIsConversationBrowserOpen(false)}
+        onLoadConversation={(treeId) => {
+          loadTree(treeId);
+          setIsConversationBrowserOpen(false);
+        }}
+        currentTreeId={currentTreeId}
       />
     </div>
   );

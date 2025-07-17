@@ -198,7 +198,8 @@
 }
 
 .clear-button,
-.history-button {
+.history-button,
+.conversation-browser-button {
   background: var(--bg-input);
   color: var(--text-primary);
   border: 1px solid var(--border-light);
@@ -209,10 +210,14 @@
   font-weight: 450;
   transition: all 0.3s ease;
   box-shadow: var(--glow-subtle);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .clear-button:hover:not(:disabled),
-.history-button:hover {
+.history-button:hover,
+.conversation-browser-button:hover {
   background: var(--bg-tertiary);
   border-color: var(--accent-color);
   transform: translateY(-1px);
