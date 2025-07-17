@@ -113,6 +113,13 @@ const Message: React.FC<MessageProps> = ({
                 {perspective.perspective}
               </button>
             ))}
+            
+            <div className="perspective-count">
+              <svg className="perspective-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L4 9V15L12 22L20 15V9L12 2Z" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+              {message.perspectives?.length || 0}
+            </div>
           </div>
         )}
       </div>
