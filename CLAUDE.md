@@ -18,6 +18,12 @@ npm run dev
 # Build for production
 npm run build
 
+# TypeScript type checking
+npm run type-check
+
+# TypeScript type checking with watch mode
+npm run type-check:watch
+
 # Preview production build
 npm run preview
 
@@ -28,37 +34,39 @@ npm run lint
 ## Architecture Overview
 
 ### Core Technologies
-- React 19.1.0 with functional components and hooks
-- Vite for build tooling
+- React 19.1.0 with TypeScript and functional components/hooks
+- Vite 7.0.4 for build tooling
 - CSS Modules with CSS custom properties
 - Netlify Functions for API proxying
-- Pure JavaScript (no TypeScript)
+- TypeScript with strict configuration
 
-### Key Components
+### Core Architecture Patterns
 
-1. **Chat System** (`src/components/`)
-   - `Chat.jsx` - Main container with header
-   - `ChatMessages.jsx` - Message list with branching support
-   - `ChatInput.jsx` - Input with model selection
-   - `Message.jsx` - Individual messages with edit/regenerate controls
+1. **Message Tree System** - Advanced conversation management
+   - Map-based data structure for O(1) message lookups  
+   - Branching conversations: edit any message to create alternate paths
+   - Version history: every edit creates a new version with timestamps
+   - Tree navigation: seamlessly move between conversation branches
+   - UUID-based message identification for precise tracking
 
-2. **Prism Mode** - Unique multi-perspective analysis
-   - `PrismToggle.jsx` - Enable/disable Prism mode
-   - `PrismTabs.jsx` - View individual perspectives
-   - `prismService.js` - Parallel processing of 5-10 theoretical lenses
-   - 498 perspective files in `public/prism/`
+2. **Prism Mode** - Multi-perspective AI analysis (unique feature)
+   - AI-driven perspective selection from 498 theoretical frameworks
+   - Parallel processing of 5-8 most relevant perspectives per query
+   - Synthesis generation combining multiple viewpoints
+   - Individual perspective tabs for detailed exploration
+   - Perspective files stored in `public/prism/` (do not modify)
 
-3. **State Management** (`src/hooks/useChat.js`)
-   - Message tree structure using Map for efficient lookups
-   - Conversation branching with active path tracking
-   - Version history for all message edits
-   - Local storage persistence
+3. **Dual API Architecture**
+   - OpenRouter API: Multiple models (GPT-4, Claude, Llama variants)
+   - GROQ SDK: High-performance inference with Kimi K2 default
+   - Runtime provider switching with fallback strategies
+   - Streaming response handling with error recovery
 
-4. **API Integration** (`src/services/chatService.js`)
-   - OpenRouter API (multiple models: GPT-4, Claude, Llama)
-   - GROQ SDK integration
-   - Streaming responses
-   - Error handling and retry logic
+4. **State Management Pattern**
+   - Custom `useChat` hook centralizes all conversation state
+   - Local storage persistence with automatic save/load
+   - Tree structure maintained in Map for efficient operations
+   - Event-driven updates trigger UI re-renders
 
 ### Message Management Features
 - **Branching**: Edit messages to create alternate conversation paths

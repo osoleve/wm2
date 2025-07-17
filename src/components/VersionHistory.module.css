@@ -17,10 +17,10 @@
 .modal {
   background: linear-gradient(
     135deg,
-    rgba(42, 40, 38, 0.95),
-    rgba(36, 35, 33, 0.95)
+    var(--bg-input),
+    var(--bg-secondary)
   );
-  border: 1px solid rgba(143, 166, 142, 0.3);
+  border: 1px solid var(--sage-muted);
   border-radius: 1rem;
   width: 90%;
   max-width: 700px;
@@ -28,7 +28,7 @@
   overflow: hidden;
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.3),
-    0 0 30px rgba(143, 166, 142, 0.1);
+    var(--shadow-glow-sage);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   display: flex;
@@ -40,7 +40,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(143, 166, 142, 0.2);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .header h3 {
@@ -63,7 +63,7 @@
 
 .closeButton:hover {
   color: var(--text-primary);
-  background: rgba(143, 166, 142, 0.1);
+  background: var(--sage-light);
 }
 
 .versionList {
@@ -73,8 +73,8 @@
 }
 
 .versionItem {
-  background: rgba(26, 25, 24, 0.6);
-  border: 1px solid rgba(143, 166, 142, 0.2);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 0.75rem;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -83,14 +83,14 @@
 }
 
 .versionItem:hover {
-  background: rgba(26, 25, 24, 0.8);
-  border-color: rgba(143, 166, 142, 0.4);
+  background: var(--bg-secondary);
+  border-color: var(--accent-color);
   transform: translateY(-1px);
 }
 
 .versionItem.current {
-  background: rgba(143, 166, 142, 0.1);
-  border-color: var(--sage-500);
+  background: var(--sage-light);
+  border-color: var(--sage-vibrant);
 }
 
 .versionHeader {
@@ -126,8 +126,8 @@
 }
 
 .restoreButton {
-  background: rgba(143, 166, 142, 0.2);
-  border: 1px solid rgba(143, 166, 142, 0.4);
+  background: var(--sage-muted);
+  border: 1px solid var(--sage-vibrant);
   color: var(--text-primary);
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
@@ -141,7 +141,7 @@
   background: var(--gradient-sage);
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(143, 166, 142, 0.3);
+  box-shadow: var(--shadow-glow-sage);
 }
 
 .versionContent {
@@ -155,10 +155,10 @@
 }
 
 .fullContent {
-  background: rgba(26, 25, 24, 0.8);
+  background: var(--bg-secondary);
   padding: 1rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(143, 166, 142, 0.2);
+  border: 1px solid var(--border-color);
   white-space: pre-wrap;
   word-wrap: break-word;
   max-height: 300px;
@@ -167,15 +167,15 @@
 
 .footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid rgba(143, 166, 142, 0.2);
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
 }
 
 .cancelButton {
-  background: rgba(42, 40, 38, 0.8);
+  background: var(--bg-input);
   color: var(--text-muted);
-  border: 1px solid rgba(143, 166, 142, 0.3);
+  border: 1px solid var(--sage-muted);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -186,8 +186,8 @@
 
 .cancelButton:hover {
   color: var(--text-primary);
-  border-color: var(--sage-500);
-  background: rgba(42, 40, 38, 0.9);
+  border-color: var(--sage-vibrant);
+  background: var(--bg-secondary);
 }
 
 /* Mobile responsive */

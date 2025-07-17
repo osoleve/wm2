@@ -21,7 +21,7 @@
   background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(143, 166, 142, 0.3);
+  box-shadow: var(--shadow-glow-sage);
 }
 
 .branch-icon {

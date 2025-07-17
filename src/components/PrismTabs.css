@@ -1,7 +1,7 @@
 /* PrismTabs.css */
 .prism-tabs-container {
   margin-top: 1rem;
-  border-top: 1px solid rgba(230, 184, 125, 0.2);
+  border-top: 1px solid var(--amber-muted);
   padding-top: 1rem;
 }
 
@@ -13,8 +13,8 @@
 }
 
 .prism-tab {
-  background: rgba(42, 40, 38, 0.6);
-  border: 1px solid rgba(230, 184, 125, 0.2);
+  background: var(--bg-secondary);
+  border: none;
   border-radius: 0.75rem;
   padding: 0.5rem 1rem;
   font-size: 0.8125rem;
@@ -27,22 +27,22 @@
 }
 
 .prism-tab:hover {
-  background: rgba(230, 184, 125, 0.15);
-  border-color: var(--tab-highlight);
+  background: var(--amber-light);
+  /* border color removed */
   color: var(--text-primary);
   transform: translateY(-2px) scale(1.02);
   box-shadow: 
-    0 4px 12px rgba(230, 184, 125, 0.2),
-    inset 0 1px 0 rgba(230, 184, 125, 0.2);
+    var(--shadow-medium),
+    inset 0 1px 0 var(--amber-light);
 }
 
 .prism-tab.active {
   background: var(--gradient-amber);
-  border-color: transparent;
-  color: #1A1918;
+  /* border removed */
+  color: var(--bg-primary);
   font-weight: 500;
   box-shadow: 
-    0 4px 16px rgba(230, 184, 125, 0.3),
+    var(--shadow-medium),
     var(--shadow-glow-amber);
   transform: translateY(-1px);
 }
@@ -72,9 +72,9 @@
 
 .prism-content {
   padding: 1rem;
-  background: rgba(42, 40, 38, 0.3);
+  background: var(--bg-tertiary);
   border-radius: 0.75rem;
-  border: 1px solid rgba(230, 184, 125, 0.1);
+  border: none;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }

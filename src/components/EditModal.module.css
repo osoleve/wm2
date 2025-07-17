@@ -17,10 +17,10 @@
 .modal {
   background: linear-gradient(
     135deg,
-    rgba(42, 40, 38, 0.95),
-    rgba(36, 35, 33, 0.95)
+    var(--bg-input),
+    var(--bg-secondary)
   );
-  border: 1px solid rgba(143, 166, 142, 0.3);
+  border: 1px solid var(--sage-muted);
   border-radius: 1rem;
   padding: 1.5rem;
   width: 90%;
@@ -29,7 +29,7 @@
   overflow-y: auto;
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.3),
-    0 0 30px rgba(143, 166, 142, 0.1);
+    var(--shadow-glow-sage);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -45,9 +45,9 @@
   width: 100%;
   min-height: 200px;
   padding: 1rem;
-  border: 1px solid rgba(143, 166, 142, 0.3);
+  border: 1px solid var(--sage-muted);
   border-radius: 0.5rem;
-  background: rgba(26, 25, 24, 0.8);
+  background: var(--bg-secondary);
   color: var(--text-primary);
   font-family: inherit;
   font-size: 0.9375rem;
@@ -59,7 +59,7 @@
 .textarea:focus {
   outline: none;
   border-color: var(--sage-500);
-  box-shadow: 0 0 0 3px rgba(143, 166, 142, 0.2);
+  box-shadow: 0 0 0 3px var(--sage-light);
 }
 
 .textarea::placeholder {
@@ -83,12 +83,12 @@
   font-weight: 500;
   cursor: pointer;
   transition: all var(--animation-fast) ease;
-  box-shadow: 0 2px 8px rgba(143, 166, 142, 0.3);
+  box-shadow: var(--shadow-glow-sage);
 }
 
 .saveButton:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(143, 166, 142, 0.4);
+  box-shadow: var(--shadow-glow-sage);
 }
 
 .saveButton:active {
@@ -96,9 +96,9 @@
 }
 
 .cancelButton {
-  background: rgba(42, 40, 38, 0.8);
+  background: var(--bg-input);
   color: var(--text-muted);
-  border: 1px solid rgba(143, 166, 142, 0.3);
+  border: 1px solid var(--sage-muted);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -110,7 +110,7 @@
 .cancelButton:hover {
   color: var(--text-primary);
   border-color: var(--sage-500);
-  background: rgba(42, 40, 38, 0.9);
+  background: var(--bg-secondary);
 }
 
 /* Mobile responsive */

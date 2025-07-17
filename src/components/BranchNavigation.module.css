@@ -5,8 +5,8 @@
 }
 
 .branchButton {
-  background: rgba(42, 40, 38, 0.8);
-  border: 1px solid rgba(230, 184, 125, 0.3);
+  background: var(--bg-input);
+  border: 1px solid var(--amber-muted);
   border-radius: 0.375rem;
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
@@ -23,11 +23,11 @@
 }
 
 .branchButton:hover {
-  background: rgba(230, 184, 125, 0.15);
+  background: var(--tab-glow);
   border-color: var(--tab-highlight);
   color: var(--text-primary);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(230, 184, 125, 0.2);
+  box-shadow: var(--shadow-glow-amber);
 }
 
 .branchButton:active {
@@ -41,17 +41,17 @@
   margin-top: 0.25rem;
   background: linear-gradient(
     135deg,
-    rgba(42, 40, 38, 0.95),
-    rgba(36, 35, 33, 0.95)
+    var(--bg-input),
+    var(--bg-secondary)
   );
-  border: 1px solid rgba(143, 166, 142, 0.3);
+  border: 1px solid var(--sage-muted);
   border-radius: 0.5rem;
   padding: 0.25rem;
   z-index: 100;
   min-width: 120px;
   box-shadow: 
     0 8px 24px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(143, 166, 142, 0.1);
+    var(--shadow-glow-sage);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   animation: branchMenuSlide var(--animation-fast) var(--ease-out-expo);
@@ -84,7 +84,7 @@
 }
 
 .branchOption:hover {
-  background: rgba(143, 166, 142, 0.1);
+  background: var(--sage-light);
   color: var(--text-primary);
 }
 
@@ -92,7 +92,7 @@
   background: var(--gradient-sage);
   color: white;
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(143, 166, 142, 0.3);
+  box-shadow: var(--shadow-glow-sage);
 }
 
 .branchOption.active:hover {

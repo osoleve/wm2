@@ -23,7 +23,7 @@
 
 .chat-input-container.focused {
   background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-medium);
 }
 
 .input-row {
@@ -103,7 +103,7 @@
   outline: none;
   border-color: var(--accent-color);
   background: var(--bg-tertiary);
-  box-shadow: 0 0 0 2px rgba(143, 166, 142, 0.15), var(--glow-subtle);
+  box-shadow: 0 0 0 2px var(--sage-focus), var(--glow-subtle);
 }
 
 .model-select:disabled {
@@ -152,7 +152,7 @@
   transition: all 0.3s ease;
   scrollbar-width: thin;
   scrollbar-color: var(--border-light) transparent;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), var(--glow-subtle);
+  box-shadow: inset 0 1px 3px var(--shadow-soft), var(--glow-subtle);
 }
 
 .message-input::-webkit-scrollbar {
@@ -177,8 +177,8 @@
   outline: none;
   border-color: var(--accent-color);
   background: var(--bg-tertiary);
-  box-shadow: 0 0 0 2px rgba(143, 166, 142, 0.15), 
-              inset 0 1px 3px rgba(0, 0, 0, 0.1),
+  box-shadow: 0 0 0 2px var(--sage-focus), 
+              inset 0 1px 3px var(--shadow-soft),
               var(--glow-subtle);
 }
 
@@ -189,8 +189,8 @@
 
 /* Auto-resize animation */
 .message-input:focus {
-  box-shadow: 0 0 0 2px rgba(143, 166, 142, 0.2), 
-              inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 2px var(--sage-focus), 
+              inset 0 1px 3px var(--shadow-soft);
 }
 
 .send-button {
@@ -207,7 +207,7 @@
   height: 48px;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
-  box-shadow: 0 2px 12px rgba(143, 166, 142, 0.3), var(--glow-subtle);
+  box-shadow: var(--shadow-glow-sage), var(--glow-subtle);
   font-weight: 500;
 }
 
@@ -217,18 +217,18 @@
 
 @keyframes readyPulse {
   0%, 100% {
-    box-shadow: 0 2px 12px rgba(143, 166, 142, 0.3);
+    box-shadow: var(--shadow-glow-sage);
   }
   50% {
-    box-shadow: 0 2px 20px rgba(143, 166, 142, 0.5);
+    box-shadow: 0 2px 20px var(--sage-vibrant);
   }
 }
 
 .send-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--accent-hover), #A8BBA7);
+  background: linear-gradient(135deg, var(--accent-hover), var(--sage-light));
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 4px 20px rgba(143, 166, 142, 0.4), 
-              0 0 16px rgba(143, 166, 142, 0.2);
+  box-shadow: var(--shadow-medium), 
+              0 0 16px var(--sage-focus);
 }
 
 .send-button:active:not(:disabled) {
@@ -237,20 +237,20 @@
 
 .send-button.long-pressing {
   transform: scale(1.1);
-  background-color: #005f99;
+  background-color: var(--accent-color);
 }
 
 .send-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-soft);
 }
 
 .loading-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(28, 27, 26, 0.3);
+  border: 2px solid var(--border-color);
   border-top: 2px solid var(--bg-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;

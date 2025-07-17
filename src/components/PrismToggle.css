@@ -24,13 +24,13 @@
 
 .prism-toggle-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-medium);
 }
 
 .prism-toggle-button.enabled {
   background: var(--gradient-amber);
   border-color: var(--tab-highlight);
-  box-shadow: 0 0 20px rgba(230, 184, 125, 0.3);
+  box-shadow: var(--shadow-glow-amber);
 }
 
 .toggle-track {
@@ -86,7 +86,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-soft);
 }
 
 .prism-toggle-button.enabled .toggle-thumb {
@@ -112,7 +112,7 @@
   font-size: 0.8125rem;
   white-space: nowrap;
   max-width: 250px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-medium);
   border: 1px solid var(--border-light);
   animation: tooltipFade 0.3s ease;
   z-index: 1000;
