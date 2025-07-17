@@ -50,7 +50,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   }, [messages]);
 
   return (
-    <div className="chat-messages">
+    <div className="chat-messages ambient-light">
       {messages.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-background">
@@ -106,6 +106,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
       {isLoading && (
         <div className="typing-indicator">
           <div className="typing-dots">
+            <span></span>
             <span></span>
             <span></span>
           </div>

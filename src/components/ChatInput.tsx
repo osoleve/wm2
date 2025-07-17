@@ -225,7 +225,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           
           <button 
             type="submit" 
-            className={`send-button ${message.trim() ? 'ready' : ''} ${isLongPressing ? 'long-pressing' : ''}`}
+            className={`send-button touch-target ${message.trim() ? 'ready breathing-glow' : ''} ${isLongPressing ? 'long-pressing' : ''}`}
             disabled={!message.trim() || isLoading}
             onMouseDown={handlePressStart}
             onMouseUp={handlePressEnd}

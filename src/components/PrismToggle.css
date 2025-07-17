@@ -33,6 +33,10 @@
   box-shadow: var(--shadow-glow-amber);
 }
 
+.prism-toggle-button.enabled.breathing-glow {
+  animation: breatheAmber 4s ease-in-out infinite;
+}
+
 .toggle-track {
   width: 100%;
   height: 100%;

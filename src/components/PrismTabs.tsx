@@ -25,7 +25,7 @@ export const PrismTabs: React.FC<PrismTabsProps> = ({ responses }) => {
     <div className="prism-tabs-container">
       <div className="prism-tabs">
         <button
-          className={`prism-tab ${activeTab === 'synthesis' ? 'active' : ''}`}
+          className={`prism-tab touch-target ${activeTab === 'synthesis' ? 'active breathing-glow' : ''}`}
           onClick={() => setActiveTab('synthesis')}
         >
           Synthesis
@@ -34,7 +34,7 @@ export const PrismTabs: React.FC<PrismTabsProps> = ({ responses }) => {
         {perspectives.map((perspective, index) => (
           <button
             key={index}
-            className={`prism-tab ${activeTab === perspective.perspective ? 'active' : ''}`}
+            className={`prism-tab touch-target ${activeTab === perspective.perspective ? 'active breathing-glow' : ''}`}
             onClick={() => setActiveTab(perspective.perspective)}
           >
             {perspective.perspective}

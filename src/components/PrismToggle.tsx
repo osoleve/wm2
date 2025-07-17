@@ -32,7 +32,7 @@ const PrismToggle: React.FC<PrismToggleProps> = ({ isPrismEnabled, onToggle, isL
       >
         <button
           onClick={handleToggle}
-          className={`prism-toggle-button ${isPrismEnabled ? 'enabled' : 'disabled'}`}
+          className={`prism-toggle-button touch-target ${isPrismEnabled ? 'enabled breathing-glow' : 'disabled'}`}
           disabled={isLoading}
         >
           <div className="toggle-track">

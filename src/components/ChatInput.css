@@ -156,16 +156,32 @@
 }
 
 .message-input::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .message-input::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
 }
 
 .message-input::-webkit-scrollbar-thumb {
-  background: var(--border-light);
-  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    var(--sage-deep),
+    var(--amber-bronze)
+  );
+  border-radius: 3px;
+  border: 1px solid var(--bg-tertiary);
+  transition: all 0.3s ease;
+}
+
+.message-input::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    var(--sage-luminous),
+    var(--amber-glow)
+  );
+  box-shadow: 0 0 6px rgba(164, 200, 150, 0.3);
 }
 
 .message-input::placeholder {
@@ -215,6 +231,10 @@
   animation: readyPulse 2s ease-in-out infinite;
 }
 
+.send-button.ready.breathing-glow {
+  animation: breatheSage 4s ease-in-out infinite;
+}
+
 @keyframes readyPulse {
   0%, 100% {
     box-shadow: var(--shadow-glow-sage);
@@ -250,10 +270,11 @@
 .loading-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid var(--border-color);
-  border-top: 2px solid var(--bg-primary);
+  border: 2px solid transparent;
+  border-top-color: var(--sage-luminous);
+  border-right-color: var(--amber-glow);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: philosophicalPulse 2s var(--ease-in-out-back) infinite;
 }
 
 @keyframes spin {
@@ -317,6 +338,7 @@
     padding: 0.75rem 1rem;
     font-size: 16px; /* Prevents zoom on iOS */
     min-height: 44px;
+    border-radius: 2rem; /* More rounded for mobile */
   }
   
   .send-button {
@@ -340,5 +362,21 @@
 
   .desktop-prism-toggle {
     display: none;
+  }
+  
+  /* Touch-friendly enhancements */
+  .send-button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  .message-input {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Optimize animations for mobile */
+  .loading-spinner {
+    animation-duration: 3s;
   }
 }
