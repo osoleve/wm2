@@ -492,6 +492,152 @@
   letter-spacing: 0.05em;
 }
 
+/* Vertical Prism tabs on the right side */
+.prism-tabs-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-left: 0.5rem;
+  padding: 0.5rem 0;
+  align-self: auto;
+  position: relative;
+}
+
+.prism-tab-vertical {
+  min-width: 2.5rem;
+  height: 2rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(
+    135deg,
+    rgba(143, 166, 142, 0.08),
+    rgba(149, 168, 140, 0.06),
+    rgba(230, 184, 125, 0.04)
+  );
+  border: 1px solid rgba(143, 166, 142, 0.12);
+  border-radius: 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(143, 166, 142, 0.6);
+  cursor: pointer;
+  transition: all var(--animation-normal) var(--ease-out-expo);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Prismatic shimmer effect */
+.prism-tab-vertical::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(143, 166, 142, 0.06) 35%,
+    rgba(230, 184, 125, 0.08) 40%,
+    rgba(149, 168, 140, 0.07) 45%,
+    rgba(232, 181, 114, 0.05) 50%,
+    rgba(143, 166, 142, 0.06) 55%,
+    transparent 30%
+  );
+  border-radius: 1.25rem;
+  transform: translateX(-100%);
+  transition: transform 0.8s ease;
+  opacity: 0;
+}
+
+.prism-tab-vertical:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(143, 166, 142, 0.18),
+    rgba(149, 168, 140, 0.15),
+    rgba(230, 184, 125, 0.12),
+    rgba(232, 181, 114, 0.10),
+    transparent 75%
+  );
+  border: 1px solid rgba(143, 166, 142, 0.35);
+  color: rgba(216, 208, 198, 0.9);
+  transform: translateX(-2px) scale(1.02);
+  box-shadow: 
+    0 4px 16px rgba(143, 166, 142, 0.12),
+    0 2px 8px rgba(230, 184, 125, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.prism-tab-vertical:hover::before {
+  transform: translateX(100%);
+  opacity: 1;
+}
+
+.prism-tab-vertical.active {
+  background: linear-gradient(
+    135deg,
+    rgba(143, 166, 142, 0.35),
+    rgba(149, 168, 140, 0.30),
+    rgba(230, 184, 125, 0.25),
+    rgba(232, 181, 114, 0.20),
+    transparent 75%
+  );
+  border: 1px solid rgba(143, 166, 142, 0.5);
+  color: rgba(216, 208, 198, 0.95);
+  font-weight: 600;
+  box-shadow: 
+    0 4px 20px rgba(143, 166, 142, 0.15),
+    0 2px 10px rgba(230, 184, 125, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+  transform: translateX(-1px);
+}
+
+.prism-tab-vertical.active::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(
+    135deg,
+    rgba(143, 166, 142, 0.15),
+    rgba(149, 168, 140, 0.12),
+    rgba(230, 184, 125, 0.08),
+    rgba(232, 181, 114, 0.06)
+  );
+  border-radius: 1.5rem;
+  opacity: 0;
+  z-index: -1;
+  filter: blur(12px);
+  animation: prismaticGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes prismaticGlow {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Adjust message layout for vertical tabs */
+.message-prism {
+  align-items: flex-start;
+}
+
+.message-prism .message-content {
+  max-width: calc(70% - 4rem); /* Account for vertical tabs space */
+}
+
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
   .message-controls {
@@ -510,6 +656,48 @@
     position: static;
     display: inline-block;
     margin-bottom: 0.5rem;
+  }
+  
+  /* Adjust vertical tabs for mobile */
+  .prism-tabs-vertical {
+    margin-left: 0.5rem;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+  }
+  
+  .prism-tab-vertical {
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.625rem;
+    border-radius: 1rem;
+  }
+  
+  .message-prism .message-content {
+    max-width: calc(85% - 3rem);
+  }
+  
+  /* Disable complex effects on mobile for performance */
+  .prism-tab-vertical::before,
+  .prism-tab-vertical.active::after {
+    display: none;
+  }
+  
+  .prism-tab-vertical {
+    background: rgba(143, 166, 142, 0.12);
+    border: 1px solid rgba(143, 166, 142, 0.18);
+  }
+  
+  .prism-tab-vertical:hover {
+    background: rgba(143, 166, 142, 0.2);
+    transform: none;
+    box-shadow: 0 2px 8px rgba(143, 166, 142, 0.12);
+  }
+  
+  .prism-tab-vertical.active {
+    background: rgba(143, 166, 142, 0.3);
+    border-color: rgba(143, 166, 142, 0.45);
+    box-shadow: 0 2px 10px rgba(143, 166, 142, 0.18);
   }
 }
 

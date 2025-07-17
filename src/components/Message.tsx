@@ -23,16 +23,13 @@ interface MessageProps {
 const Message: React.FC<MessageProps> = ({ 
   message, 
   isUser,
-  isLast: _isLast, // unused
   onEdit, 
   onRegenerate, 
   onCopy, 
   onNavigateBranch,
   getBranchInfo,
   getMessageVersions,
-  onSwitchToVersion,
-  isPrismMode: _isPrismMode, // unused
-  prismResponses: _prismResponses // unused
+  onSwitchToVersion
 }) => {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showVersionHistory, setShowVersionHistory] = useState<boolean>(false);
@@ -91,33 +88,33 @@ const Message: React.FC<MessageProps> = ({
         <div className="message-content">
           {message.isEdited && <span className="edited-label">(edited)</span>}
           
-          {/* Prism tabs at the top of the message */}
-          {isPrismMessage && (
-            <div className="prism-tabs">
-              <button
-                className={`prism-tab ${activeTab === 'synthesis' ? 'active' : ''}`}
-                onClick={() => setActiveTab('synthesis')}
-              >
-                Synthesis
-              </button>
-              
-              {message.perspectives?.map((perspective, index) => (
-                <button
-                  key={index}
-                  className={`prism-tab ${activeTab === perspective.perspective ? 'active' : ''}`}
-                  onClick={() => setActiveTab(perspective.perspective)}
-                >
-                  {perspective.perspective}
-                </button>
-              ))}
-            </div>
-          )}
-          
           <div className="message-text">
             {getDisplayContent()}
           </div>
           
         </div>
+        
+        {/* Vertical Prism tabs on the right side for AI messages */}
+        {isPrismMessage && !isUser && (
+          <div className="prism-tabs-vertical">
+            <button
+              className={`prism-tab-vertical ${activeTab === 'synthesis' ? 'active' : ''}`}
+              onClick={() => setActiveTab('synthesis')}
+            >
+              Synthesis
+            </button>
+            
+            {message.perspectives?.map((perspective, index) => (
+              <button
+                key={index}
+                className={`prism-tab-vertical ${activeTab === perspective.perspective ? 'active' : ''}`}
+                onClick={() => setActiveTab(perspective.perspective)}
+              >
+                {perspective.perspective}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div 
