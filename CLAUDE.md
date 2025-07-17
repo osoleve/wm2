@@ -81,7 +81,7 @@ npm run lint
 
 4. **Code Style**:
    - Functional components only
-   - No TypeScript - pure JavaScript
+   - Typescript only
    - CSS Modules for component styling
    - Avoid inline styles
 
@@ -102,6 +102,5 @@ public/prism/      # 498 theoretical perspective text files, ignore
 
 ## Recent Changes
 - Enhanced message state control system
-- Version management features
-- Increased character limit from default
+- Migrate to typescript
 - System prompt toggle functionality

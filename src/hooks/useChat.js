@@ -223,7 +223,8 @@ export const useChat = () => {
             hasBranches: true,
             branchCount: parentBranches.length,
             currentBranchIndex: currentIndex,
-            siblings: parentBranches.map(b => b.id)
+            siblings: parentBranches.map(b => b.id),
+            isSiblingBranch: true
           };
         }
       }
@@ -234,7 +235,8 @@ export const useChat = () => {
       hasBranches: true,
       branchCount: branches.length,
       currentBranchIndex: 0,
-      siblings: branches.map(b => b.id)
+      siblings: branches.map(b => b.id),
+      isSiblingBranch: false
     };
   }, [messages]);
 
