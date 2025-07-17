@@ -1,20 +1,50 @@
 // OpenRouter API service using Netlify Functions
 
+interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+interface ModelInfo {
+  id: string;
+  name: string;
+  context_length?: number;
+}
+
+interface ChatOptions {
+  temperature?: number;
+  top_p?: number;
+  max_tokens?: number;
+  [key: string]: any;
+}
+
+interface ChatResponse {
+  role: 'assistant';
+  content: string;
+  id?: string;
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+}
+
+type Provider = 'openrouter' | 'groq';
+
 class ChatService {
-  constructor() {
-    this.provider = 'openrouter'; // 'openrouter' or 'groq'
-    this.apiUrl = '/.netlify/functions/chat';
-    this.groqApiUrl = '/.netlify/functions/groq';
-    this.isDevelopment = import.meta.env.DEV;
-  }
+  private provider: Provider = 'openrouter';
+  private readonly apiUrl = '/.netlify/functions/chat';
+  private readonly groqApiUrl = '/.netlify/functions/groq';
+  private readonly isDevelopment = (import.meta as any).env?.DEV || false;
 
   /**
    * Send a message to the chat provider.
-   * @param {Array} messages - The chat history/messages.
-   * @param {string} model - The model to use.
-   * @param {Object} options - Optional sampling parameters (e.g., temperature, top_p, etc.)
    */
-  async sendMessage(messages, model = "openai/gpt-4.1", options = {}) {
+  async sendMessage(
+    messages: ChatMessage[], 
+    model: string = "openai/gpt-4.1", 
+    options: ChatOptions = {}
+  ): Promise<ChatResponse> {
     try {
       const body = {
         messages: messages,
@@ -45,16 +75,16 @@ class ChatService {
     }
   }
 
-  setProvider(provider) {
+  setProvider(provider: Provider): void {
     this.provider = provider;
   }
 
-  getProvider() {
+  getProvider(): Provider {
     return this.provider;
   }
 
   // Get available models (optional feature)
-  async getAvailableModels() {
+  async getAvailableModels(): Promise<ModelInfo[]> {
     // Return models for the selected provider
     if (this.provider === 'groq') {
       try {
@@ -65,7 +95,7 @@ class ChatService {
         const data = await response.json();
         const availableModels = data.data || [];
         
-        return availableModels.map(model => ({
+        return availableModels.map((model: any) => ({
           id: model.id,
           name: model.name || model.id.split('/').pop(),
           context_length: model.context_length
@@ -87,7 +117,7 @@ class ChatService {
     if (this.isDevelopment) {
       try {
         const response = await fetch('https://openrouter.ai/api/v1/models');
-        const models = [
+        const models: ModelInfo[] = [
           { id: 'moonshotai/kimi-k2', name: 'Kimi K2' },
           { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B Instruct' },
           { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3 8B Instruct' },
@@ -102,7 +132,7 @@ class ChatService {
         ];
         const data = await response.json();
         const availableModels = data.data || models;
-        return availableModels.map(model => ({
+        return availableModels.map((model: any) => ({
           id: model.id,
           name: model.name || model.id.split('/').pop(),
           context_length: model.context_length

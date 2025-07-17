@@ -1,14 +1,93 @@
-// src/services/conversationTreeService.js
+// src/services/conversationTreeService.ts
 import { v4 as uuidv4 } from 'uuid';
 
+interface TreeNode {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  parentId: string | null;
+  children: string[];
+  timestamp: number;
+  depth: number;
+  isEdited?: boolean;
+  originalId?: string;
+  versions?: Array<{
+    id: string;
+    content: string;
+    timestamp: number;
+  }>;
+  isPrism?: boolean;
+  perspectives?: Array<{
+    perspective: string;
+    content: string;
+  }>;
+  synthesis?: string;
+}
+
+interface TreeMetadata {
+  totalNodes: number;
+  maxDepth: number;
+  branches: number;
+}
+
+interface ConversationTree {
+  id: string;
+  title: string;
+  created: string;
+  lastModified: string;
+  nodes: Map<string, TreeNode>;
+  rootNodes: string[];
+  metadata: TreeMetadata;
+  imported?: string;
+}
+
+interface BranchInfo {
+  id: string;
+  preview: string;
+  timestamp: number | null;
+  descendantCount: number;
+}
+
+interface TreeStats {
+  totalMessages: number;
+  userMessages: number;
+  aiMessages: number;
+  prismMessages: number;
+  branches: number;
+  maxDepth: number;
+  created: string;
+  lastModified: string;
+}
+
+interface SearchMatch {
+  nodeId: string;
+  content: string;
+  role: string;
+  timestamp: number;
+}
+
+interface SearchResult {
+  treeId: string;
+  title: string;
+  matches: SearchMatch[];
+  lastModified: string;
+}
+
+interface ExportData extends Omit<ConversationTree, 'nodes'> {
+  nodes: [string, TreeNode][];
+  exported: string;
+  version: string;
+}
+
 class ConversationTreeService {
+  private storageKey = 'prism-conversation-trees';
+  private currentTreeId: string | null = null;
+
   constructor() {
-    this.storageKey = 'prism-conversation-trees';
-    this.currentTreeId = null;
     this.initialize();
   }
 
-  initialize() {
+  private initialize(): void {
     // Load existing trees or create first one
     const trees = this.getAllTrees();
     if (Object.keys(trees).length === 0) {
@@ -16,22 +95,22 @@ class ConversationTreeService {
     } else {
       // Set the most recent tree as current
       const sortedTrees = Object.values(trees).sort((a, b) => 
-        new Date(b.lastModified) - new Date(a.lastModified)
+        new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime()
       );
       this.currentTreeId = sortedTrees[0].id;
     }
   }
 
   // Create a new conversation tree
-  createNewTree(title = 'New Conversation') {
+  createNewTree(title: string = 'New Conversation'): string {
     const treeId = uuidv4();
-    const tree = {
+    const tree: ConversationTree = {
       id: treeId,
       title,
       created: new Date().toISOString(),
       lastModified: new Date().toISOString(),
-      nodes: new Map(), // Will be serialized as array
-      rootNodes: [], // IDs of root messages
+      nodes: new Map(),
+      rootNodes: [],
       metadata: {
         totalNodes: 0,
         maxDepth: 0,
@@ -45,7 +124,7 @@ class ConversationTreeService {
   }
 
   // Save tree to localStorage
-  saveTree(tree) {
+  private saveTree(tree: ConversationTree): void {
     const trees = this.getAllTrees();
     
     // Convert Map to array for serialization
@@ -55,12 +134,12 @@ class ConversationTreeService {
       lastModified: new Date().toISOString()
     };
     
-    trees[tree.id] = serializedTree;
+    trees[tree.id] = serializedTree as any;
     localStorage.setItem(this.storageKey, JSON.stringify(trees));
   }
 
   // Get all trees from localStorage
-  getAllTrees() {
+  getAllTrees(): Record<string, ConversationTree> {
     try {
       const stored = localStorage.getItem(this.storageKey);
       const trees = stored ? JSON.parse(stored) : {};
@@ -80,25 +159,27 @@ class ConversationTreeService {
   }
 
   // Get current tree
-  getCurrentTree() {
+  getCurrentTree(): ConversationTree | null {
     if (!this.currentTreeId) return null;
     const trees = this.getAllTrees();
-    return trees[this.currentTreeId];
+    return trees[this.currentTreeId] || null;
   }
 
   // Add a node to the current tree
-  addNode(node, parentId = null) {
+  addNode(node: Partial<TreeNode>, parentId: string | null = null): string | null {
     const tree = this.getCurrentTree();
     if (!tree) return null;
 
     // Ensure node has required properties
-    const completeNode = {
-      ...node,
+    const completeNode: TreeNode = {
       id: node.id || uuidv4(),
+      role: node.role || 'user',
+      content: node.content || '',
       parentId,
       children: node.children || [],
       timestamp: node.timestamp || Date.now(),
-      depth: 0
+      depth: 0,
+      ...node
     };
 
     // Calculate depth
@@ -136,11 +217,11 @@ class ConversationTreeService {
   }
 
   // Load a branch starting from a specific node
-  loadBranch(nodeId, includeAncestors = true) {
+  loadBranch(nodeId: string, includeAncestors: boolean = true): TreeNode[] {
     const tree = this.getCurrentTree();
     if (!tree || !tree.nodes.has(nodeId)) return [];
 
-    const messages = [];
+    const messages: TreeNode[] = [];
     
     // Get ancestors if requested
     if (includeAncestors) {
@@ -150,7 +231,9 @@ class ConversationTreeService {
 
     // Get the node itself
     const node = tree.nodes.get(nodeId);
-    messages.push(node);
+    if (node) {
+      messages.push(node);
+    }
 
     // Get all descendants following the first child path
     const descendants = this.getDescendants(nodeId, 'first-child');
@@ -160,12 +243,12 @@ class ConversationTreeService {
   }
 
   // Get all ancestors of a node
-  getAncestors(nodeId) {
+  getAncestors(nodeId: string): TreeNode[] {
     const tree = this.getCurrentTree();
     if (!tree) return [];
 
-    const ancestors = [];
-    let currentId = nodeId;
+    const ancestors: TreeNode[] = [];
+    let currentId: string | null = nodeId;
     
     while (currentId) {
       const node = tree.nodes.get(currentId);
@@ -188,16 +271,16 @@ class ConversationTreeService {
   }
 
   // Get descendants of a node
-  getDescendants(nodeId, strategy = 'all') {
+  getDescendants(nodeId: string, strategy: 'all' | 'first-child' = 'all'): TreeNode[] {
     const tree = this.getCurrentTree();
     if (!tree) return [];
 
-    const descendants = [];
-    const queue = [nodeId];
-    const visited = new Set();
+    const descendants: TreeNode[] = [];
+    const queue: string[] = [nodeId];
+    const visited = new Set<string>();
 
     while (queue.length > 0) {
-      const currentId = queue.shift();
+      const currentId = queue.shift()!;
       if (visited.has(currentId)) continue;
       visited.add(currentId);
 
@@ -228,7 +311,7 @@ class ConversationTreeService {
   }
 
   // Get all branches from a node
-  getBranches(nodeId) {
+  getBranches(nodeId: string): BranchInfo[] {
     const tree = this.getCurrentTree();
     if (!tree) return [];
 
@@ -247,7 +330,7 @@ class ConversationTreeService {
   }
 
   // Switch to a different tree
-  switchTree(treeId) {
+  switchTree(treeId: string): boolean {
     const trees = this.getAllTrees();
     if (trees[treeId]) {
       this.currentTreeId = treeId;
@@ -257,7 +340,7 @@ class ConversationTreeService {
   }
 
   // Delete a tree
-  deleteTree(treeId) {
+  deleteTree(treeId: string): boolean {
     const trees = this.getAllTrees();
     if (trees[treeId]) {
       delete trees[treeId];
@@ -278,13 +361,15 @@ class ConversationTreeService {
   }
 
   // Export tree data
-  exportTree(treeId = null) {
+  exportTree(treeId: string | null = null): ExportData | null {
     const targetTreeId = treeId || this.currentTreeId;
+    if (!targetTreeId) return null;
+    
     const trees = this.getAllTrees();
     const tree = trees[targetTreeId];
     if (!tree) return null;
 
-    const exportData = {
+    const exportData: ExportData = {
       ...tree,
       nodes: Array.from(tree.nodes),
       exported: new Date().toISOString(),
@@ -307,9 +392,9 @@ class ConversationTreeService {
   }
 
   // Import tree data
-  importTree(treeData) {
+  importTree(treeData: any): string | null {
     try {
-      const tree = {
+      const tree: ConversationTree = {
         ...treeData,
         id: treeData.id || uuidv4(),
         nodes: new Map(treeData.nodes),
@@ -326,7 +411,7 @@ class ConversationTreeService {
   }
 
   // Get tree statistics
-  getTreeStats(treeId = null) {
+  getTreeStats(treeId: string | null = null): TreeStats | null {
     const tree = treeId ? this.getAllTrees()[treeId] : this.getCurrentTree();
     if (!tree) return null;
 
@@ -348,13 +433,13 @@ class ConversationTreeService {
   }
 
   // Find common ancestor of two nodes
-  findCommonAncestor(nodeId1, nodeId2) {
+  findCommonAncestor(nodeId1: string, nodeId2: string): string | null {
     const tree = this.getCurrentTree();
     if (!tree) return null;
 
     const ancestors1 = new Set([nodeId1, ...this.getAncestors(nodeId1).map(n => n.id)]);
     
-    let current = nodeId2;
+    let current: string | null = nodeId2;
     while (current) {
       if (ancestors1.has(current)) return current;
       
@@ -367,7 +452,7 @@ class ConversationTreeService {
   }
 
   // Prune a branch (delete node and all descendants)
-  pruneBranch(nodeId) {
+  pruneBranch(nodeId: string): boolean {
     const tree = this.getCurrentTree();
     if (!tree) return false;
 
@@ -400,12 +485,12 @@ class ConversationTreeService {
   }
 
   // Search trees by content
-  searchTrees(query) {
+  searchTrees(query: string): SearchResult[] {
     const trees = this.getAllTrees();
-    const results = [];
+    const results: SearchResult[] = [];
 
     Object.values(trees).forEach(tree => {
-      const matches = [];
+      const matches: SearchMatch[] = [];
       
       tree.nodes.forEach((node, nodeId) => {
         if (node.content && node.content.toLowerCase().includes(query.toLowerCase())) {

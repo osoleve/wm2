@@ -156,7 +156,7 @@ const Chat: React.FC = () => {
     <div className="chat-container">
       <div className="chat-header">
         <div className="header-content">
-          <h1 className={isPrismEnabled ? 'prism-enabled' : ''}>{isPrismEnabled ? 'Prism' : 'W.M.'}</h1>
+          <h1 className={isPrismEnabled ? 'prism-enabled' : ''}>{isPrismEnabled ? 'Prism' : 'Iris'}</h1>
         </div>
         <div className="header-controls">
           <div className="provider-toggle">

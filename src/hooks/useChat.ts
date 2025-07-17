@@ -1,18 +1,71 @@
-// src/hooks/useChat.js
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { v4 as uuidv4 } from 'https://jspm.dev/uuid@9.0.1';
+// src/hooks/useChat.ts
+import { useState, useCallback, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import chatService from '../services/chatService';
 import prismService from '../services/prismService';
 import loggingService from '../services/loggingService';
 import conversationTreeService from '../services/conversationTreeService';
 import { getSystemPrompt } from '../utils/systemPrompt';
 
+interface MessageVersion {
+  id: string;
+  content: string;
+  timestamp: number;
+  isCurrent?: boolean;
+}
+
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: number;
+  parentId: string | null;
+  children: string[];
+  isEdited?: boolean;
+  originalId?: string;
+  versions?: MessageVersion[];
+  isPrism?: boolean;
+  perspectives?: Array<{
+    perspective: string;
+    content: string;
+  }>;
+  synthesis?: string;
+}
+
+interface BranchInfo {
+  hasBranches: boolean;
+  branchCount?: number;
+  currentBranchIndex?: number;
+  siblings?: string[];
+  isSiblingBranch?: boolean;
+}
+
+interface TreeInfo {
+  id: string;
+  title: string;
+  created: string;
+  lastModified: string;
+  stats: any;
+}
+
+interface SearchResult {
+  treeId: string;
+  title: string;
+  matches: Array<{
+    nodeId: string;
+    content: string;
+    role: string;
+    timestamp: number;
+  }>;
+  lastModified: string;
+}
+
 export const useChat = () => {
-  const [messages, setMessages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [isPrismEnabled, setIsPrismEnabled] = useState(false);
-  const [currentTreeId, setCurrentTreeId] = useState(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPrismEnabled, setIsPrismEnabled] = useState<boolean>(false);
+  const [currentTreeId, setCurrentTreeId] = useState<string | null>(null);
 
   // Initialize from saved tree on mount
   useEffect(() => {
@@ -33,10 +86,15 @@ export const useChat = () => {
     }
   }, [messages, currentTreeId]);
 
-  const sendMessage = useCallback(async (content, model, prismModel, isSystemPromptEnabled) => {
+  const sendMessage = useCallback(async (
+    content: string, 
+    model: string, 
+    prismModel?: string, 
+    isSystemPromptEnabled?: boolean
+  ) => {
     if (!content.trim()) return;
 
-    const userMessage = { 
+    const userMessage: ChatMessage = { 
       id: uuidv4(),
       role: 'user', 
       content,
@@ -53,26 +111,59 @@ export const useChat = () => {
     setError(null);
 
     try {
-      let conversationHistory = [...messages, userMessage];
+      let conversationHistory: ChatMessage[] = [...messages, userMessage];
       
       if (isSystemPromptEnabled) {
         const systemPrompt = await getSystemPrompt();
-        const systemMessage = { role: 'system', content: systemPrompt };
+        const systemMessage: ChatMessage = { 
+          id: uuidv4(),
+          role: 'system', 
+          content: systemPrompt,
+          timestamp: Date.now(),
+          parentId: null,
+          children: []
+        };
         conversationHistory = [systemMessage, ...conversationHistory];
       }
 
-      let aiResponse;
+      let aiResponse: ChatMessage;
 
       if (isPrismEnabled) {
-        aiResponse = await prismService.generateCompletePrismResponse(
+        const prismResponse = await prismService.generateCompletePrismResponse(
           content,
           conversationHistory,
           prismModel || model,
           model,
           isSystemPromptEnabled
         );
+        aiResponse = {
+          id: uuidv4(),
+          role: prismResponse.role,
+          content: prismResponse.content,
+          timestamp: Date.now(),
+          parentId: userMessage.id,
+          children: [],
+          isPrism: prismResponse.isPrism,
+          perspectives: prismResponse.perspectives,
+          synthesis: prismResponse.synthesis
+        };
       } else {
-        aiResponse = await chatService.sendMessage(conversationHistory, model);
+        const response = await chatService.sendMessage(
+          conversationHistory.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          })), 
+          model
+        );
+        
+        aiResponse = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: response.content || 'No response received',
+          timestamp: Date.now(),
+          parentId: userMessage.id,
+          children: []
+        };
       }
       
       // Ensure AI response has proper structure
@@ -94,7 +185,7 @@ export const useChat = () => {
       } catch (loggingError) {
         console.error('Logging error (non-fatal):', loggingError);
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'Failed to send message');
       console.error('Chat error:', err);
     } finally {
@@ -116,7 +207,7 @@ export const useChat = () => {
   }, []);
 
   // Edit a message and create a new branch
-  const editMessage = useCallback(async (messageId, newContent) => {
+  const editMessage = useCallback(async (messageId: string, newContent: string): Promise<string | undefined> => {
     const originalMessage = messages.find(m => m.id === messageId);
     if (!originalMessage) return;
 
@@ -125,7 +216,7 @@ export const useChat = () => {
     const messagesToKeep = messages.slice(0, messageIndex);
     
     // Create edited version
-    const editedMessage = {
+    const editedMessage: ChatMessage = {
       id: uuidv4(),
       content: newContent,
       role: originalMessage.role,
@@ -155,21 +246,54 @@ export const useChat = () => {
       try {
         const conversationHistory = [...messagesToKeep, editedMessage];
         const systemPrompt = await getSystemPrompt();
-        const systemMessage = { role: 'system', content: systemPrompt };
+        const systemMessage: ChatMessage = { 
+          id: uuidv4(),
+          role: 'system', 
+          content: systemPrompt,
+          timestamp: Date.now(),
+          parentId: null,
+          children: []
+        };
         const fullHistory = [systemMessage, ...conversationHistory];
         
-        let aiResponse;
+        let aiResponse: ChatMessage;
         
         if (isPrismEnabled) {
-          aiResponse = await prismService.generateCompletePrismResponse(
+          const prismResponse = await prismService.generateCompletePrismResponse(
             newContent,
             fullHistory,
             'moonshotai/kimi-k2-instruct',
             'moonshotai/kimi-k2-instruct',
             true
           );
+          aiResponse = {
+            id: uuidv4(),
+            role: prismResponse.role,
+            content: prismResponse.content,
+            timestamp: Date.now(),
+            parentId: editedMessage.id,
+            children: [],
+            isPrism: prismResponse.isPrism,
+            perspectives: prismResponse.perspectives,
+            synthesis: prismResponse.synthesis
+          };
         } else {
-          aiResponse = await chatService.sendMessage(fullHistory, 'moonshotai/kimi-k2-instruct');
+          const response = await chatService.sendMessage(
+            fullHistory.map(msg => ({
+              role: msg.role,
+              content: msg.content
+            })), 
+            'moonshotai/kimi-k2-instruct'
+          );
+          
+          aiResponse = {
+            id: uuidv4(),
+            role: 'assistant',
+            content: response.content || 'No response received',
+            timestamp: Date.now(),
+            parentId: editedMessage.id,
+            children: []
+          };
         }
         
         if (!aiResponse.id) {
@@ -191,7 +315,7 @@ export const useChat = () => {
           console.error('Logging error (non-fatal):', loggingError);
         }
         
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message || 'Failed to generate response');
         console.error('Edit response error:', err);
       } finally {
@@ -203,13 +327,13 @@ export const useChat = () => {
   }, [messages, isPrismEnabled]);
 
   // Navigate to a specific branch
-  const navigateToBranch = useCallback((messageId) => {
+  const navigateToBranch = useCallback((messageId: string) => {
     const branch = conversationTreeService.loadBranch(messageId);
     setMessages(branch);
   }, []);
 
   // Get branch navigation info
-  const getBranchInfo = useCallback((messageId) => {
+  const getBranchInfo = useCallback((messageId: string): BranchInfo => {
     const branches = conversationTreeService.getBranches(messageId);
     
     if (branches.length === 0) {
@@ -241,7 +365,7 @@ export const useChat = () => {
   }, [messages]);
 
   // Load a different conversation tree
-  const loadTree = useCallback((treeId) => {
+  const loadTree = useCallback((treeId: string) => {
     if (conversationTreeService.switchTree(treeId)) {
       const tree = conversationTreeService.getCurrentTree();
       if (tree && tree.rootNodes.length > 0) {
@@ -254,7 +378,7 @@ export const useChat = () => {
   }, []);
 
   // Get all available trees
-  const getAllTrees = useCallback(() => {
+  const getAllTrees = useCallback((): TreeInfo[] => {
     const trees = conversationTreeService.getAllTrees();
     return Object.values(trees).map(tree => ({
       id: tree.id,
@@ -266,24 +390,27 @@ export const useChat = () => {
   }, []);
 
   // Search across all trees
-  const searchTrees = useCallback((query) => {
+  const searchTrees = useCallback((query: string): SearchResult[] => {
     return conversationTreeService.searchTrees(query);
   }, []);
 
   // Export current tree
-  const exportTree = useCallback((treeId = null) => {
+  const exportTree = useCallback((treeId?: string | null) => {
     conversationTreeService.exportTree(treeId || currentTreeId);
   }, [currentTreeId]);
 
   // Import a tree
-  const importTree = useCallback((file) => {
+  const importTree = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const treeData = JSON.parse(e.target.result);
-        const newTreeId = conversationTreeService.importTree(treeData);
-        if (newTreeId) {
-          loadTree(newTreeId);
+        const result = e.target?.result;
+        if (typeof result === 'string') {
+          const treeData = JSON.parse(result);
+          const newTreeId = conversationTreeService.importTree(treeData);
+          if (newTreeId) {
+            loadTree(newTreeId);
+          }
         }
       } catch (error) {
         console.error('Error importing tree:', error);
@@ -294,7 +421,7 @@ export const useChat = () => {
   }, [loadTree]);
 
   // Other methods remain the same but simplified since tree handles persistence
-  const regenerateMessage = useCallback(async (messageId) => {
+  const regenerateMessage = useCallback(async (messageId: string) => {
     const messageIndex = messages.findIndex(m => m.id === messageId);
     const message = messages[messageIndex];
     
@@ -312,21 +439,54 @@ export const useChat = () => {
     try {
       let conversationHistory = messagesToKeep;
       const systemPrompt = await getSystemPrompt();
-      const systemMessage = { role: 'system', content: systemPrompt };
+      const systemMessage: ChatMessage = { 
+        id: uuidv4(),
+        role: 'system', 
+        content: systemPrompt,
+        timestamp: Date.now(),
+        parentId: null,
+        children: []
+      };
       conversationHistory = [systemMessage, ...conversationHistory];
       
-      let aiResponse;
+      let aiResponse: ChatMessage;
       
       if (isPrismEnabled) {
-        aiResponse = await prismService.generateCompletePrismResponse(
+        const prismResponse = await prismService.generateCompletePrismResponse(
           parentMessage.content,
           conversationHistory,
           'moonshotai/kimi-k2-instruct',
           'moonshotai/kimi-k2-instruct',
           true
         );
+        aiResponse = {
+          id: uuidv4(),
+          role: prismResponse.role,
+          content: prismResponse.content,
+          timestamp: Date.now(),
+          parentId: parentMessage.id,
+          children: [],
+          isPrism: prismResponse.isPrism,
+          perspectives: prismResponse.perspectives,
+          synthesis: prismResponse.synthesis
+        };
       } else {
-        aiResponse = await chatService.sendMessage(conversationHistory, 'moonshotai/kimi-k2-instruct');
+        const response = await chatService.sendMessage(
+          conversationHistory.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          })), 
+          'moonshotai/kimi-k2-instruct'
+        );
+        
+        aiResponse = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: response.content || 'No response received',
+          timestamp: Date.now(),
+          parentId: parentMessage.id,
+          children: []
+        };
       }
       
       if (!aiResponse.id) {
@@ -346,7 +506,7 @@ export const useChat = () => {
       
       setMessages(prev => [...prev, aiResponse]);
       
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'Failed to regenerate message');
       console.error('Regeneration error:', err);
     } finally {
@@ -354,7 +514,7 @@ export const useChat = () => {
     }
   }, [messages, isPrismEnabled]);
 
-  const copyMessage = useCallback(async (messageId) => {
+  const copyMessage = useCallback(async (messageId: string): Promise<boolean> => {
     const message = messages.find(m => m.id === messageId);
     if (!message) return false;
     
@@ -367,7 +527,7 @@ export const useChat = () => {
     }
   }, [messages]);
 
-  const getMessageVersions = useCallback((messageId) => {
+  const getMessageVersions = useCallback((messageId: string): MessageVersion[] => {
     const message = messages.find(m => m.id === messageId);
     if (!message) return [];
     
@@ -383,7 +543,7 @@ export const useChat = () => {
     ];
   }, [messages]);
 
-  const switchToVersion = useCallback(async (messageId, versionId) => {
+  const switchToVersion = useCallback(async (messageId: string, versionId: string) => {
     // Similar to edit, but restores a previous version
     const message = messages.find(m => m.id === messageId);
     if (!message || !message.versions) return;
@@ -396,7 +556,7 @@ export const useChat = () => {
   }, [messages, editMessage]);
 
   // Delete a tree
-  const deleteTree = useCallback((treeId) => {
+  const deleteTree = useCallback((treeId: string): boolean => {
     return conversationTreeService.deleteTree(treeId);
   }, []);
 

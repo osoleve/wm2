@@ -2,14 +2,38 @@
 import chatService from './chatService';
 import { getSystemPrompt } from '../utils/systemPrompt';
 
+interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  isPrism?: boolean;
+}
+
+interface PrismResponse {
+  perspective: string;
+  content: string;
+}
+
+interface CompletePrismResponse {
+  role: 'assistant';
+  content: string;
+  isPrism: true;
+  perspectives: PrismResponse[];
+  synthesis: string;
+}
+
+interface ChatResponse {
+  content: string;
+}
+
 class PrismService {
+  private prismFiles: string[] = [];
+
   constructor() {
-    this.prismFiles = [];
     this.loadPrismFileList();
   }
 
   // Load the list of available prism files
-  async loadPrismFileList() {
+  private async loadPrismFileList(): Promise<void> {
     // Complete list of all 498 theoretical lenses from the prism directory
     this.prismFiles = [
       'Abolition Studies', 'Absurdism', 'Accelerationism', 'Accelerationist Aesthetics',
@@ -145,7 +169,7 @@ class PrismService {
   }
 
   // Randomly select 5-10 prism perspectives (backup method)
-  selectRandomPrisms(min = 5, max = 10) {
+  selectRandomPrisms(min: number = 5, max: number = 10): string[] {
     const count = Math.floor(Math.random() * (max - min + 1)) + min;
     const shuffled = [...this.prismFiles].sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, count);
@@ -155,7 +179,7 @@ class PrismService {
   }
 
   // AI-driven prism selection based on user message
-  async selectAIPrisms(userMessage, conversationHistory, model, min = 5, max = 8) {
+  async selectAIPrisms(userMessage: string, _conversationHistory: ChatMessage[], model: string, min: number = 5, max: number = 8): Promise<string[]> {
     try {
       const selectionPrompt = `You are a meta-analytical AI that selects the most relevant theoretical lenses for analyzing a given question or topic.
 
@@ -176,15 +200,15 @@ Example response format:
 
 Your response:`;
 
-      const selectionMessage = { role: 'system', content: selectionPrompt };
-      const selectionConversation = [selectionMessage, { role: 'user', content: userMessage }];
+      const selectionMessage: ChatMessage = { role: 'system', content: selectionPrompt };
+      const selectionConversation: ChatMessage[] = [selectionMessage, { role: 'user', content: userMessage }];
       
       const response = await chatService.sendMessage(selectionConversation, model);
       
       // Parse the JSON response
-      let selectedPrisms;
+      let selectedPrisms: string[];
       try {
-        selectedPrisms = JSON.parse(response.content.trim());
+        selectedPrisms = JSON.parse(response.content?.trim() || '[]');
       } catch (parseError) {
         console.warn('Failed to parse AI prism selection, falling back to random selection:', parseError);
         return this.selectRandomPrisms(min, max);
@@ -208,7 +232,7 @@ Your response:`;
   }
 
   // Load a specific prism prompt from the server
-  async loadPrismPrompt(prismName) {
+  async loadPrismPrompt(prismName: string): Promise<string> {
     try {
       const response = await fetch(`/prism/${prismName}.txt`);
       if (!response.ok) {
@@ -235,25 +259,25 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
   }
 
   // Generate responses from multiple prism perspectives (in parallel)
-  async generatePrismResponses(userMessage, conversationHistory, model, selectedPrisms) {
+  async generatePrismResponses(_userMessage: string, conversationHistory: ChatMessage[], model: string, selectedPrisms: string[]): Promise<PrismResponse[]> {
     // Create conversation history without system prompt for prism perspectives
     const prismConversationHistory = conversationHistory.filter(msg => msg.role !== 'system');
     
     // Generate all prism responses in parallel
-    const prismPromises = selectedPrisms.map(async (prismName) => {
+    const prismPromises = selectedPrisms.map(async (prismName): Promise<PrismResponse> => {
       try {
         const prismPrompt = await this.loadPrismPrompt(prismName);
         const extra_instructions = ``;
         // const extra_instructions = `Keep your response under 300 words, in a concise, clear, conversational style.`;
         
         // Create a conversation with ONLY the prism perspective as system prompt
-        const prismSystemMessage = { role: 'system', content: prismPrompt + extra_instructions };
-        const prismConversation = [prismSystemMessage, ...prismConversationHistory];
+        const prismSystemMessage: ChatMessage = { role: 'system', content: prismPrompt + extra_instructions };
+        const prismConversation: ChatMessage[] = [prismSystemMessage, ...prismConversationHistory];
         
         const response = await chatService.sendMessage(prismConversation, model, { temperature: 0.9 });
         return {
           perspective: prismName,
-          content: response.content
+          content: response.content || `[Error generating ${prismName} perspective]`
         };
       } catch (error) {
         console.error(`Error generating response for ${prismName}:`, error);
@@ -267,20 +291,11 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
     // Wait for all prism responses to complete
     const responses = await Promise.all(prismPromises);
     
-    // Debug the prism responses
-    // console.log('🔍 PRISM RESPONSES DEBUG:');
-    // responses.forEach((response, i) => {
-    //   console.log(`Response ${i}: ${response.perspective}`);
-    //   console.log(`Content length: ${response.content?.length || 0}`);
-    //   console.log(`Content preview: ${response.content?.substring(0, 100) + '...' || 'NO CONTENT'}`);
-    //   console.log('-'.repeat(40));
-    // });
-    
     return responses;
   }
 
   // Synthesize multiple prism responses into a final response
-  async synthesizePrismResponses(userMessage, prismResponses, baseSystemPrompt, model, conversationHistory) {
+  async synthesizePrismResponses(_userMessage: string, prismResponses: PrismResponse[], baseSystemPrompt: string, model: string, conversationHistory: ChatMessage[]): Promise<ChatResponse> {
     console.log('🔄 Synthesizing prism responses...');
     console.log('📊 Prism responses received:', prismResponses.map(r => r.perspective));
     
@@ -291,8 +306,6 @@ Write with expertise in ${prismName.toLowerCase()}, bringing unique theoretical 
       throw new Error('No valid prism responses provided for synthesis');
     }
     
-    // console.log('✅ Valid prism responses:', validPrismResponses.length);
-    
     // Build perspectives section
     const perspectivesSection = validPrismResponses.map(response => 
       `**${response.perspective} Perspective:**
@@ -300,7 +313,6 @@ ${response.content}
 
 `).join('\n\n---\n\n');
     
-    // Debug: Verify perspectives section is built correctly
     console.log('🔍 PERSPECTIVES SECTION:');
     console.log('='.repeat(80));
     console.log(perspectivesSection);
@@ -312,7 +324,7 @@ ${response.content}
 
 You are now in PRISM mode. Your task is to synthesize the multiple prism perspectives into your gestalt, bespoke response to the user.`;
 
-    const perspectivesPrompt = `The user said: "${userMessage}"
+    const perspectivesPrompt = `The user said: "${_userMessage}"
 
 ## Perspectives Selected
 
@@ -323,27 +335,15 @@ ${perspectivesSection}
 In a conversational style, without listing out the perspectives, respond to the user, and casually remind them that they can access the individual perspectives in the UI using the tabs at the top.`;
 
     try {
-      const synthesisSystemMessage = { role: 'system', content: synthesisSystemPrompt };
-      const perspectivesMessage = { role: 'user', content: perspectivesPrompt };
+      const synthesisSystemMessage: ChatMessage = { role: 'system', content: synthesisSystemPrompt };
+      const perspectivesMessage: ChatMessage = { role: 'user', content: perspectivesPrompt };
       
-      // Debug: Log the synthesis prompts to ensure perspectives are included
       console.log('📋 Synthesis system prompt length:', synthesisSystemPrompt.length);
-      console.log('� Perspectives prompt length:', perspectivesPrompt.length);
+      console.log('📄 Perspectives prompt length:', perspectivesPrompt.length);
       console.log('🔍 Perspectives prompt contains perspectives:', 
         validPrismResponses.every(r => perspectivesPrompt.includes(r.perspective))
       );
       console.log('📝 Perspectives section preview:', perspectivesSection.substring(0, 200) + '...');
-      
-      // MORE DETAILED DEBUGGING
-      console.log('🔍 DETAILED SYNTHESIS SYSTEM PROMPT:');
-      console.log('='.repeat(80));
-      console.log(synthesisSystemPrompt);
-      console.log('='.repeat(80));
-      
-      console.log('🔍 DETAILED PERSPECTIVES PROMPT:');
-      console.log('='.repeat(80));
-      console.log(perspectivesPrompt);
-      console.log('='.repeat(80));
       
       // Include conversation history for context, but filter out system messages AND prism responses
       // to avoid confusion between old and new perspectives
@@ -351,37 +351,16 @@ In a conversational style, without listing out the perspectives, respond to the 
         msg.role !== 'system' && !msg.isPrism
       );
       
-      const synthesisConversation = [
+      const synthesisConversation: ChatMessage[] = [
         synthesisSystemMessage, 
         ...cleanConversationHistory,
         perspectivesMessage
       ];
       
-      console.log('🎯 Synthesis conversation structure:', synthesisConversation.map(m => ({ 
-        role: m.role, 
-        hasContent: !!m.content, 
-        contentLength: m.content?.length || 0,
-        isPrism: m.isPrism || false,
-        isSystemMessage: m.role === 'system',
-        isPerspectivesMessage: m.content?.includes('analytical perspectives')
-      })));
-      
-      console.log('🔍 FULL SYNTHESIS CONVERSATION:');
-      console.log('='.repeat(80));
-      synthesisConversation.forEach((msg, i) => {
-        console.log(`Message ${i}: ${msg.role}`);
-        if (msg.role === 'system') {
-          console.log('[SYSTEM PROMPT]');
-        } else if (msg.content?.includes('analytical perspectives')) {
-          console.log('[PERSPECTIVES MESSAGE]');
-        }
-        console.log(msg.content.substring(0, 500) + '...');
-        console.log('-'.repeat(40));
-      });
-      console.log('='.repeat(80));
-      
       const synthesizedResponse = await chatService.sendMessage(synthesisConversation, model);
-      return synthesizedResponse;
+      return {
+        content: synthesizedResponse.content || 'Error generating synthesis'
+      };
     } catch (error) {
       console.error('Error synthesizing prism responses:', error);
       throw error;
@@ -389,7 +368,7 @@ In a conversational style, without listing out the perspectives, respond to the 
   }
 
   // Generate complete prism analysis with perspectives and synthesis
-  async generateCompletePrismResponse(userMessage, conversationHistory, prismModel, synthesisModel, isSystemPromptEnabled) {
+  async generateCompletePrismResponse(userMessage: string, conversationHistory: ChatMessage[], prismModel: string, synthesisModel?: string, isSystemPromptEnabled?: boolean): Promise<CompletePrismResponse> {
     console.log('🤖 Using AI to select most relevant prisms...');
     // Use AI to select the most relevant prisms instead of random selection
     const selectedPrisms = await this.selectAIPrisms(userMessage, conversationHistory, prismModel, 5, 8);

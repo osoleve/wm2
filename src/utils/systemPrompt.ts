@@ -1,7 +1,7 @@
 // Fetch System prompt for Wittgenstein's Monster from prompts/wm.txt
-let systemPromptCache = null;
+let systemPromptCache: string | null = null;
 
-export const getSystemPrompt = async () => {
+export const getSystemPrompt = async (): Promise<string> => {
   if (systemPromptCache) {
     return systemPromptCache;
   }
