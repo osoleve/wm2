@@ -8,7 +8,9 @@
       "Bash(npm install:*)",
       "Bash(npm run lint)",
       "Bash(timeout 10 npm run dev:netlify)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(find:*)",
+      "Bash(npx depcheck:*)"
     ],
     "deny": []
   }
