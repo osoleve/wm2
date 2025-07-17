@@ -6,9 +6,10 @@ import PrismToggle from './PrismToggle';
 import SystemPromptToggle from './SystemPromptToggle';
 import LoggingDashboard from './LoggingDashboard';
 import chatService from '../services/chatService';
+import { Model, Provider, BranchInfo } from '../types';
 import './Chat.css';
 
-const Chat = () => {
+const Chat: React.FC = () => {
   const { 
     messages, 
     isLoading, 
@@ -25,12 +26,13 @@ const Chat = () => {
     getMessageVersions,
     switchToVersion
   } = useChat();
+  
   // Default chat model is Haiku
-  const [provider, setProvider] = useState('groq'); // Start with GROQ as default
-  const [selectedModel, setSelectedModel] = useState('moonshotai/kimi-k2-instruct');
+  const [provider, setProvider] = useState<Provider>('groq'); // Start with GROQ as default
+  const [selectedModel, setSelectedModel] = useState<string>('moonshotai/kimi-k2-instruct');
   // Default prism backend model is Kimi K2
-  const [selectedPrismModel, setSelectedPrismModel] = useState('moonshotai/kimi-k2-instruct');
-  const [isSystemPromptEnabled, setIsSystemPromptEnabled] = useState(true);
+  const [selectedPrismModel, setSelectedPrismModel] = useState<string>('moonshotai/kimi-k2-instruct');
+  const [isSystemPromptEnabled, setIsSystemPromptEnabled] = useState<boolean>(true);
   
   // Update selectedModel when switching providers
   useEffect(() => {
@@ -40,27 +42,28 @@ const Chat = () => {
       setSelectedModel('moonshotai/kimi-k2'); // Default to Kimi K2 for OpenRouter
     }
   }, [provider]);
-  const [isLoggingDashboardOpen, setIsLoggingDashboardOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [models, setModels] = useState([]);
-  const [modelsLoading, setModelsLoading] = useState(true);
+  
+  const [isLoggingDashboardOpen, setIsLoggingDashboardOpen] = useState<boolean>(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [models, setModels] = useState<Model[]>([]);
+  const [_modelsLoading, setModelsLoading] = useState<boolean>(true); // used in fetchModels useEffect
 
   // Fetch available models
   useEffect(() => {
     chatService.setProvider(provider);
-    const fetchModels = async () => {
+    const fetchModels = async (): Promise<void> => {
       try {
         const availableModels = await chatService.getAvailableModels();
-        const popularModels = availableModels.filter(model => {
+        const popularModels = availableModels.filter(() => {
           return true; // Include all models for now
-        }).map(model => ({
+        }).map((model: any): Model => ({
           id: model.id,
           name: model.name || model.id.split('/').pop(),
           context_length: model.context_length
         }));
 
-        const sortedModels = popularModels.sort((a, b) => {
-          const getCategory = (id) => {
+        const sortedModels = popularModels.sort((a: Model, b: Model) => {
+          const getCategory = (id: string): number => {
             const lower = id.toLowerCase();
             if (lower.includes('free')) return 0;
             return 999;
@@ -78,7 +81,7 @@ const Chat = () => {
         // Set default model based on provider when switching
         if (provider === 'groq' && sortedModels.length > 0) {
           // Set Kimi K2 as default for GROQ
-          const kimiModel = sortedModels.find(m => m.id === 'moonshotai/kimi-k2-instruct');
+          const kimiModel = sortedModels.find((m: Model) => m.id === 'moonshotai/kimi-k2-instruct');
           if (kimiModel) {
             setSelectedModel('moonshotai/kimi-k2-instruct');
             setSelectedPrismModel('moonshotai/kimi-k2-instruct');
@@ -89,12 +92,12 @@ const Chat = () => {
           }
         } else if (provider === 'openrouter' && sortedModels.length > 0) {
           // Set Kimi K2 as default for OpenRouter
-          const kimiModel = sortedModels.find(m => m.id === 'moonshotai/kimi-k2');
+          const kimiModel = sortedModels.find((m: Model) => m.id === 'moonshotai/kimi-k2');
           if (kimiModel) {
             setSelectedModel('moonshotai/kimi-k2');
           } else {
             // Fallback to Claude Haiku if Kimi K2 not available
-            const claudeModel = sortedModels.find(m => m.id === 'anthropic/claude-3-5-haiku');
+            const claudeModel = sortedModels.find((m: Model) => m.id === 'anthropic/claude-3-5-haiku');
             if (claudeModel) {
               setSelectedModel('anthropic/claude-3-5-haiku');
             } else {
@@ -103,7 +106,7 @@ const Chat = () => {
           }
           
           // Set Llama 3.3 70B as default prism model for OpenRouter
-          const llamaModel = sortedModels.find(m => m.id === 'meta-llama/llama-3.3-70b-instruct');
+          const llamaModel = sortedModels.find((m: Model) => m.id === 'meta-llama/llama-3.3-70b-instruct');
           if (llamaModel) {
             setSelectedPrismModel('meta-llama/llama-3.3-70b-instruct');
           } else {
@@ -112,7 +115,7 @@ const Chat = () => {
         }
       } catch (error) {
         console.error('Error fetching models:', error);
-        const fallbackModels = [
+        const fallbackModels: Model[] = [
           { id: 'anthropic/claude-3-5-haiku', name: 'Claude 3.5 Haiku' },
           { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B' },
           { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3.1 8B' },
@@ -128,7 +131,7 @@ const Chat = () => {
 
   // Close mobile menu when pressing Escape and prevent body scroll
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape' && isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
       }
@@ -196,7 +199,7 @@ const Chat = () => {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <span className="model-name">
-              {models.find(m => m.id === selectedModel)?.name.split(' ')[0] || 'Model'}
+              {models.find((m: Model) => m.id === selectedModel)?.name.split(' ')[0] || 'Model'}
             </span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M6 9l6 6 6-6"/>
@@ -213,22 +216,6 @@ const Chat = () => {
             </svg>
           </button>
           
-          {/* {isPrismEnabled && (
-            <div className="prism-status-badge">
-              <div className="prism-icon-small">∆y</div>
-              {/* <span>Prism Active</span> */}
-            {/* </div> */}
-          
-          {/* <button 
-            onClick={() => {
-              console.log('History button clicked');
-              setIsLoggingDashboardOpen(true);
-            }} 
-            className="history-button"
-            title="View Session History"
-          >
-            📊 History
-          </button> */}
           <button 
             onClick={clearChat} 
             className="clear-button"
@@ -315,7 +302,7 @@ const Chat = () => {
                   }}
                   className="model-select-mobile"
                 >
-                  {models.map(model => (
+                  {models.map((model: Model) => (
                     <option key={model.id} value={model.id}>
                       {model.name}
                     </option>
@@ -338,7 +325,7 @@ const Chat = () => {
                     }}
                     className="model-select-mobile"
                   >
-                    {models.map(model => (
+                    {models.map((model: Model) => (
                       <option key={model.id} value={model.id}>
                         {model.name}
                       </option>
@@ -382,20 +369,20 @@ const Chat = () => {
       <ChatMessages 
         messages={messages} 
         isLoading={isLoading} 
-        onSendMessage={(msg) => sendMessage(msg, selectedModel, selectedPrismModel, isSystemPromptEnabled)}
+        onSendMessage={(msg: string) => sendMessage(msg, selectedModel, selectedPrismModel, isSystemPromptEnabled)}
         selectedModel={selectedModel}
         isPrismMode={isPrismEnabled}
         onEditMessage={editMessage}
         onRegenerateMessage={regenerateMessage}
         onCopyMessage={copyMessage}
         onNavigateBranch={navigateToBranch}
-        getBranchInfo={getBranchInfo}
+        getBranchInfo={getBranchInfo as (messageId: string) => BranchInfo | null}
         getMessageVersions={getMessageVersions}
         onSwitchToVersion={switchToVersion}
       />
       
       <ChatInput 
-        onSendMessage={(msg) => sendMessage(msg, selectedModel, selectedPrismModel, isSystemPromptEnabled)}
+        onSendMessage={(msg: string) => sendMessage(msg, selectedModel, selectedPrismModel, isSystemPromptEnabled)}
         isLoading={isLoading}
         selectedModel={selectedModel}
         onModelChange={setSelectedModel}
@@ -406,8 +393,6 @@ const Chat = () => {
         isMobileMenuOpen={isMobileMenuOpen}
         provider={provider}
         setProvider={setProvider}
-        isSystemPromptEnabled={isSystemPromptEnabled}
-        onSystemPromptToggle={() => setIsSystemPromptEnabled(prev => !prev)}
       />
 
       <LoggingDashboard 

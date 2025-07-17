@@ -1,7 +1,12 @@
 import React from 'react';
 import './SystemPromptToggle.css';
 
-const SystemPromptToggle = ({ isEnabled, onToggle }) => {
+interface SystemPromptToggleProps {
+  isEnabled: boolean;
+  onToggle: () => void;
+}
+
+const SystemPromptToggle: React.FC<SystemPromptToggleProps> = ({ isEnabled, onToggle }) => {
   return (
     <div className="system-prompt-toggle">
       <label htmlFor="system-prompt-toggle-switch">

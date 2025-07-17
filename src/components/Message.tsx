@@ -1,14 +1,29 @@
-// src/components/Message.jsx - Update the message display logic
 import React, { useState } from 'react';
 import { EditModal } from './EditModal';
 import { BranchNavigation } from './BranchNavigation';
 import { VersionHistory } from './VersionHistory';
+import { MessageWithPrism, Version, BranchInfo, PrismResponse } from '../types';
 import './Message.css';
 
-const Message = ({ 
+interface MessageProps {
+  message: MessageWithPrism;
+  isUser: boolean;
+  isLast?: boolean; // unused
+  onEdit: (messageId: string, newContent: string) => void;
+  onRegenerate: (messageId: string) => void;
+  onCopy: (messageId: string) => Promise<boolean>;
+  onNavigateBranch: (messageId: string) => void;
+  getBranchInfo?: (messageId: string) => BranchInfo | null;
+  getMessageVersions?: (messageId: string) => Version[];
+  onSwitchToVersion: (messageId: string, versionId: string) => void;
+  isPrismMode?: boolean; // unused
+  prismResponses?: PrismResponse[]; // unused
+}
+
+const Message: React.FC<MessageProps> = ({ 
   message, 
   isUser,
-  isLast, 
+  isLast: _isLast, // unused
   onEdit, 
   onRegenerate, 
   onCopy, 
@@ -16,41 +31,41 @@ const Message = ({
   getBranchInfo,
   getMessageVersions,
   onSwitchToVersion,
-  isPrismMode,
-  prismResponses 
+  isPrismMode: _isPrismMode, // unused
+  prismResponses: _prismResponses // unused
 }) => {
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showVersionHistory, setShowVersionHistory] = useState(false);
-  const [showControls, setShowControls] = useState(false);
-  const [activeTab, setActiveTab] = useState('synthesis');
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+  const [showVersionHistory, setShowVersionHistory] = useState<boolean>(false);
+  const [showControls, setShowControls] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>('synthesis');
   
   const branchInfo = getBranchInfo?.(message.id);
   const isPrismMessage = message.isPrism && message.perspectives;
   const messageVersions = getMessageVersions?.(message.id) || [];
   const hasVersions = messageVersions.length > 1;
 
-  const handleEdit = (newContent) => {
+  const handleEdit = (newContent: string): void => {
     onEdit(message.id, newContent);
     setShowEditModal(false);
   };
 
-  const handleRegenerate = () => {
+  const handleRegenerate = (): void => {
     onRegenerate(message.id);
   };
 
-  const handleCopy = async () => {
+  const handleCopy = async (): Promise<void> => {
     const success = await onCopy(message.id);
     if (success) {
       setShowControls(false);
     }
   };
 
-  const handleShowVersions = () => {
+  const handleShowVersions = (): void => {
     setShowVersionHistory(true);
   };
 
   // Get the content to display based on active tab
-  const getDisplayContent = () => {
+  const getDisplayContent = (): string => {
     if (!isPrismMessage) {
       return message.content;
     }
@@ -59,7 +74,7 @@ const Message = ({
       return message.synthesis || message.content;
     }
 
-    const perspective = message.perspectives.find(p => p.perspective === activeTab);
+    const perspective = message.perspectives?.find(p => p.perspective === activeTab);
     return perspective?.content || message.content;
   };
 
@@ -82,7 +97,7 @@ const Message = ({
               Synthesis
             </button>
             
-            {message.perspectives.map((perspective, index) => (
+            {message.perspectives?.map((perspective, index) => (
               <button
                 key={index}
                 className={`prism-tab ${activeTab === perspective.perspective ? 'active' : ''}`}
@@ -120,15 +135,6 @@ const Message = ({
               </button>
             )}
             
-            {hasVersions && (
-              <button 
-                className="control-button"
-                onClick={handleShowVersions}
-                title="View message versions"
-              >
-                🕐
-              </button>
-            )}
             
             <button 
               className="control-button"

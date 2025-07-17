@@ -1,19 +1,41 @@
-// src/components/BranchIndicator.jsx
 import React, { useState } from 'react';
 import './BranchIndicator.css';
 
-const BranchIndicator = ({ 
+interface Branch {
+  id: string;
+  preview: string;
+  descendantCount: number;
+}
+
+interface BranchPointInfo {
+  nodeId: string;
+  branches: Branch[];
+  hasBranches: boolean;
+  depth: number;
+}
+
+interface ConversationTreeService {
+  getBranches: (nodeId: string) => Branch[];
+}
+
+interface BranchIndicatorProps {
+  currentPath: string[];
+  branchPoints?: any; // Not used in component
+  onNavigateToBranch: (branchId: string) => void;
+  conversationTreeService: ConversationTreeService;
+}
+
+const BranchIndicator: React.FC<BranchIndicatorProps> = ({ 
   currentPath, 
-  branchPoints, 
   onNavigateToBranch,
   conversationTreeService 
 }) => {
-  const [showBranchMenu, setShowBranchMenu] = useState(false);
+  const [showBranchMenu, setShowBranchMenu] = useState<boolean>(false);
   
   if (!currentPath || currentPath.length === 0) return null;
 
   // Get branch information for current path
-  const pathBranches = currentPath.map((nodeId, index) => {
+  const pathBranches: BranchPointInfo[] = currentPath.map((nodeId, index) => {
     const branches = conversationTreeService.getBranches(nodeId);
     return {
       nodeId,

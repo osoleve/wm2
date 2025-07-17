@@ -97,7 +97,7 @@ src/
 └── utils/         # Utilities
 
 netlify/functions/ # Serverless API proxies
-public/prism/      # 498 theoretical perspective files
+public/prism/      # 498 theoretical perspective text files, ignore
 ```
 
 ## Recent Changes

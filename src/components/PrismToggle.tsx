@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import './PrismToggle.css';
 
-const PrismToggle = ({ isPrismEnabled, onToggle, isLoading }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
+interface PrismToggleProps {
+  isPrismEnabled: boolean;
+  onToggle: () => void;
+  isLoading: boolean;
+}
 
-  const handleToggle = () => {
+const PrismToggle: React.FC<PrismToggleProps> = ({ isPrismEnabled, onToggle, isLoading }) => {
+  const [showTooltip, setShowTooltip] = useState<boolean>(false);
+  const [hasInteracted, setHasInteracted] = useState<boolean>(false);
+
+  const handleToggle = (): void => {
     onToggle();
     setHasInteracted(true);
     setShowTooltip(false);
   };
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (): void => {
     if (!hasInteracted) {
       setShowTooltip(true);
     }

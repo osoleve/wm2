@@ -3,7 +3,27 @@ import chatService from '../services/chatService';
 import PrismToggle from './PrismToggle';
 import './ChatInput.css';
 
-const ChatInput = ({
+interface Model {
+  id: string;
+  name: string;
+  context_length: number;
+}
+
+interface ChatInputProps {
+  onSendMessage: (message: string, model: string) => void;
+  isLoading: boolean;
+  selectedModel: string;
+  onModelChange: (model: string) => void;
+  selectedPrismModel: string;
+  onPrismModelChange: (model: string) => void;
+  isPrismEnabled: boolean;
+  togglePrism: () => void;
+  isMobileMenuOpen?: boolean; // unused
+  provider: 'openrouter' | 'groq';
+  setProvider?: (provider: 'openrouter' | 'groq') => void; // unused
+}
+
+const ChatInput: React.FC<ChatInputProps> = ({
   onSendMessage,
   isLoading,
   selectedModel,
@@ -12,18 +32,18 @@ const ChatInput = ({
   onPrismModelChange,
   isPrismEnabled,
   togglePrism,
-  isMobileMenuOpen,
+  isMobileMenuOpen: _isMobileMenuOpen, // unused
   provider,
-  setProvider
+  setProvider: _setProvider // unused
 }) => {
-  const [message, setMessage] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
-  const [models, setModels] = useState([]);
-  const [modelsLoading, setModelsLoading] = useState(true);
-  const textareaRef = useRef(null);
+  const [message, setMessage] = useState<string>('');
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [models, setModels] = useState<Model[]>([]);
+  const [modelsLoading, setModelsLoading] = useState<boolean>(true);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const maxLength = 16384;
-  const longPressTimeoutRef = useRef(null);
-  const [isLongPressing, setIsLongPressing] = useState(false);
+  const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isLongPressing, setIsLongPressing] = useState<boolean>(false);
 
   // Fetch available models on provider change
   useEffect(() => {
@@ -31,7 +51,7 @@ const ChatInput = ({
     const fetchModels = async () => {
       try {
         const availableModels = await chatService.getAvailableModels();
-        const popularModels = availableModels.filter(model => true).map(model => ({
+        const popularModels = availableModels.filter(() => true).map((model: any): Model => ({
           id: model.id,
           name: model.name || model.id.split('/').pop(),
           context_length: model.context_length
@@ -41,18 +61,18 @@ const ChatInput = ({
         // Set default model based on provider when switching
         if (provider === 'groq' && popularModels.length > 0) {
           // Set Kimi K2 as default for GROQ
-          const kimiModel = popularModels.find(m => m.id === 'moonshotai/kimi-k2');
-          if (kimiModel && !popularModels.find(m => m.id === selectedModel)) {
+          const kimiModel = popularModels.find((m: Model) => m.id === 'moonshotai/kimi-k2');
+          if (kimiModel && !popularModels.find((m: Model) => m.id === selectedModel)) {
             onModelChange('moonshotai/kimi-k2');
-          } else if (!popularModels.find(m => m.id === selectedModel)) {
+          } else if (!popularModels.find((m: Model) => m.id === selectedModel)) {
             onModelChange(popularModels[0].id);
           }
         } else if (provider === 'openrouter' && popularModels.length > 0) {
           // Set Claude Haiku as default for OpenRouter
-          const claudeModel = popularModels.find(m => m.id === 'anthropic/claude-3-5-haiku');
-          if (claudeModel && !popularModels.find(m => m.id === selectedModel)) {
+          const claudeModel = popularModels.find((m: Model) => m.id === 'anthropic/claude-3-5-haiku');
+          if (claudeModel && !popularModels.find((m: Model) => m.id === selectedModel)) {
             onModelChange('anthropic/claude-3-5-haiku');
-          } else if (!popularModels.find(m => m.id === selectedModel)) {
+          } else if (!popularModels.find((m: Model) => m.id === selectedModel)) {
             onModelChange(popularModels[0].id);
           }
         }
@@ -74,7 +94,7 @@ const ChatInput = ({
     }
   }, [message]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
       onSendMessage(message, selectedModel);
@@ -86,21 +106,21 @@ const ChatInput = ({
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     const newValue = e.target.value;
     if (newValue.length <= maxLength) {
       setMessage(newValue);
     }
   };
 
-  const handlePressStart = () => {
+  const handlePressStart = (): void => {
     setIsLongPressing(false);
     longPressTimeoutRef.current = setTimeout(() => {
       setIsLongPressing(true);
@@ -112,7 +132,7 @@ const ChatInput = ({
     }, 500); // 500ms for long press
   };
 
-  const handlePressEnd = (e) => {
+  const handlePressEnd = (e: React.MouseEvent | React.TouchEvent): void => {
     if (longPressTimeoutRef.current) {
       clearTimeout(longPressTimeoutRef.current);
     }

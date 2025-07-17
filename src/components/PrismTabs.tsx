@@ -1,8 +1,19 @@
 import React, { useState } from 'react';
+import { PrismPerspective } from '../types';
 import './PrismTabs.css';
 
-export const PrismTabs = ({ responses }) => {
-  const [activeTab, setActiveTab] = useState('synthesis');
+interface PrismResponse {
+  synthesis?: string;
+  content?: string;
+  perspectives?: PrismPerspective[];
+}
+
+interface PrismTabsProps {
+  responses: PrismResponse;
+}
+
+export const PrismTabs: React.FC<PrismTabsProps> = ({ responses }) => {
+  const [activeTab, setActiveTab] = useState<string>('synthesis');
   
   if (!responses || !responses.perspectives) {
     return null;

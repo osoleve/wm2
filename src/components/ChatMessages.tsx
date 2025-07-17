@@ -1,14 +1,31 @@
 import React, { useRef, useEffect } from 'react';
 import Message from './Message';
+import { MessageWithPrism, Version, BranchInfo, PrismResponse } from '../types';
 import './ChatMessages.css';
 
-const ChatMessages = ({ 
+interface ChatMessagesProps {
+  messages: MessageWithPrism[];
+  isLoading: boolean;
+  onSendMessage?: (message: string, model: string) => void;
+  selectedModel: string;
+  isPrismMode: boolean;
+  prismResponses?: PrismResponse[]; // unused
+  onEditMessage: (messageId: string, newContent: string) => void;
+  onRegenerateMessage: (messageId: string) => void;
+  onCopyMessage: (messageId: string) => Promise<boolean>;
+  onNavigateBranch: (messageId: string) => void;
+  getBranchInfo?: (messageId: string) => BranchInfo | null;
+  getMessageVersions?: (messageId: string) => Version[];
+  onSwitchToVersion: (messageId: string, versionId: string) => void;
+}
+
+const ChatMessages: React.FC<ChatMessagesProps> = ({ 
   messages, 
   isLoading, 
   onSendMessage, 
   selectedModel,
-  isPrismMode, 
-  prismResponses,
+  isPrismMode: _isPrismMode, // unused
+  prismResponses: _prismResponses, // unused
   onEditMessage,
   onRegenerateMessage,
   onCopyMessage,
@@ -17,14 +34,14 @@ const ChatMessages = ({
   getMessageVersions,
   onSwitchToVersion
 }) => {
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const examplePrompts = [
+  const examplePrompts: string[] = [
     "How do we deal with food stamp fraud without harming the vulnerable?",
     "What are the implications of LLMs on entrenched interests in the US?",
   ];
 
-  const scrollToBottom = () => {
+  const scrollToBottom = (): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -69,7 +86,6 @@ const ChatMessages = ({
         </div>
       ) : (
         messages.map((message, index) => (
-          // In ChatMessages.jsx, remove the prismResponses prop since it's no longer needed:
           <Message
             key={message.id || index}
             message={message}
