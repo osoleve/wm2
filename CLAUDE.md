@@ -29,6 +29,19 @@ npm run preview
 
 # Lint code
 npm run lint
+
+# Testing
+npm test              # Run tests in watch mode
+npm run test:run      # Run tests once
+npm run test:ui       # Run tests with UI
+npm run test:coverage # Run tests with coverage report
+
+# Run specific test files
+npm test -- src/components/Message.test.tsx
+npm test -- src/services/chatService.test.ts
+
+# Run tests matching pattern
+npm test -- --grep "should handle"
 ```
 
 ## Architecture Overview
@@ -75,11 +88,15 @@ npm run lint
    - Use `npm run dev:netlify` for full API functionality
    - Character limit: 16,384 per message
 
-2. **TypeScript Configuration**
+2. **TypeScript Migration Status**
    - Strict mode enabled with comprehensive linting
    - Path aliases: `@/*` maps to `src/*`
    - Use `npm run type-check` before commits
-   - Migration from JavaScript to TypeScript in progress
+   - **Active Migration**: Core files migrating from JS to TS
+   - **Completed**: Services (chatService.ts, prismService.ts), some components
+   - **In Progress**: useChat.js, Chat.jsx, ChatMessages.jsx, Message.jsx
+   - All test files use TypeScript with Vitest and Testing Library
+   - **The ts migration is complete**
 
 3. **CSS Architecture & Theming**
    - Enhanced sage/amber color palette with rich depth
@@ -125,10 +142,73 @@ App.tsx
     └── BranchNavigation.tsx (Tree navigation controls)
 ```
 
+## Critical Implementation Details
+
+### Message Tree System (Core Data Structure)
+- **useChat.js** manages conversation state using Map data structure
+- Each message has UUID, parent/child relationships, version history
+- Branching: editing any message creates new conversation path
+- Tree navigation allows switching between conversation branches
+- Automatic localStorage persistence of entire conversation tree
+
+### Prism Mode Pipeline (Unique Feature)
+1. **prismService.ts**: AI selects 5-8 relevant theoretical perspectives 
+2. **Parallel Processing**: Each perspective generates response independently
+3. **Synthesis**: AI combines perspectives into coherent final response
+4. **UI Display**: PrismTabs.tsx shows synthesis + individual perspective tabs
+5. **Perspective Files**: `public/prism/` contains 498 curated prompts (read-only)
+
+### API Architecture
+- **Dual Providers**: OpenRouter (multiple models) + GROQ (high-performance)
+- **Runtime Switching**: Users can change providers/models mid-conversation
+- **Netlify Functions**: All API calls proxied through serverless functions
+- **Error Recovery**: Automatic fallbacks and user-friendly error messages
+
 ## Key Files to Understand
 
-- `src/hooks/useChat.ts` - Central state management and tree operations
-- `src/services/chatService.ts` - API integration with error handling  
-- `src/services/prismService.ts` - Multi-perspective analysis workflow
-- `src/components/ChatMessages.tsx` - Tree traversal and rendering logic
-- `public/prism/` - 498 theoretical perspective files (read-only)
+- `src/hooks/useChat.js` - **Central state management** and tree operations (JS, migrating to TS)
+- `src/services/chatService.ts` - **API integration** with error handling and provider switching
+- `src/services/prismService.ts` - **Multi-perspective analysis** workflow and AI perspective selection
+- `src/components/ChatMessages.jsx` - **Tree traversal** and message rendering logic (JS, migrating to TS)
+- `public/prism/` - **498 theoretical perspective** files (read-only, never modify)
+- `netlify/functions/` - **API proxy functions** for OpenRouter and GROQ
+
+## Testing Strategy
+
+- Vitest with Testing Library for component and service testing
+- **Logic-focused testing**: Tests component behavior, not DOM rendering
+- Comprehensive mocking for external dependencies (APIs, localStorage)
+- Test files use `.test.tsx` extension and located alongside source files
+- **Current Coverage**: 
+  - Services: chatService.ts, prismService.ts (API integration, error handling)
+  - Components: ChatInput, ChatMessages, Message, PrismTabs, BranchNavigation, PrismToggle, SystemPromptToggle
+  - Focus on state management, user interactions, edge cases, accessibility
+
+## Code Style Guidelines (from Copilot Instructions)
+
+- **Functional components** with hooks exclusively
+- **TypeScript migration** in progress (was pure JavaScript)
+- Follow **React 19** patterns and best practices
+- Use **async/await** for asynchronous operations
+- **CSS custom properties** for theming with BEM-like naming
+- **Map objects** for efficient lookups in conversation trees
+- All API calls go through Netlify Functions (never expose API keys)
+- **60fps animation performance target** with mobile-first responsive design
+
+## Important Development Constraints
+
+### Required Environment Variables
+- `VITE_OPENROUTER_API_KEY` - OpenRouter API access
+- `VITE_GROQ_API_KEY` - GROQ API access
+- Use `npm run dev:netlify` (not `npm run dev`) for full API functionality
+
+### Critical "Do Not Modify" Areas
+- **`public/prism/` directory** - Contains 498 curated theoretical perspective prompts
+- **Conversation tree structure** - Preserve parent/child relationships and UUID system
+- **API proxy pattern** - All external API calls must go through Netlify Functions
+
+### Performance Requirements
+- **Character limit**: 16,384 per message (enforced in ChatInput)
+- **Mobile-first**: Responsive design from 320px to 4K
+- **60fps animations** with smooth transitions and glass morphism effects
+- **Map-based lookups** for O(1) message retrieval in conversation trees
