@@ -61,19 +61,27 @@ const ConversationBrowser: React.FC<ConversationBrowserProps> = ({
     setIsLoading(true);
     try {
       const allTrees = conversationTreeService.getAllTrees();
-      const conversationList = Object.values(allTrees).map(tree => ({
-        id: tree.id,
-        title: tree.title,
-        created: tree.created,
-        lastModified: tree.lastModified,
-        stats: conversationTreeService.getTreeStats(tree.id) || {
-          totalMessages: 0,
-          userMessages: 0,
-          aiMessages: 0,
-          prismMessages: 0,
-          branches: 0
-        }
-      })).sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime());
+      
+      const conversationList = Object.values(allTrees).map(tree => {
+        const stats = conversationTreeService.getTreeStats(tree.id);
+        
+        return {
+          id: tree.id,
+          title: tree.title,
+          created: tree.created,
+          lastModified: tree.lastModified,
+          stats: stats || {
+            totalMessages: 0,
+            userMessages: 0,
+            aiMessages: 0,
+            prismMessages: 0,
+            branches: 0
+          }
+        };
+      }).filter(conversation => {
+        // Only show conversations that have messages or are the current conversation
+        return conversation.stats.totalMessages > 0 || conversation.id === currentTreeId;
+      }).sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime());
 
       setConversations(conversationList);
     } catch (error) {

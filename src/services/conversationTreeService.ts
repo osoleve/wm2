@@ -216,6 +216,14 @@ class ConversationTreeService {
       }
     }
 
+    // Update title based on first user message
+    if (completeNode.role === 'user' && tree.metadata.totalNodes === 1) {
+      const title = completeNode.content.length > 50 
+        ? completeNode.content.substring(0, 50) + '...' 
+        : completeNode.content;
+      tree.title = title || 'New Conversation';
+    }
+
     this.saveTree(tree);
     return completeNode.id;
   }

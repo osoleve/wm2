@@ -197,7 +197,7 @@
   opacity: 0.9;
 }
 
-.clear-button,
+.new-chat-button,
 .history-button,
 .conversation-browser-button {
   background: var(--bg-input);
@@ -215,7 +215,7 @@
   gap: 6px;
 }
 
-.clear-button:hover:not(:disabled),
+.new-chat-button:hover,
 .history-button:hover,
 .conversation-browser-button:hover {
   background: var(--bg-tertiary);
@@ -224,10 +224,6 @@
   box-shadow: var(--glow-subtle), var(--shadow-glow-sage);
 }
 
-.clear-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .error-banner {
   background: linear-gradient(135deg, var(--error-color), var(--error-color));
@@ -621,7 +617,7 @@
     display: none; /* Hide to save space */
   }
   
-  .clear-button,
+  .new-chat-button,
   .history-button {
     padding: 0.375rem 0.75rem;
     font-size: 0.75rem;

@@ -35,6 +35,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   onSwitchToVersion
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatMessagesRef = useRef<HTMLDivElement>(null);
 
   const examplePrompts: string[] = [
     "How do we deal with food stamp fraud without harming the vulnerable?",
@@ -45,12 +46,53 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const isNearBottom = (): boolean => {
+    if (!chatMessagesRef.current) return true;
+    const { scrollTop, scrollHeight, clientHeight } = chatMessagesRef.current;
+    return scrollHeight - scrollTop - clientHeight < 100; // Within 100px of bottom
+  };
+
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length === 0) {
+      // Reset scroll position and force layout recalculation when switching to empty state
+      if (chatMessagesRef.current) {
+        chatMessagesRef.current.scrollTop = 0;
+        // Force reflow to ensure proper height calculation
+        chatMessagesRef.current.style.height = 'auto';
+        chatMessagesRef.current.offsetHeight; // Trigger reflow
+        chatMessagesRef.current.style.height = '';
+      }
+    } else if (messages.length > 0) {
+      // Only auto-scroll if user was already near the bottom or if the last message is from assistant
+      const lastMessage = messages[messages.length - 1];
+      const shouldScroll = lastMessage.role === 'assistant' || isNearBottom();
+      
+      if (shouldScroll) {
+        // Small delay to ensure DOM has updated
+        setTimeout(() => {
+          scrollToBottom();
+        }, 50);
+      }
+    }
   }, [messages]);
 
+  // Handle scrolling when loading state changes
+  useEffect(() => {
+    if (isLoading && messages.length > 0) {
+      // When loading starts, scroll to bottom if user was near bottom
+      if (isNearBottom()) {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100); // Slight delay to ensure typing indicator is rendered
+      }
+    }
+  }, [isLoading]);
+
   return (
-    <div className="chat-messages ambient-light">
+    <div 
+      ref={chatMessagesRef}
+      className={`chat-messages ambient-light ${messages.length === 0 ? 'empty' : ''}`}
+    >
       {messages.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-background">
@@ -85,36 +127,38 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
           </div>
         </div>
       ) : (
-        messages.map((message, index) => (
-          <Message
-            key={message.id || index}
-            message={message}
-            isUser={message.role === 'user'}
-            isLast={index === messages.length - 1}
-            onEdit={onEditMessage}
-            onRegenerate={onRegenerateMessage}
-            onCopy={onCopyMessage}
-            onNavigateBranch={onNavigateBranch}
-            getBranchInfo={getBranchInfo}
-            getMessageVersions={getMessageVersions}
-            onSwitchToVersion={onSwitchToVersion}
-            isPrismMode={message.isPrism || false}
-          />
-        ))
+        <>
+          {messages.map((message, index) => (
+            <Message
+              key={message.id || index}
+              message={message}
+              isUser={message.role === 'user'}
+              isLast={index === messages.length - 1}
+              onEdit={onEditMessage}
+              onRegenerate={onRegenerateMessage}
+              onCopy={onCopyMessage}
+              onNavigateBranch={onNavigateBranch}
+              getBranchInfo={getBranchInfo}
+              getMessageVersions={getMessageVersions}
+              onSwitchToVersion={onSwitchToVersion}
+              isPrismMode={message.isPrism || false}
+            />
+          ))}
+          
+          {isLoading && (
+            <div className="typing-indicator">
+              <div className="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <div className="typing-text"></div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </>
       )}
-      
-      {isLoading && (
-        <div className="typing-indicator">
-          <div className="typing-dots">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          <div className="typing-text"></div>
-        </div>
-      )}
-      
-      <div ref={messagesEndRef} />
     </div>
   );
 };

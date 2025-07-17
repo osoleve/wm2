@@ -17,7 +17,7 @@ const Chat: React.FC = () => {
     isLoading, 
     error, 
     sendMessage, 
-    clearChat, 
+    newChat, 
     isPrismEnabled, 
     togglePrism,
     editMessage,
@@ -239,11 +239,14 @@ const Chat: React.FC = () => {
           <ExportButton treeId={currentTreeId} />
           
           <button 
-            onClick={clearChat} 
-            className="clear-button"
-            disabled={messages.length === 0}
+            onClick={newChat} 
+            className="new-chat-button"
+            title="Start a new conversation"
           >
-            Clear Chat
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14m-7-7h14"/>
+            </svg>
+            New Chat
           </button>
         </div>
       </div>

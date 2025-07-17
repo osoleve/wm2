@@ -8,6 +8,20 @@
   background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
   scrollbar-width: thin;
   scrollbar-color: var(--border-light) transparent;
+  min-height: 0;
+  max-height: 100%; /* Constrain to available space */
+}
+
+/* Remove padding when showing empty state */
+.chat-messages.empty {
+  padding: 0;
+  overflow: hidden; /* No scrollbar for empty state */
+  height: 100%; /* Force height reset */
+  scrollbar-width: none; /* Hide scrollbar completely */
+}
+
+.chat-messages.empty::-webkit-scrollbar {
+  display: none; /* Hide scrollbar on webkit browsers */
 }
 
 /* Apply ambient effects to messages container */
@@ -48,72 +62,100 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: auto;
-  height: auto;
+  flex: 1;
+  width: 100%;
+  height: 100%;
   text-align: center;
   color: var(--text-muted);
+  position: relative;
+  overflow: hidden;
 }
 
 .empty-state-content {
   position: relative;
   z-index: 1;
-  padding: 2rem;
+  padding: 1rem;
+  max-height: 100%;
+  overflow-y: auto;
 }
 
 .empty-state-background {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   pointer-events: none;
+  overflow: hidden;
   width: 100%;
   height: 100%;
-  overflow: hidden;
 }
 
 .floating-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(40px);
-  opacity: 0.1;
-  animation: float 20s infinite ease-in-out;
+  display: none; /* Disable orbs to prevent scrollbar issues */
 }
-
+/* 
 .orb-1 {
-  width: 300px;
-  height: 300px;
+  width: min(200px, 25vw);
+  height: min(200px, 25vw);
   background: var(--gradient-sage);
-  top: 50px;
-  left: 50px;
+  top: 20%;
+  left: 20%;
   animation-delay: 0s;
 }
 
 .orb-2 {
-  width: 200px;
-  height: 200px;
+  width: min(150px, 20vw);
+  height: min(150px, 20vw);
   background: var(--gradient-amber);
-  bottom: 100px;
-  right: 150px;
+  bottom: 20%;
+  right: 20%;
   animation-delay: 7s;
 }
 
 .orb-3 {
-  width: 250px;
-  height: 250px;
+  width: min(180px, 23vw);
+  height: min(180px, 23vw);
   background: var(--gradient-sage);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   animation-delay: 7s;
-}
+  animation-name: float-centered;
+} */
 
 @keyframes float {
   0%, 100% {
     transform: translate(0, 0) scale(1);
   }
   33% {
-    transform: translate(30px, -30px) scale(1.1);
+    transform: translate(10px, -10px) scale(1);
   }
   66% {
-    transform: translate(-20px, 20px) scale(0.9);
+    transform: translate(-8px, 8px) scale(1);
+  }
+}
+
+@keyframes float-centered {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  33% {
+    transform: translate(calc(-50% + 10px), calc(-50% - 10px)) scale(1);
+  }
+  66% {
+    transform: translate(calc(-50% - 8px), calc(-50% + 8px)) scale(1);
+  }
+}
+
+@keyframes typingDotFloat {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-6px);
   }
 }
 
@@ -123,13 +165,14 @@
 }
 
 .empty-state h2 {
-  margin-bottom: 1rem;
+  margin: 0 0 0.75rem 0;
   color: var(--text-secondary);
-  font-size: 2rem;
-  font-weight: 500; /* Lighter for dark mode */
+  font-size: 1.5rem;
+  font-weight: 500;
 }
 
 .empty-state p {
+  margin: 0;
   color: var(--text-muted);
   font-size: 0.9375rem;
   line-height: 1.6;
@@ -138,17 +181,20 @@
 
 .tagline {
   color: var(--text-secondary);
-  font-size: 1rem;
-  margin: 1.5rem 0 2rem;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1rem;
   opacity: 0.9;
   font-style: italic;
 }
 
 .example-prompts {
-  margin-top: auto;
+  margin-top: 1rem;
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .prompts-label {
@@ -161,17 +207,17 @@
 }
 
 .example-prompt {
-  display: flex;
+  display: inline-block;
   width: auto;
-  max-width: 15rem;
-  margin: 1rem auto;
-  padding: 1rem 1rem;
+  max-width: 20rem;
+  margin: 0;
+  padding: 0.75rem 1.25rem;
   background: linear-gradient(135deg, var(--bg-input), var(--bg-secondary));
   border: 1px solid var(--border-light);
   border-radius: 1rem;
   color: var(--text-secondary);
-  font-size: 0.8rem;
-  text-align: left;
+  font-size: 0.875rem;
+  text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
@@ -196,10 +242,24 @@
   border-bottom-left-radius: 0.5rem;
   max-width: 200px;
   margin-bottom: 1rem;
+  min-height: 48px; /* Stable height to prevent layout shifts */
   box-shadow: 
     var(--shadow-medium),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
+  will-change: auto; /* Optimize for dynamic addition/removal */
+  animation: fadeInTyping 0.2s ease-out;
+}
+
+@keyframes fadeInTyping {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .typing-dots {

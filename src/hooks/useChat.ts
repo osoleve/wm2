@@ -198,7 +198,7 @@ export const useChat = () => {
     }
   }, [messages, isPrismEnabled, currentTreeId]);
 
-  const clearChat = useCallback(() => {
+  const newChat = useCallback(() => {
     // Create a new tree instead of clearing the current one
     const newTreeId = conversationTreeService.createNewTree();
     setMessages([]);
@@ -611,7 +611,7 @@ export const useChat = () => {
     error,
     isPrismEnabled,
     sendMessage,
-    clearChat,
+    newChat,
     togglePrism,
     editMessage,
     regenerateMessage,
