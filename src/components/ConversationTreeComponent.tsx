@@ -1,8 +1,53 @@
-// src/components/ConversationTreeBrowser.jsx
+// src/components/ConversationTreeBrowser.tsx
 import React, { useState, useEffect } from 'react';
 import './ConversationTreeBrowser.css';
 
-const ConversationTreeBrowser = ({ 
+interface TreeStats {
+  totalMessages: number;
+  userMessages: number;
+  aiMessages: number;
+  prismMessages: number;
+  branches: number;
+  maxDepth: number;
+  created: string;
+  lastModified: string;
+}
+
+interface TreeInfo {
+  id: string;
+  title: string;
+  created: string;
+  lastModified: string;
+  stats: TreeStats;
+}
+
+interface SearchMatch {
+  nodeId: string;
+  content: string;
+  role: string;
+  timestamp: number;
+}
+
+interface SearchResult {
+  treeId: string;
+  title: string;
+  matches: SearchMatch[];
+  lastModified: string;
+}
+
+interface ConversationTreeBrowserProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onLoadTree: (treeId: string) => void;
+  getAllTrees: () => TreeInfo[];
+  searchTrees: (query: string) => SearchResult[];
+  currentTreeId: string | null;
+  onExportTree: (treeId?: string) => void;
+  onImportTree: (file: File) => void;
+  onDeleteTree: (treeId: string) => boolean;
+}
+
+const ConversationTreeBrowser: React.FC<ConversationTreeBrowserProps> = ({ 
   isOpen, 
   onClose, 
   onLoadTree, 
@@ -13,10 +58,10 @@ const ConversationTreeBrowser = ({
   onImportTree,
   onDeleteTree
 }) => {
-  const [trees, setTrees] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState(null);
-  const [selectedTreeId, setSelectedTreeId] = useState(currentTreeId);
+  const [trees, setTrees] = useState<TreeInfo[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<SearchResult[] | null>(null);
+  const [_selectedTreeId, setSelectedTreeId] = useState<string | null>(currentTreeId);
 
   useEffect(() => {
     if (isOpen) {
@@ -24,14 +69,14 @@ const ConversationTreeBrowser = ({
     }
   }, [isOpen]);
 
-  const loadTrees = () => {
+  const loadTrees = (): void => {
     const allTrees = getAllTrees();
     setTrees(allTrees.sort((a, b) => 
-      new Date(b.lastModified) - new Date(a.lastModified)
+      new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime()
     ));
   };
 
-  const handleSearch = (query) => {
+  const handleSearch = (query: string): void => {
     setSearchQuery(query);
     if (query.trim()) {
       const results = searchTrees(query);
@@ -41,23 +86,23 @@ const ConversationTreeBrowser = ({
     }
   };
 
-  const handleLoadTree = (treeId) => {
+  const handleLoadTree = (treeId: string): void => {
     onLoadTree(treeId);
     onClose();
   };
 
-  const handleImport = (event) => {
-    const file = event.target.files[0];
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = event.target.files?.[0];
     if (file) {
       onImportTree(file);
       loadTrees();
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffMs = now - date;
+    const diffMs = now.getTime() - date.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
 

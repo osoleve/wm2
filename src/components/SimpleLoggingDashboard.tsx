@@ -1,6 +1,11 @@
 import React from 'react';
 
-const SimpleLoggingDashboard = ({ isOpen, onClose }) => {
+interface SimpleLoggingDashboardProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const SimpleLoggingDashboard: React.FC<SimpleLoggingDashboardProps> = ({ isOpen, onClose }) => {
   console.log('SimpleLoggingDashboard render, isOpen:', isOpen);
   
   if (!isOpen) return null;

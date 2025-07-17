@@ -3,11 +3,77 @@ import loggingService from '../services/loggingService';
 import SessionSummary from './SessionSummary';
 import './LoggingDashboard.css';
 
-const LoggingDashboard = ({ isOpen, onClose }) => {
-  const [sessions, setSessions] = useState([]);
-  const [selectedSession, setSelectedSession] = useState(null);
-  const [analytics, setAnalytics] = useState(null);
-  const [activeTab, setActiveTab] = useState('sessions');
+interface SessionData {
+  id: string;
+  startTime: string;
+  endTime: string | null;
+  messages: Array<{
+    id: string;
+    timestamp: string;
+    userMessage: {
+      role: 'user';
+      content: string;
+      timestamp: string;
+    };
+    aiResponse: {
+      role: 'assistant';
+      content: string;
+      timestamp: string;
+      model: string;
+      isPrism: boolean;
+      perspectives?: Array<{
+        perspective: string;
+        content: string;
+      }> | null;
+      synthesis?: string | null;
+    };
+    model: string;
+    isPrismMode: boolean;
+  }>;
+  modelsUsed: string[];
+  perspectivesUsed: string[];
+  totalMessages: number;
+  prismInteractions: number;
+  regularInteractions: number;
+}
+
+interface SessionSummaryData {
+  id: string;
+  startTime: string;
+  endTime: string | null;
+  duration: string;
+  totalMessages: number;
+  prismInteractions: number;
+  regularInteractions: number;
+  modelsUsed: string[];
+  perspectivesUsed: string[];
+  lastActivity: string;
+}
+
+interface Analytics {
+  totalSessions: number;
+  totalMessages: number;
+  totalPrismInteractions: number;
+  totalRegularInteractions: number;
+  prismUsageRate: string;
+  uniqueModelsUsed: number;
+  uniquePerspectivesUsed: number;
+  modelUsageStats: Record<string, number>;
+  perspectiveUsageStats: Record<string, number>;
+  mostUsedModel: string;
+  mostUsedPerspective: string;
+}
+
+interface LoggingDashboardProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const LoggingDashboard: React.FC<LoggingDashboardProps> = ({ isOpen, onClose }) => {
+  const [sessions, setSessions] = useState<SessionSummaryData[]>([]);
+  const [selectedSession, setSelectedSession] = useState<SessionData | null>(null);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [activeTab, setActiveTab] = useState<'sessions' | 'analytics'>('sessions');
 
   useEffect(() => {
     if (isOpen) {
@@ -15,7 +81,7 @@ const LoggingDashboard = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
-  const loadData = () => {
+  const loadData = (): void => {
     try {
       console.log('Loading logging data...');
       const sessionSummaries = loggingService.getAllSessionSummaries();
@@ -31,12 +97,12 @@ const LoggingDashboard = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleSessionSelect = (sessionId) => {
+  const handleSessionSelect = (sessionId: string): void => {
     const sessionDetails = loggingService.getSessionDetails(sessionId);
     setSelectedSession(sessionDetails);
   };
 
-  const handleSessionDelete = (sessionId) => {
+  const handleSessionDelete = (sessionId: string): void => {
     if (window.confirm('Are you sure you want to delete this session?')) {
       loggingService.deleteSession(sessionId);
       loadData();
@@ -46,11 +112,11 @@ const LoggingDashboard = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleSessionExport = (sessionId) => {
+  const handleSessionExport = (sessionId: string): void => {
     loggingService.exportSession(sessionId);
   };
 
-  const formatDate = (isoString) => {
+  const formatDate = (isoString: string): string => {
     return new Date(isoString).toLocaleString();
   };
 
@@ -104,7 +170,7 @@ const LoggingDashboard = ({ isOpen, onClose }) => {
                           onSelect={handleSessionSelect}
                           onDelete={handleSessionDelete}
                           onExport={handleSessionExport}
-                          isSelected={selectedSession && selectedSession.id === session.id}
+                          isSelected={selectedSession ? selectedSession.id === session.id : false}
                         />
                       ))}
                     </div>
@@ -328,7 +394,7 @@ const LoggingDashboard = ({ isOpen, onClose }) => {
           <div className="dashboard-content">
             <div style={{ padding: '20px', textAlign: 'center' }}>
               <p>Sorry, there was an error loading the logging dashboard.</p>
-              <p>Error: {error.message}</p>
+              <p>Error: {error instanceof Error ? error.message : 'Unknown error'}</p>
               <button onClick={onClose} style={{ padding: '10px 20px', marginTop: '10px' }}>
                 Close
               </button>

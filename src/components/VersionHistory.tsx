@@ -1,22 +1,42 @@
 import React, { useState } from 'react';
 import styles from './VersionHistory.module.css';
 
-export const VersionHistory = ({ messageId, versions, onSwitchToVersion, onClose }) => {
-  const [selectedVersion, setSelectedVersion] = useState(null);
+interface MessageVersion {
+  id: string;
+  content: string;
+  timestamp: number;
+  isCurrent?: boolean;
+}
 
-  const handleSwitchToVersion = (versionId) => {
-    if (versionId && !versions.find(v => v.id === versionId)?.isCurrent) {
+interface VersionHistoryProps {
+  messageId: string;
+  versions: MessageVersion[];
+  onSwitchToVersion: (messageId: string, versionId: string) => void;
+  onClose: () => void;
+}
+
+export const VersionHistory: React.FC<VersionHistoryProps> = ({ 
+  messageId, 
+  versions, 
+  onSwitchToVersion, 
+  onClose 
+}) => {
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
+
+  const handleSwitchToVersion = (versionId: string): void => {
+    const version = versions.find(v => v.id === versionId);
+    if (versionId && version && !version.isCurrent) {
       onSwitchToVersion(messageId, versionId);
     }
     onClose();
   };
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = (timestamp: number): string => {
     const date = new Date(timestamp);
     return date.toLocaleString();
   };
 
-  const getVersionPreview = (content) => {
+  const getVersionPreview = (content: string): string => {
     return content.length > 100 ? content.substring(0, 100) + '...' : content;
   };
 

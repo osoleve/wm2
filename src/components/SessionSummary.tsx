@@ -1,19 +1,46 @@
 import React from 'react';
 import './SessionSummary.css';
 
-const SessionSummary = ({ session, onSelect, onDelete, onExport, isSelected }) => {
+interface SessionSummaryData {
+  id: string;
+  startTime: string;
+  endTime: string | null;
+  duration: string;
+  totalMessages: number;
+  prismInteractions: number;
+  regularInteractions: number;
+  modelsUsed: string[];
+  perspectivesUsed: string[];
+  lastActivity: string;
+}
+
+interface SessionSummaryProps {
+  session: SessionSummaryData;
+  onSelect: (sessionId: string) => void;
+  onDelete: (sessionId: string) => void;
+  onExport: (sessionId: string) => void;
+  isSelected: boolean;
+}
+
+const SessionSummary: React.FC<SessionSummaryProps> = ({ 
+  session, 
+  onSelect, 
+  onDelete, 
+  onExport, 
+  isSelected 
+}) => {
   // Add null/undefined checks
   if (!session) {
     console.warn('SessionSummary: session prop is null or undefined');
     return null;
   }
 
-  const formatDate = (isoString) => {
+  const formatDate = (isoString: string): string => {
     if (!isoString) return 'Unknown';
     try {
       const date = new Date(isoString);
       const now = new Date();
-      const diffMs = now - date;
+      const diffMs = now.getTime() - date.getTime();
       const diffHours = diffMs / (1000 * 60 * 60);
       const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
@@ -33,7 +60,7 @@ const SessionSummary = ({ session, onSelect, onDelete, onExport, isSelected }) =
     }
   };
 
-  const getSessionTitle = () => {
+  const getSessionTitle = (): string => {
     const totalMessages = session.totalMessages || 0;
     const prismInteractions = session.prismInteractions || 0;
     
@@ -42,7 +69,7 @@ const SessionSummary = ({ session, onSelect, onDelete, onExport, isSelected }) =
     }
     
     const prismRatio = totalMessages > 0 ? 
-      (prismInteractions / totalMessages * 100).toFixed(0) : 0;
+      (prismInteractions / totalMessages * 100).toFixed(0) : '0';
     
     if (prismInteractions > 0) {
       return `Mixed Session (${prismRatio}% Prism)`;

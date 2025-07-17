@@ -1,19 +1,83 @@
-// src/components/TreeVisualizer.jsx
+// src/components/TreeVisualizer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import './TreeVisualizer.css';
 
-const TreeVisualizer = ({ 
+interface TreeNode {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  parentId: string | null;
+  children: string[];
+  timestamp: number;
+  depth: number;
+  isEdited?: boolean;
+  originalId?: string;
+  versions?: Array<{
+    id: string;
+    content: string;
+    timestamp: number;
+  }>;
+  isPrism?: boolean;
+  perspectives?: Array<{
+    perspective: string;
+    content: string;
+  }>;
+  synthesis?: string;
+}
+
+interface TreeLink {
+  source: string;
+  target: string;
+}
+
+interface TreeData {
+  nodes: TreeNode[];
+  links: TreeLink[];
+}
+
+interface PositionedNode extends TreeNode {
+  x: number;
+  y: number;
+  level: number;
+}
+
+interface ConversationTree {
+  id: string;
+  title: string;
+  created: string;
+  lastModified: string;
+  nodes: Map<string, TreeNode>;
+  rootNodes: string[];
+  metadata: {
+    totalNodes: number;
+    maxDepth: number;
+    branches: number;
+  };
+}
+
+interface ConversationTreeService {
+  getAllTrees(): Record<string, ConversationTree>;
+}
+
+interface TreeVisualizerProps {
+  treeId: string;
+  currentMessageId: string;
+  onNavigateToNode: (nodeId: string) => void;
+  conversationTreeService: ConversationTreeService;
+}
+
+const TreeVisualizer: React.FC<TreeVisualizerProps> = ({ 
   treeId, 
   currentMessageId,
   onNavigateToNode,
   conversationTreeService 
 }) => {
-  const [treeData, setTreeData] = useState(null);
-  const [selectedNodeId, setSelectedNodeId] = useState(currentMessageId);
-  const svgRef = useRef(null);
-  const [viewBox, setViewBox] = useState('0 0 800 600');
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [treeData, setTreeData] = useState<TreeData | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string>(currentMessageId);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [viewBox, setViewBox] = useState<string>('0 0 800 600');
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+  const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useEffect(() => {
     if (treeId) {
@@ -21,12 +85,12 @@ const TreeVisualizer = ({
     }
   }, [treeId]);
 
-  const loadTreeData = () => {
+  const loadTreeData = (): void => {
     const tree = conversationTreeService.getAllTrees()[treeId];
     if (tree) {
       // Convert tree structure to visualization format
       const nodes = Array.from(tree.nodes.values());
-      const links = [];
+      const links: TreeLink[] = [];
       
       nodes.forEach(node => {
         if (node.children) {
@@ -43,10 +107,10 @@ const TreeVisualizer = ({
     }
   };
 
-  const calculateNodePositions = (nodes, links) => {
+  const calculateNodePositions = (nodes: TreeNode[], _links: TreeLink[]): Map<string, PositionedNode> => {
     // Simple tree layout algorithm
-    const nodeMap = new Map();
-    const levels = new Map();
+    const nodeMap = new Map<string, PositionedNode>();
+    const levels = new Map<number, number>();
     
     // Initialize nodes
     nodes.forEach(node => {
@@ -59,7 +123,7 @@ const TreeVisualizer = ({
     });
 
     // Calculate levels (depth)
-    const calculateLevel = (nodeId, level = 0) => {
+    const calculateLevel = (nodeId: string, level: number = 0): void => {
       const node = nodeMap.get(nodeId);
       if (!node) return;
       
@@ -83,7 +147,7 @@ const TreeVisualizer = ({
     // Position nodes
     const levelWidth = 150;
     const nodeHeight = 80;
-    const levelCounts = new Map();
+    const levelCounts = new Map<number, number>();
 
     nodeMap.forEach(node => {
       const level = node.level;
@@ -99,17 +163,17 @@ const TreeVisualizer = ({
     return nodeMap;
   };
 
-  const handleNodeClick = (nodeId) => {
+  const handleNodeClick = (nodeId: string): void => {
     setSelectedNodeId(nodeId);
     onNavigateToNode(nodeId);
   };
 
-  const handlePanStart = (e) => {
+  const handlePanStart = (e: React.MouseEvent): void => {
     setIsPanning(true);
     setPanStart({ x: e.clientX, y: e.clientY });
   };
 
-  const handlePanMove = (e) => {
+  const handlePanMove = (e: React.MouseEvent): void => {
     if (!isPanning) return;
     
     const dx = e.clientX - panStart.x;
@@ -120,11 +184,11 @@ const TreeVisualizer = ({
     setPanStart({ x: e.clientX, y: e.clientY });
   };
 
-  const handlePanEnd = () => {
+  const handlePanEnd = (): void => {
     setIsPanning(false);
   };
 
-  const handleZoom = (delta) => {
+  const handleZoom = (delta: number): void => {
     const [x, y, width, height] = viewBox.split(' ').map(Number);
     const factor = delta > 0 ? 0.9 : 1.1;
     const newWidth = width * factor;

@@ -1,20 +1,99 @@
 // Local session logging service for chat conversations
+
+interface MessageEntry {
+  id: string;
+  timestamp: string;
+  userMessage: {
+    role: 'user';
+    content: string;
+    timestamp: string;
+  };
+  aiResponse: {
+    role: 'assistant';
+    content: string;
+    timestamp: string;
+    model: string;
+    isPrism: boolean;
+    perspectives?: Array<{
+      perspective: string;
+      content: string;
+    }> | null;
+    synthesis?: string | null;
+  };
+  model: string;
+  isPrismMode: boolean;
+}
+
+interface Session {
+  id: string;
+  startTime: string;
+  endTime: string | null;
+  messages: MessageEntry[];
+  modelsUsed: Set<string>;
+  perspectivesUsed: Set<string>;
+  totalMessages: number;
+  prismInteractions: number;
+  regularInteractions: number;
+}
+
+interface SerializedSession extends Omit<Session, 'modelsUsed' | 'perspectivesUsed'> {
+  modelsUsed: string[];
+  perspectivesUsed: string[];
+}
+
+interface SessionSummary {
+  id: string;
+  startTime: string;
+  endTime: string | null;
+  duration: string;
+  totalMessages: number;
+  prismInteractions: number;
+  regularInteractions: number;
+  modelsUsed: string[];
+  perspectivesUsed: string[];
+  lastActivity: string;
+}
+
+interface AIResponse {
+  content: string;
+  perspectives?: Array<{
+    perspective: string;
+    content: string;
+  }>;
+  synthesis?: string;
+}
+
+interface Analytics {
+  totalSessions: number;
+  totalMessages: number;
+  totalPrismInteractions: number;
+  totalRegularInteractions: number;
+  prismUsageRate: string;
+  uniqueModelsUsed: number;
+  uniquePerspectivesUsed: number;
+  modelUsageStats: Record<string, number>;
+  perspectiveUsageStats: Record<string, number>;
+  mostUsedModel: string;
+  mostUsedPerspective: string;
+}
+
 class LoggingService {
+  private storageKey: string = 'prism-chat-sessions';
+  private currentSessionId: string | null = null;
+
   constructor() {
-    this.storageKey = 'prism-chat-sessions';
-    this.currentSessionId = null;
     this.initializeSession();
   }
 
   // Generate a unique session ID
-  generateSessionId() {
+  generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   // Initialize a new session
-  initializeSession() {
+  initializeSession(): void {
     this.currentSessionId = this.generateSessionId();
-    const session = {
+    const session: Session = {
       id: this.currentSessionId,
       startTime: new Date().toISOString(),
       endTime: null,
@@ -31,7 +110,7 @@ class LoggingService {
   }
 
   // Log a message exchange
-  logMessage(userMessage, aiResponse, model, isPrismMode = false) {
+  logMessage(userMessage: string, aiResponse: AIResponse, model: string, isPrismMode: boolean = false): void {
     if (!this.currentSessionId) {
       this.initializeSession();
     }
@@ -39,7 +118,7 @@ class LoggingService {
     const session = this.getCurrentSession();
     if (!session) return;
 
-    const messageEntry = {
+    const messageEntry: MessageEntry = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
       timestamp: new Date().toISOString(),
       userMessage: {
@@ -79,7 +158,7 @@ class LoggingService {
     session.endTime = new Date().toISOString();
 
     // Convert Sets to Arrays for storage
-    const sessionToSave = {
+    const sessionToSave: SerializedSession = {
       ...session,
       modelsUsed: Array.from(session.modelsUsed),
       perspectivesUsed: Array.from(session.perspectivesUsed)
@@ -90,10 +169,10 @@ class LoggingService {
   }
 
   // Save session to localStorage
-  saveSession(session) {
+  saveSession(session: Session | SerializedSession): void {
     try {
       const sessions = this.getAllSessions();
-      sessions[session.id] = session;
+      sessions[session.id] = session as SerializedSession;
       localStorage.setItem(this.storageKey, JSON.stringify(sessions));
     } catch (error) {
       console.error('Error saving session:', error);
@@ -101,10 +180,10 @@ class LoggingService {
   }
 
   // Get current session
-  getCurrentSession() {
+  getCurrentSession(): Session | null {
     try {
       const sessions = this.getAllSessions();
-      const session = sessions[this.currentSessionId];
+      const session = sessions[this.currentSessionId || ''];
       
       if (session) {
         // Convert arrays back to Sets for internal use, with proper validation
@@ -128,13 +207,13 @@ class LoggingService {
   }
 
   // Get all sessions from localStorage
-  getAllSessions() {
+  getAllSessions(): Record<string, SerializedSession> {
     try {
       const stored = localStorage.getItem(this.storageKey);
       const sessions = stored ? JSON.parse(stored) : {};
       
       // Validate and clean up session data
-      const validSessions = {};
+      const validSessions: Record<string, SerializedSession> = {};
       Object.keys(sessions).forEach(sessionId => {
         const session = sessions[sessionId];
         if (session && typeof session === 'object') {
@@ -158,8 +237,10 @@ class LoggingService {
   }
 
   // Get session summary for display
-  getSessionSummary(sessionId = null) {
+  getSessionSummary(sessionId: string | null = null): SessionSummary | null {
     const targetSessionId = sessionId || this.currentSessionId;
+    if (!targetSessionId) return null;
+    
     const sessions = this.getAllSessions();
     const session = sessions[targetSessionId];
     
@@ -181,12 +262,12 @@ class LoggingService {
   }
 
   // Calculate session duration
-  calculateDuration(startTime, endTime) {
+  calculateDuration(startTime: string, endTime: string | null): string {
     if (!endTime) return 'Active';
     
     const start = new Date(startTime);
     const end = new Date(endTime);
-    const diffMs = end - start;
+    const diffMs = end.getTime() - start.getTime();
     
     const hours = Math.floor(diffMs / (1000 * 60 * 60));
     const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -202,28 +283,28 @@ class LoggingService {
   }
 
   // Get all session summaries sorted by most recent
-  getAllSessionSummaries() {
+  getAllSessionSummaries(): SessionSummary[] {
     const sessions = this.getAllSessions();
     return Object.values(sessions)
       .map(session => this.getSessionSummary(session.id))
-      .filter(summary => summary !== null)
-      .sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+      .filter((summary): summary is SessionSummary => summary !== null)
+      .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
   }
 
   // Get detailed session data
-  getSessionDetails(sessionId) {
+  getSessionDetails(sessionId: string): SerializedSession | null {
     const sessions = this.getAllSessions();
     return sessions[sessionId] || null;
   }
 
   // Clear current session (start fresh)
-  clearCurrentSession() {
+  clearCurrentSession(): void {
     this.initializeSession();
     console.log('🔄 Session cleared, new session started');
   }
 
   // Delete a specific session
-  deleteSession(sessionId) {
+  deleteSession(sessionId: string): boolean {
     try {
       const sessions = this.getAllSessions();
       if (sessions[sessionId]) {
@@ -240,9 +321,9 @@ class LoggingService {
   }
 
   // Export session data
-  exportSession(sessionId) {
+  exportSession(sessionId: string): void {
     const session = this.getSessionDetails(sessionId);
-    if (!session) return null;
+    if (!session) return;
 
     const exportData = {
       ...session,
@@ -267,7 +348,7 @@ class LoggingService {
   }
 
   // Get analytics data
-  getAnalytics() {
+  getAnalytics(): Analytics {
     const sessions = this.getAllSessions();
     const allSessions = Object.values(sessions);
     
@@ -277,8 +358,8 @@ class LoggingService {
     const totalRegularInteractions = allSessions.reduce((sum, s) => sum + (s.regularInteractions || 0), 0);
     
     // Get all unique models and perspectives used
-    const allModels = new Set();
-    const allPerspectives = new Set();
+    const allModels = new Set<string>();
+    const allPerspectives = new Set<string>();
     
     allSessions.forEach(session => {
       (session.modelsUsed || []).forEach(model => allModels.add(model));
@@ -286,8 +367,8 @@ class LoggingService {
     });
 
     // Calculate usage statistics
-    const modelUsageStats = {};
-    const perspectiveUsageStats = {};
+    const modelUsageStats: Record<string, number> = {};
+    const perspectiveUsageStats: Record<string, number> = {};
     
     allSessions.forEach(session => {
       (session.modelsUsed || []).forEach(model => {
@@ -303,7 +384,7 @@ class LoggingService {
       totalMessages,
       totalPrismInteractions,
       totalRegularInteractions,
-      prismUsageRate: totalMessages > 0 ? (totalPrismInteractions / totalMessages * 100).toFixed(1) : 0,
+      prismUsageRate: totalMessages > 0 ? (totalPrismInteractions / totalMessages * 100).toFixed(1) : '0',
       uniqueModelsUsed: allModels.size,
       uniquePerspectivesUsed: allPerspectives.size,
       modelUsageStats,

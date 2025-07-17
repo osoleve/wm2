@@ -36,14 +36,13 @@ const Message: React.FC<MessageProps> = ({
 }) => {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showVersionHistory, setShowVersionHistory] = useState<boolean>(false);
-  const [showControls, setShowControls] = useState<boolean>(false);
+  const [_showControls, setShowControls] = useState<boolean>(false);
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('synthesis');
   
   const branchInfo = getBranchInfo?.(message.id);
   const isPrismMessage = message.isPrism && message.perspectives;
   const messageVersions = getMessageVersions?.(message.id) || [];
-  const hasVersions = messageVersions.length > 1;
   
   // Show branch controls only when this message is a sibling branch (alternative response)
   // not when it's a branch point that has children
@@ -67,9 +66,6 @@ const Message: React.FC<MessageProps> = ({
     }
   };
 
-  const handleShowVersions = (): void => {
-    setShowVersionHistory(true);
-  };
 
   // Get the content to display based on active tab
   const getDisplayContent = (): string => {

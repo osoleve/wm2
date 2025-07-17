@@ -1,23 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './EditModal.module.css';
 
-export const EditModal = ({ originalContent, onSave, onCancel }) => {
-  const [content, setContent] = useState(originalContent);
-  const textareaRef = useRef(null);
+interface EditModalProps {
+  originalContent: string;
+  onSave: (content: string) => void;
+  onCancel: () => void;
+}
+
+export const EditModal: React.FC<EditModalProps> = ({ originalContent, onSave, onCancel }) => {
+  const [content, setContent] = useState<string>(originalContent);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     textareaRef.current?.focus();
     textareaRef.current?.select();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (content.trim()) {
       onSave(content.trim());
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter' && e.ctrlKey) {
       handleSubmit(e);
     }
