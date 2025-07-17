@@ -10,7 +10,8 @@
       "Bash(timeout 10 npm run dev:netlify)",
       "Bash(npm run:*)",
       "Bash(find:*)",
-      "Bash(npx depcheck:*)"
+      "Bash(npx depcheck:*)",
+      "Bash(npm test:*)"
     ],
     "deny": []
   }

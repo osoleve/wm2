@@ -59,29 +59,64 @@ Object.defineProperty(global, 'window', {
   }
 })
 
-// Comprehensive document mock
-const mockBody = {
-  appendChild: vi.fn(),
-  removeChild: vi.fn(),
+// Create a proper DOM environment for React Testing Library
+const createMockElement = (tagName: string) => {
+  const element = {
+    tagName: tagName.toUpperCase(),
+    setAttribute: vi.fn(),
+    getAttribute: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+    click: vi.fn(),
+    focus: vi.fn(),
+    blur: vi.fn(),
+    scrollIntoView: vi.fn(),
+    appendChild: vi.fn(),
+    removeChild: vi.fn(),
+    innerHTML: '',
+    textContent: '',
+    className: '',
+    id: '',
+    style: {},
+    href: '',
+    download: '',
+    children: [],
+    parentNode: null,
+    querySelector: vi.fn(),
+    querySelectorAll: vi.fn(() => []),
+    contains: vi.fn(() => false),
+    getBoundingClientRect: vi.fn(() => ({
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
+      width: 0,
+      height: 0
+    }))
+  }
+  return element
 }
 
+const mockBody = createMockElement('body')
+
+// Enhanced document mock for React Testing Library
 Object.defineProperty(global, 'document', {
   value: {
-    createElement: vi.fn((tagName: string) => {
-      const element = {
-        tagName: tagName.toUpperCase(),
-        setAttribute: vi.fn(),
-        getAttribute: vi.fn(),
-        style: {},
-        click: vi.fn(),
-        href: '',
-        download: '',
-        appendChild: vi.fn(),
-        removeChild: vi.fn(),
-      }
-      return element
-    }),
-    body: mockBody
+    createElement: vi.fn(createMockElement),
+    createTextNode: vi.fn((text: string) => ({ textContent: text, nodeValue: text })),
+    body: mockBody,
+    documentElement: createMockElement('html'),
+    getElementById: vi.fn(),
+    querySelector: vi.fn(),
+    querySelectorAll: vi.fn(() => []),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    createEvent: vi.fn(() => ({
+      initEvent: vi.fn(),
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn()
+    }))
   }
 })
 
