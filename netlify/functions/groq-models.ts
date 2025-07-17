@@ -1,10 +1,28 @@
-const { Groq } = require('groq-sdk');
+import Groq from 'groq-sdk';
+import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-exports.handler = async (event, context) => {
+interface Model {
+  id: string;
+  name: string;
+  context_length: number;
+  created?: number;
+}
+
+interface GroqModel {
+  id: string;
+  context_window?: number;
+  created?: number;
+}
+
+interface ModelsResponse {
+  data: GroqModel[];
+}
+
+export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -29,10 +47,10 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const models = await client.models.list();
+    const models: ModelsResponse = await client.models.list();
     
     // Filter and format GROQ models
-    const formattedModels = models.data.map(model => ({
+    const formattedModels: Model[] = models.data.map(model => ({
       id: model.id,
       name: model.id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       context_length: model.context_window || 8192,
@@ -55,7 +73,7 @@ exports.handler = async (event, context) => {
     console.error('GROQ Models Error:', error);
     
     // Return fallback models if API fails - with Kimi K2 as default
-    const fallbackModels = [
+    const fallbackModels: Model[] = [
       { id: 'moonshotai/kimi-k2', name: 'Kimi K2', context_length: 200000 },
       { id: 'llama3-70b-8192', name: 'Llama 3 70B', context_length: 8192 },
       { id: 'llama3-8b-8192', name: 'Llama 3 8B', context_length: 8192 },
@@ -73,7 +91,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ 
         data: fallbackModels,
         fallback: true,
-        error: error.message 
+        error: error instanceof Error ? error.message : 'Unknown error'
       }),
     };
   }

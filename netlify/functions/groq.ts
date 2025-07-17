@@ -1,16 +1,21 @@
-const OpenAI = require('openai');
+import Groq from 'groq-sdk';
+import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 
-const client = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
-  defaultHeaders: {
-    "HTTP-Referer": process.env.URL,
-    "X-Title": "Wittgenstein's Monster",
-  }
+const client = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
-exports.handler = async (event, context) => {
-  // Handle CORS preflight
+interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+interface ChatRequest {
+  messages: ChatMessage[];
+  model?: string;
+}
+
+export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -35,14 +40,12 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { messages, model = "openai/gpt-4.1" } = JSON.parse(event.body);
+    const { messages, model = "moonshotai/kimi-k2-instruct" }: ChatRequest = JSON.parse(event.body || '{}');
+    console.log('GROQ Incoming messages:', JSON.stringify(messages, null, 2));
+    console.log('GROQ Model:', model);
 
-    // Log the incoming messages for debugging
-    console.log('Incoming messages:', JSON.stringify(messages, null, 2));
-    console.log('Model:', model);
-
-    // Filter out custom properties that might cause issues
-    const cleanMessages = messages.map(msg => ({
+    // Filter out custom properties that GROQ doesn't support
+    const cleanMessages: ChatMessage[] = messages.map(msg => ({
       role: msg.role,
       content: msg.content
     }));
@@ -54,8 +57,7 @@ exports.handler = async (event, context) => {
       max_tokens: 1000,
     });
 
-    // Log the response for debugging
-    console.log('OpenRouter response:', JSON.stringify(completion.choices[0].message, null, 2));
+    console.log('GROQ response:', JSON.stringify(completion.choices[0].message, null, 2));
 
     return {
       statusCode: 200,
@@ -68,14 +70,17 @@ exports.handler = async (event, context) => {
       body: JSON.stringify(completion.choices[0].message),
     };
   } catch (error) {
-    console.error('Error:', error);
+    console.error('GROQ Error:', error);
     return {
       statusCode: 500,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({ error: 'Failed to get response', details: error.message }),
+      body: JSON.stringify({ 
+        error: 'Failed to get response from GROQ', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      }),
     };
   }
 };
