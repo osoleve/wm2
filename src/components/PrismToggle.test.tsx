@@ -273,11 +273,11 @@ describe('PrismToggle Component Logic Tests', () => {
 
       const prismIcon = getIconProps(true)
       expect(prismIcon.type).toBe('prism')
-      expect(prismIcon.paths).toHaveLength(2)
+      expect((prismIcon as any).paths).toHaveLength(2)
 
       const circleIcon = getIconProps(false)
       expect(circleIcon.type).toBe('circle')
-      expect(circleIcon.elements).toHaveLength(2)
+      expect((circleIcon as any).elements).toHaveLength(2)
     })
   })
 
