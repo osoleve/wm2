@@ -1,5 +1,5 @@
 // src/hooks/useChat.ts
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import chatService from '../services/chatService';
 import prismService from '../services/prismService';
@@ -352,37 +352,50 @@ export const useChat = () => {
     setMessages(branch);
   }, []);
 
+  // Memoize branch info calculations
+  const branchInfoCache = useMemo(() => {
+    const cache = new Map<string, BranchInfo>();
+    
+    messages.forEach(message => {
+      const branches = conversationTreeService.getBranches(message.id);
+      
+      if (branches.length === 0) {
+        // Check parent for branches
+        if (message.parentId) {
+          const parentBranches = conversationTreeService.getBranches(message.parentId);
+          if (parentBranches.length > 1) {
+            const currentIndex = parentBranches.findIndex(b => b.id === message.id);
+            cache.set(message.id, {
+              hasBranches: true,
+              branchCount: parentBranches.length,
+              currentBranchIndex: currentIndex,
+              siblings: parentBranches.map(b => b.id),
+              isSiblingBranch: true
+            });
+          } else {
+            cache.set(message.id, { hasBranches: false });
+          }
+        } else {
+          cache.set(message.id, { hasBranches: false });
+        }
+      } else {
+        cache.set(message.id, {
+          hasBranches: true,
+          branchCount: branches.length,
+          currentBranchIndex: 0,
+          siblings: branches.map(b => b.id),
+          isSiblingBranch: false
+        });
+      }
+    });
+    
+    return cache;
+  }, [messages]);
+
   // Get branch navigation info
   const getBranchInfo = useCallback((messageId: string): BranchInfo => {
-    const branches = conversationTreeService.getBranches(messageId);
-    
-    if (branches.length === 0) {
-      // Check parent for branches
-      const message = messages.find(m => m.id === messageId);
-      if (message && message.parentId) {
-        const parentBranches = conversationTreeService.getBranches(message.parentId);
-        if (parentBranches.length > 1) {
-          const currentIndex = parentBranches.findIndex(b => b.id === messageId);
-          return {
-            hasBranches: true,
-            branchCount: parentBranches.length,
-            currentBranchIndex: currentIndex,
-            siblings: parentBranches.map(b => b.id),
-            isSiblingBranch: true
-          };
-        }
-      }
-      return { hasBranches: false };
-    }
-
-    return {
-      hasBranches: true,
-      branchCount: branches.length,
-      currentBranchIndex: 0,
-      siblings: branches.map(b => b.id),
-      isSiblingBranch: false
-    };
-  }, [messages]);
+    return branchInfoCache.get(messageId) || { hasBranches: false };
+  }, [branchInfoCache]);
 
   // Load a different conversation tree
   const loadTree = useCallback((treeId: string) => {
@@ -410,8 +423,8 @@ export const useChat = () => {
     }
   }, []);
 
-  // Get all available trees
-  const getAllTrees = useCallback((): TreeInfo[] => {
+  // Memoize tree list computation
+  const allTrees = useMemo((): TreeInfo[] => {
     const trees = conversationTreeService.getAllTrees();
     return Object.values(trees).map(tree => ({
       id: tree.id,
@@ -420,7 +433,12 @@ export const useChat = () => {
       lastModified: tree.lastModified,
       stats: conversationTreeService.getTreeStats(tree.id)
     }));
-  }, []);
+  }, [currentTreeId]); // Re-compute when current tree changes
+
+  // Get all available trees
+  const getAllTrees = useCallback((): TreeInfo[] => {
+    return allTrees;
+  }, [allTrees]);
 
   // Search across all trees
   const searchTrees = useCallback((query: string): SearchResult[] => {

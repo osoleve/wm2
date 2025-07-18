@@ -224,7 +224,7 @@
 }
 
 .example-prompt:hover {
-  background: linear-gradient(135deg, var(--sage-light), var(--sage-muted));
+  /* background: linear-gradient(135deg, var(--sage-light), var(--sage-muted)); */
   border-color: var(--accent-color);
   color: var(--text-primary);
   transform: translateY(-2px);

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import Message from './Message';
 import { MessageWithPrism, Version, BranchInfo, PrismResponse } from '../types';
 import './ChatMessages.css';
@@ -36,11 +36,78 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
+  
+  // Virtual scrolling state
+  const [scrollTop, setScrollTop] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
+  
+  // Virtual scrolling constants
+  const ESTIMATED_MESSAGE_HEIGHT = 150; // Average message height
+  const BUFFER_SIZE = 5; // Number of messages to render outside viewport
+  const ENABLE_VIRTUAL_SCROLLING_THRESHOLD = 50; // Enable when > 50 messages
 
   const examplePrompts: string[] = [
     "How do we deal with food stamp fraud without harming the vulnerable?",
     "What are the implications of LLMs on entrenched interests in the US?",
   ];
+
+  // Determine if virtual scrolling should be enabled
+  const useVirtualScrolling = useMemo(() => {
+    return messages.length > ENABLE_VIRTUAL_SCROLLING_THRESHOLD;
+  }, [messages.length]);
+
+  // Calculate visible range for virtual scrolling
+  const visibleRange = useMemo(() => {
+    if (!useVirtualScrolling) {
+      return { start: 0, end: messages.length };
+    }
+
+    const startIndex = Math.max(0, Math.floor(scrollTop / ESTIMATED_MESSAGE_HEIGHT) - BUFFER_SIZE);
+    const endIndex = Math.min(
+      messages.length,
+      Math.ceil((scrollTop + containerHeight) / ESTIMATED_MESSAGE_HEIGHT) + BUFFER_SIZE
+    );
+
+    return { start: startIndex, end: endIndex };
+  }, [useVirtualScrolling, scrollTop, containerHeight, messages.length]);
+
+  // Calculate total height for virtual scrolling
+  const totalHeight = useMemo(() => {
+    return useVirtualScrolling ? messages.length * ESTIMATED_MESSAGE_HEIGHT : 0;
+  }, [useVirtualScrolling, messages.length]);
+
+  // Get visible messages
+  const visibleMessages = useMemo(() => {
+    if (!useVirtualScrolling) {
+      return messages.map((message, index) => ({ message, index }));
+    }
+
+    return messages
+      .slice(visibleRange.start, visibleRange.end)
+      .map((message, relativeIndex) => ({
+        message,
+        index: visibleRange.start + relativeIndex
+      }));
+  }, [messages, useVirtualScrolling, visibleRange]);
+
+  // Handle scroll events for virtual scrolling
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    setScrollTop(target.scrollTop);
+  }, []);
+
+  // Update container height
+  useEffect(() => {
+    const updateHeight = () => {
+      if (chatMessagesRef.current) {
+        setContainerHeight(chatMessagesRef.current.clientHeight);
+      }
+    };
+
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
 
   const scrollToBottom = (): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -92,6 +159,13 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
     <div 
       ref={chatMessagesRef}
       className={`chat-messages ambient-light ${messages.length === 0 ? 'empty' : ''}`}
+      onScroll={useVirtualScrolling ? handleScroll : undefined}
+      style={{
+        ...(useVirtualScrolling && {
+          overflowY: 'auto',
+          position: 'relative'
+        })
+      }}
     >
       {messages.length === 0 ? (
         <div className="empty-state">
@@ -128,22 +202,63 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
         </div>
       ) : (
         <>
-          {messages.map((message, index) => (
-            <Message
-              key={message.id || index}
-              message={message}
-              isUser={message.role === 'user'}
-              isLast={index === messages.length - 1}
-              onEdit={onEditMessage}
-              onRegenerate={onRegenerateMessage}
-              onCopy={onCopyMessage}
-              onNavigateBranch={onNavigateBranch}
-              getBranchInfo={getBranchInfo}
-              getMessageVersions={getMessageVersions}
-              onSwitchToVersion={onSwitchToVersion}
-              isPrismMode={message.isPrism || false}
-            />
-          ))}
+          {useVirtualScrolling && (
+            // Virtual scrolling container
+            <div style={{ height: totalHeight, position: 'relative' }}>
+              {/* Spacer for items before visible range */}
+              <div style={{ height: visibleRange.start * ESTIMATED_MESSAGE_HEIGHT }} />
+              
+              {/* Render visible messages */}
+              {visibleMessages.map(({ message, index }) => (
+                <div
+                  key={message.id || index}
+                  style={{
+                    position: 'relative',
+                    minHeight: ESTIMATED_MESSAGE_HEIGHT
+                  }}
+                >
+                  <Message
+                    message={message}
+                    isUser={message.role === 'user'}
+                    isLast={index === messages.length - 1}
+                    onEdit={onEditMessage}
+                    onRegenerate={onRegenerateMessage}
+                    onCopy={onCopyMessage}
+                    onNavigateBranch={onNavigateBranch}
+                    getBranchInfo={getBranchInfo}
+                    getMessageVersions={getMessageVersions}
+                    onSwitchToVersion={onSwitchToVersion}
+                    isPrismMode={message.isPrism || false}
+                  />
+                </div>
+              ))}
+              
+              {/* Spacer for items after visible range */}
+              <div style={{ height: (messages.length - visibleRange.end) * ESTIMATED_MESSAGE_HEIGHT }} />
+            </div>
+          )}
+          
+          {!useVirtualScrolling && (
+            // Regular rendering for smaller message lists
+            <>
+              {messages.map((message, index) => (
+                <Message
+                  key={message.id || index}
+                  message={message}
+                  isUser={message.role === 'user'}
+                  isLast={index === messages.length - 1}
+                  onEdit={onEditMessage}
+                  onRegenerate={onRegenerateMessage}
+                  onCopy={onCopyMessage}
+                  onNavigateBranch={onNavigateBranch}
+                  getBranchInfo={getBranchInfo}
+                  getMessageVersions={getMessageVersions}
+                  onSwitchToVersion={onSwitchToVersion}
+                  isPrismMode={message.isPrism || false}
+                />
+              ))}
+            </>
+          )}
           
           {isLoading && (
             <div className="typing-indicator">

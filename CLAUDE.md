@@ -122,7 +122,9 @@ npm test -- --grep "should handle"
 - **Node Structure**: Each message is a node with parent/child relationships
 - **Branch Creation**: Editing any message creates a new branch from that point
 - **Path Tracking**: Active conversation path maintained for current view
-- **Persistence**: Entire tree serialized to localStorage automatically
+- **Persistence**: Entire tree serialized to localStorage with Map ↔ Array conversion
+- **Multiple Conversations**: Each conversation is a separate tree, browsable via ConversationBrowser
+- **Data Integrity**: Critical to avoid cache pollution during save/load cycles (use fresh localStorage reads)
 
 ## Component Architecture
 
@@ -136,17 +138,21 @@ App.tsx
     ├── ChatInput.tsx (Input with model/provider selection)
     ├── PrismToggle.tsx (Enable/disable multi-perspective mode)
     ├── SystemPromptToggle.tsx (System prompt visibility)
-    └── BranchNavigation.tsx (Tree navigation controls)
+    ├── BranchNavigation.tsx (Tree navigation controls)
+    ├── ConversationBrowser.tsx (History browser and conversation management)
+    └── LoggingDashboard.tsx (Session analytics and export)
 ```
 
 ## Critical Implementation Details
 
 ### Message Tree System (Core Data Structure)
 - **useChat.ts** manages conversation state using Map data structure
+- **conversationTreeService.ts** handles persistence, serialization, and tree operations
 - Each message has UUID, parent/child relationships, version history
 - Branching: editing any message creates new conversation path
 - Tree navigation allows switching between conversation branches
-- Automatic localStorage persistence of entire conversation tree
+- **CRITICAL**: Map ↔ Array serialization for localStorage - avoid cache pollution between save/load operations
+- Multiple conversation trees stored simultaneously with tree switching capability
 
 ### Prism Mode Pipeline (Unique Feature)
 1. **prismService.ts**: AI selects 5-8 relevant theoretical perspectives 
@@ -164,9 +170,11 @@ App.tsx
 ## Key Files to Understand
 
 - `src/hooks/useChat.ts` - **Central state management** and tree operations
+- `src/services/conversationTreeService.ts` - **Conversation persistence** and tree data structure management (critical for localStorage)
 - `src/services/chatService.ts` - **API integration** with error handling and provider switching
 - `src/services/prismService.ts` - **Multi-perspective analysis** workflow and AI perspective selection
 - `src/components/ChatMessages.tsx` - **Tree traversal** and message rendering logic
+- `src/components/ConversationBrowser.tsx` - **Conversation history** browser and management
 - `public/prism/` - **498 theoretical perspective** files (read-only, never modify)
 - `netlify/functions/` - **API proxy functions** for OpenRouter and GROQ
 
@@ -209,3 +217,10 @@ App.tsx
 - **Mobile-first**: Responsive design from 320px to 4K
 - **60fps animations** with smooth transitions and glass morphism effects
 - **Map-based lookups** for O(1) message retrieval in conversation trees
+
+### localStorage Data Persistence (Recently Fixed)
+- **ConversationTreeService** manages all localStorage operations
+- **Map serialization**: Trees stored as arrays in localStorage, converted to Maps on load
+- **No caching**: Fresh localStorage reads prevent data corruption between save/load cycles
+- **Multiple trees**: Each conversation is a separate tree with unique UUID
+- **Data integrity**: Critical to avoid mutating cached tree objects during operations

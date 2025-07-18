@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { EditModal } from './EditModal';
 import { BranchNavigation } from './BranchNavigation';
 import { VersionHistory } from './VersionHistory';
@@ -186,4 +186,34 @@ const Message: React.FC<MessageProps> = ({
   );
 };
 
-export default Message;
+// Custom comparison function for React.memo
+const arePropsEqual = (prevProps: MessageProps, nextProps: MessageProps): boolean => {
+  // Check if message content has changed
+  if (prevProps.message.id !== nextProps.message.id) return false;
+  if (prevProps.message.content !== nextProps.message.content) return false;
+  if (prevProps.message.timestamp !== nextProps.message.timestamp) return false;
+  if (prevProps.message.isEdited !== nextProps.message.isEdited) return false;
+  
+  // Check prism-specific properties
+  if (prevProps.message.isPrism !== nextProps.message.isPrism) return false;
+  if (prevProps.message.synthesis !== nextProps.message.synthesis) return false;
+  
+  // Compare perspectives array (shallow comparison for performance)
+  const prevPerspectives = prevProps.message.perspectives;
+  const nextPerspectives = nextProps.message.perspectives;
+  if (prevPerspectives?.length !== nextPerspectives?.length) return false;
+  if (prevPerspectives && nextPerspectives) {
+    for (let i = 0; i < prevPerspectives.length; i++) {
+      if (prevPerspectives[i].perspective !== nextPerspectives[i].perspective) return false;
+      if (prevPerspectives[i].content !== nextPerspectives[i].content) return false;
+    }
+  }
+  
+  // Check other relevant props
+  if (prevProps.isUser !== nextProps.isUser) return false;
+  
+  // Functions are assumed to be stable (wrapped in useCallback)
+  return true;
+};
+
+export default memo(Message, arePropsEqual);

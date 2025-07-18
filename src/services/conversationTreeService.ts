@@ -82,6 +82,9 @@ interface ExportData extends Omit<ConversationTree, 'nodes'> {
 class ConversationTreeService {
   private storageKey = 'prism-conversation-trees';
   private currentTreeId: string | null = null;
+  private pendingSaves = new Map<string, ConversationTree>();
+  private saveTimeoutId: number | null = null;
+  private readonly SAVE_DEBOUNCE_MS = 500;
 
   constructor() {
     this.initialize();
@@ -119,24 +122,20 @@ class ConversationTreeService {
     };
     
     this.currentTreeId = treeId;
-    this.saveTree(tree);
+    // Force immediate save for new tree creation (critical operation)
+    this.forceSave(tree);
     return treeId;
   }
 
-  // Save tree to localStorage
+  // Queue tree for debounced save
   private saveTree(tree: ConversationTree): void {
-    // Get fresh trees to avoid mutating cached data
-    const stored = localStorage.getItem(this.storageKey);
-    const trees = stored ? JSON.parse(stored) : {};
-    
-    // Ensure tree.nodes is a Map before serializing
+    // Ensure tree.nodes is a Map before queuing
     let nodesMap: Map<string, TreeNode>;
     if (tree.nodes instanceof Map) {
       nodesMap = tree.nodes;
     } else if (Array.isArray(tree.nodes)) {
       nodesMap = new Map(tree.nodes);
     } else if (tree.nodes && typeof tree.nodes === 'object') {
-      // Handle case where nodes is an object (could be empty {})
       const entries = Object.entries(tree.nodes) as [string, TreeNode][];
       console.log(`Converting object with ${entries.length} entries to Map for tree ${tree.id}`);
       nodesMap = new Map(entries);
@@ -147,17 +146,81 @@ class ConversationTreeService {
     
     // Update the tree's actual nodes reference to be the Map
     tree.nodes = nodesMap;
+    tree.lastModified = new Date().toISOString();
     
-    // Convert Map to array for serialization
-    const serializedTree = {
-      ...tree,
-      nodes: Array.from(nodesMap.entries()),
-      lastModified: new Date().toISOString()
-    };
+    // Add to pending saves
+    this.pendingSaves.set(tree.id, tree);
     
-    console.log(`SAVING: Tree ${tree.id} with ${nodesMap.size} nodes -> localStorage array length: ${serializedTree.nodes.length}`);
-    trees[tree.id] = serializedTree as any;
-    localStorage.setItem(this.storageKey, JSON.stringify(trees));
+    // Debounce the actual save operation
+    this.debouncedSave();
+  }
+
+  // Debounced save implementation
+  private debouncedSave(): void {
+    if (this.saveTimeoutId !== null) {
+      clearTimeout(this.saveTimeoutId);
+    }
+    
+    this.saveTimeoutId = window.setTimeout(() => {
+      this.flushPendingSaves();
+      this.saveTimeoutId = null;
+    }, this.SAVE_DEBOUNCE_MS);
+  }
+
+  // Flush all pending saves to localStorage
+  private flushPendingSaves(): void {
+    if (this.pendingSaves.size === 0) return;
+
+    try {
+      // Use requestIdleCallback for non-blocking save when available
+      const saveOperation = () => {
+        // Get fresh trees to avoid mutating cached data
+        const stored = localStorage.getItem(this.storageKey);
+        const trees = stored ? JSON.parse(stored) : {};
+        
+        // Batch update all pending trees
+        this.pendingSaves.forEach((tree, treeId) => {
+          const serializedTree = {
+            ...tree,
+            nodes: Array.from(tree.nodes.entries())
+          };
+          
+          console.log(`BATCHED SAVE: Tree ${treeId} with ${tree.nodes.size} nodes`);
+          trees[treeId] = serializedTree as any;
+        });
+        
+        // Single localStorage write for all batched updates
+        localStorage.setItem(this.storageKey, JSON.stringify(trees));
+        console.log(`FLUSHED: ${this.pendingSaves.size} trees to localStorage`);
+        
+        // Clear pending saves
+        this.pendingSaves.clear();
+      };
+
+      // Use requestIdleCallback if available, otherwise immediate execution
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(saveOperation, { timeout: 1000 });
+      } else {
+        saveOperation();
+      }
+    } catch (error) {
+      console.error('Error flushing pending saves:', error);
+      this.pendingSaves.clear();
+    }
+  }
+
+  // Force immediate save (for critical operations)
+  private forceSave(tree?: ConversationTree): void {
+    if (tree) {
+      this.pendingSaves.set(tree.id, tree);
+    }
+    
+    if (this.saveTimeoutId !== null) {
+      clearTimeout(this.saveTimeoutId);
+      this.saveTimeoutId = null;
+    }
+    
+    this.flushPendingSaves();
   }
 
   // Get all trees from localStorage
@@ -465,7 +528,18 @@ class ConversationTreeService {
     const trees = this.getAllTrees();
     if (trees[treeId]) {
       delete trees[treeId];
-      localStorage.setItem(this.storageKey, JSON.stringify(trees));
+      
+      // Force immediate save for deletion
+      const allTrees = Object.fromEntries(
+        Object.entries(trees).map(([id, t]) => [
+          id,
+          {
+            ...t,
+            nodes: Array.from(t.nodes instanceof Map ? t.nodes : new Map(t.nodes))
+          }
+        ])
+      );
+      localStorage.setItem(this.storageKey, JSON.stringify(allTrees));
       
       // If we deleted the current tree, switch to another
       if (this.currentTreeId === treeId) {
