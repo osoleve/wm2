@@ -216,12 +216,19 @@ const arePropsEqual = (prevProps: MessageProps, nextProps: MessageProps): boolea
   const prevBranch = prevProps.getBranchInfo?.(prevProps.message.id);
   const nextBranch = nextProps.getBranchInfo?.(nextProps.message.id);
 
-  const branchChanged = (prev: BranchInfo | null | undefined, next: BranchInfo | null | undefined): boolean => {
+  const branchChanged = (
+    prev: BranchInfo | null | undefined,
+    next: BranchInfo | null | undefined
+  ): boolean => {
     if (!prev && !next) return false;
     if (!prev || !next) return true;
-    return prev.hasBranches !== next.hasBranches ||
+    if (prev.hasBranches !== next.hasBranches) return true;
+    if (!prev.hasBranches && !next.hasBranches) return false;
+    if (!prev.hasBranches || !next.hasBranches) return true;
+    return (
       prev.branchCount !== next.branchCount ||
-      prev.currentBranchIndex !== next.currentBranchIndex;
+      prev.currentBranchIndex !== next.currentBranchIndex
+    );
   };
 
   if (branchChanged(prevBranch, nextBranch)) return false;
