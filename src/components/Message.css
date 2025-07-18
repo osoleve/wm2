@@ -762,6 +762,7 @@
 /* Adjust message layout for vertical tabs */
 .message-prism {
   align-items: flex-start;
+  position: relative;
 }
 
 .message-prism .message-content {
@@ -819,13 +820,31 @@
     margin-bottom: 0.5rem;
   }
   
-  /* Adjust vertical tabs for mobile */
+  /* Slide-reveal Prism tabs */
+  .message-prism {
+    overflow-x: auto;
+    padding-right: 3rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .message-prism::-webkit-scrollbar {
+    display: none;
+  }
+
   .prism-tabs-vertical {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
     gap: 4px;
     padding: 3px;
-    margin-left: 0.25rem;
+    width: 3rem;
+    transform: translateX(30%);
+    margin-left: 0;
+    z-index: 1;
   }
-  
+
   .prism-tab-vertical {
     padding: 3px 6px;
     font-size: 8px;
@@ -833,11 +852,12 @@
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
   }
-  
+
   .message-prism .message-content {
     max-width: 85%;
+    flex-shrink: 0;
   }
-  
+
   .perspective-count {
     display: none; /* Hide on mobile to save space */
   }
