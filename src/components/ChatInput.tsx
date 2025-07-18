@@ -36,6 +36,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
   provider,
   setProvider: _setProvider // unused
 }) => {
+  // Check if we're in development mode
+  const isDevelopment = import.meta.env.DEV;
   const [message, setMessage] = useState<string>('');
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [models, setModels] = useState<Model[]>([]);
@@ -145,29 +147,31 @@ const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div className={`chat-input-container ${isPrismEnabled ? 'prism-enabled' : ''} ${isFocused ? 'focused' : ''}`}>
       <div className="input-header">
-        <div className="model-selector">
-          <label className="model-label">
-            <span className="model-label-text">Model:</span>
-            <span className="model-label-mobile">{isPrismEnabled ? 'Prism:' : 'Model:'}</span>
-          </label>
-          <select 
-            value={selectedModel} 
-            onChange={(e) => onModelChange(e.target.value)}
-            className="model-select main-model-select"
-            disabled={modelsLoading || isLoading}
-          >
-            {modelsLoading ? (
-              <option>Loading models...</option>
-            ) : (
-              models.map(model => (
-                <option key={model.id} value={model.id}>
-                  {model.name}
-                </option>
-              ))
-            )}
-          </select>
-        </div>
-        {isPrismEnabled && (
+        {isDevelopment && (
+          <div className="model-selector">
+            <label className="model-label">
+              <span className="model-label-text">Model:</span>
+              <span className="model-label-mobile">{isPrismEnabled ? 'Prism:' : 'Model:'}</span>
+            </label>
+            <select 
+              value={selectedModel} 
+              onChange={(e) => onModelChange(e.target.value)}
+              className="model-select main-model-select"
+              disabled={modelsLoading || isLoading}
+            >
+              {modelsLoading ? (
+                <option>Loading models...</option>
+              ) : (
+                models.map(model => (
+                  <option key={model.id} value={model.id}>
+                    {model.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+        )}
+        {isDevelopment && isPrismEnabled && (
           <div className="model-selector prism-model-selector">
             <label className="model-label">
               <span className="model-label-text">Prism Model:</span>
