@@ -1,37 +1,18 @@
 /* ConversationBrowser.css */
+/* Use shared modal-overlay-base class in JSX */
 .conversation-browser-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
+  /* Additional specific styles only */
 }
 
+/* Use shared modal-container-base class in JSX */
 .conversation-browser-panel {
-  background: var(--surface-color);
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  width: 100%;
   max-width: 800px;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  background: var(--surface-color);
 }
 
+/* Use shared modal-header-base class in JSX */
 .conversation-browser-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 24px;
-  border-bottom: 1px solid var(--border-color);
   background: var(--surface-color);
 }
 
@@ -41,16 +22,7 @@
   color: var(--text-color);
 }
 
-.close-button {
-  background: none;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  color: var(--text-muted);
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
+/* Use shared btn-close class in JSX */
 .close-button:hover {
   background: var(--hover-color);
   color: var(--text-color);
@@ -101,22 +73,18 @@
   font-size: 1.1rem;
 }
 
+/* Use shared btn-danger class in JSX */
 .delete-all-button {
   padding: 8px 12px;
-  border: 1px solid #dc3545;
-  border-radius: 6px;
-  background: transparent;
-  color: #dc3545;
-  cursor: pointer;
   font-size: 0.85rem;
-  transition: all 0.2s ease;
+  background: transparent;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
 .delete-all-button:hover {
-  background: #dc3545;
+  background: var(--error-color);
   color: white;
   transform: translateY(-1px);
 }
@@ -174,17 +142,13 @@
   gap: 8px;
 }
 
+/* Use shared btn-action class in JSX */
 .export-button,
 .load-button,
 .delete-button {
   padding: 6px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
   background: var(--surface-color);
-  color: var(--text-color);
-  cursor: pointer;
   font-size: 0.85rem;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -198,9 +162,9 @@
 }
 
 .delete-button:hover {
-  background: #dc3545;
+  background: var(--error-color);
   color: white;
-  border-color: #dc3545;
+  border-color: var(--error-color);
 }
 
 .load-button:disabled {
@@ -311,39 +275,21 @@
 }
 
 /* Export Modal */
+/* Use shared modal-overlay-base class in JSX */
 .export-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 1100;
 }
 
+/* Use shared modal-container-base class in JSX */
 .export-modal {
-  background: var(--surface-color);
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  width: 100%;
   max-width: 600px;
-  max-height: 80vh;
   min-height: 400px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  background: var(--surface-color);
 }
 
+/* Use shared modal-header-base class in JSX */
 .export-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border-color);
 }
 
 .export-modal-header h3 {
@@ -446,14 +392,10 @@
   margin-top: auto;
 }
 
+/* Use shared btn-action class in JSX */
 .cancel-button {
   padding: 8px 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
   background: var(--surface-color);
-  color: var(--text-color);
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .cancel-button:hover {
@@ -494,11 +436,6 @@
   height: 40px;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 
 /* Mobile Responsive */

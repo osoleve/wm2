@@ -105,6 +105,13 @@
   --success-color: #859E84;         /* Deeper sage-based success */
   --warning-color: #C09C5F;        /* Richer amber-based warning */
   --error-color: #B06B66;           /* Warmer red with sage undertone */
+
+  /* Additional frequently used colors to reduce hardcoding */
+  --overlay-dark: rgba(0, 0, 0, 0.7);
+  --overlay-medium: rgba(0, 0, 0, 0.5);
+  --overlay-light: rgba(0, 0, 0, 0.8);
+  --sage-alpha-15: rgba(143, 166, 142, 0.15);
+  --amber-alpha-15: rgba(230, 184, 125, 0.15);
 }
 
 /* Glass Morphism Base Components */
@@ -121,6 +128,138 @@
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Shared Modal Base Classes */
+.modal-overlay-base {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--overlay-dark);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-container-base {
+  background: linear-gradient(135deg, var(--bg-input), var(--bg-secondary));
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 90%;
+  max-height: 80vh;
+}
+
+.modal-header-base {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header-base h2,
+.modal-header-base h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Shared Button Base Classes */
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-radius: 6px;
+  padding: 8px;
+  transition: all 0.2s ease;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.btn-action {
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 450;
+  font-family: inherit;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-action:hover:not(:disabled) {
+  border-color: var(--accent-color);
+  background: var(--bg-input);
+  transform: translateY(-0.5px);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--error-color), #9A5B5B);
+  border-color: var(--error-color);
+  color: var(--text-secondary);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #C47671, var(--error-color));
+  box-shadow: 0 4px 16px rgba(176, 107, 102, 0.3);
+}
+
+/* Shared Animation Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Fade utility classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.4s ease-out;
 }
 
 /* Iridescent borders for special elements */

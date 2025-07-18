@@ -1,39 +1,22 @@
 /* Logging Dashboard Styles */
+/* Use shared modal-overlay-base class in JSX alongside this class */
 .logging-dashboard-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--overlay-light);
   backdrop-filter: blur(10px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
 }
 
+/* Use shared modal-container-base class in JSX alongside this class */
 .logging-dashboard {
   background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
   width: 95%;
   max-width: 1200px;
   height: 90vh;
   max-height: 800px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
+/* Use shared modal-header-base class in JSX alongside this class */
 .dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border-color);
   background: var(--bg-secondary);
 }
 
@@ -44,9 +27,8 @@
   font-weight: 600;
 }
 
+/* Use shared btn-close class in JSX */
 .close-button {
-  background: none;
-  border: none;
   font-size: 24px;
   color: var(--text-secondary);
   cursor: pointer;
