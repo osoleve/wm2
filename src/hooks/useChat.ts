@@ -1,5 +1,5 @@
 // src/hooks/useChat.ts
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import chatService from '../services/chatService';
 import prismService from '../services/prismService';
@@ -65,7 +65,13 @@ export const useChat = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isPrismEnabled, setIsPrismEnabled] = useState<boolean>(false);
+  const isPrismEnabledRef = useRef<boolean>(false);
   const [currentTreeId, setCurrentTreeId] = useState<string | null>(null);
+
+  // Keep ref in sync with state for immediate access in callbacks
+  useEffect(() => {
+    isPrismEnabledRef.current = isPrismEnabled;
+  }, [isPrismEnabled]);
 
   // Initialize from saved tree on mount
   useEffect(() => {
@@ -143,7 +149,7 @@ export const useChat = () => {
 
       let aiResponse: ChatMessage;
 
-      if (isPrismEnabled) {
+      if (isPrismEnabledRef.current) {
         const prismResponse = await prismService.generateCompletePrismResponse(
           content,
           conversationHistory,
@@ -201,7 +207,7 @@ export const useChat = () => {
       
       // Log the message exchange
       try {
-        loggingService.logMessage(content, aiResponse, model, isPrismEnabled);
+        loggingService.logMessage(content, aiResponse, model, isPrismEnabledRef.current);
       } catch (loggingError) {
         console.error('Logging error (non-fatal):', loggingError);
       }
@@ -211,7 +217,7 @@ export const useChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isPrismEnabled, currentTreeId]);
+  }, [messages, currentTreeId]);
 
   const newChat = useCallback(() => {
     // Create a new tree instead of clearing the current one
@@ -223,7 +229,11 @@ export const useChat = () => {
   }, []);
 
   const togglePrism = useCallback(() => {
-    setIsPrismEnabled(prev => !prev);
+    setIsPrismEnabled(prev => {
+      const next = !prev;
+      isPrismEnabledRef.current = next;
+      return next;
+    });
   }, []);
 
   // Edit a message and create a new branch
@@ -278,7 +288,7 @@ export const useChat = () => {
         
         let aiResponse: ChatMessage;
         
-        if (isPrismEnabled) {
+        if (isPrismEnabledRef.current) {
           const prismResponse = await prismService.generateCompletePrismResponse(
             newContent,
             fullHistory,
@@ -330,7 +340,7 @@ export const useChat = () => {
         
         // Log the exchange
         try {
-          loggingService.logMessage(newContent, aiResponse, 'moonshotai/kimi-k2-instruct', isPrismEnabled);
+          loggingService.logMessage(newContent, aiResponse, 'moonshotai/kimi-k2-instruct', isPrismEnabledRef.current);
         } catch (loggingError) {
           console.error('Logging error (non-fatal):', loggingError);
         }
@@ -344,7 +354,7 @@ export const useChat = () => {
     }
     
     return editedMessage.id;
-  }, [messages, isPrismEnabled]);
+  }, [messages]);
 
   // Navigate to a specific branch
   const navigateToBranch = useCallback((messageId: string) => {
@@ -364,7 +374,10 @@ export const useChat = () => {
         if (message.parentId) {
           const parentBranches = conversationTreeService.getBranches(message.parentId);
           if (parentBranches.length > 1) {
-            const currentIndex = parentBranches.findIndex(b => b.id === message.id);
+            let currentIndex = parentBranches.findIndex(b => b.id === message.id);
+            if (currentIndex === -1) {
+              currentIndex = parentBranches.length - 1;
+            }
             cache.set(message.id, {
               hasBranches: true,
               branchCount: parentBranches.length,
@@ -502,7 +515,7 @@ export const useChat = () => {
       
       let aiResponse: ChatMessage;
       
-      if (isPrismEnabled) {
+      if (isPrismEnabledRef.current) {
         const prismResponse = await prismService.generateCompletePrismResponse(
           parentMessage.content,
           conversationHistory,
@@ -563,7 +576,7 @@ export const useChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isPrismEnabled]);
+  }, [messages]);
 
   const copyMessage = useCallback(async (messageId: string): Promise<boolean> => {
     const message = messages.find(m => m.id === messageId);

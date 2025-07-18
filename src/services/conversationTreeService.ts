@@ -83,6 +83,8 @@ class ConversationTreeService {
   private storageKey = 'prism-conversation-trees';
   private currentTreeId: string | null = null;
   private pendingSaves = new Map<string, ConversationTree>();
+  // Cache trees in memory so we can access unsaved changes immediately
+  private treesCache: Record<string, ConversationTree> = {};
   private saveTimeoutId: number | null = null;
   private readonly SAVE_DEBOUNCE_MS = 500;
 
@@ -92,7 +94,8 @@ class ConversationTreeService {
 
   private initialize(): void {
     // Load existing trees or create first one
-    const trees = this.getAllTrees();
+    const trees = this.loadFromStorage();
+    this.treesCache = trees;
     if (Object.keys(trees).length === 0) {
       this.createNewTree();
     } else {
@@ -147,9 +150,10 @@ class ConversationTreeService {
     // Update the tree's actual nodes reference to be the Map
     tree.nodes = nodesMap;
     tree.lastModified = new Date().toISOString();
-    
-    // Add to pending saves
+
+    // Add to pending saves and update cache immediately
     this.pendingSaves.set(tree.id, tree);
+    this.treesCache[tree.id] = tree;
     
     // Debounce the actual save operation
     this.debouncedSave();
@@ -184,9 +188,10 @@ class ConversationTreeService {
             ...tree,
             nodes: Array.from(tree.nodes.entries())
           };
-          
+
           console.log(`BATCHED SAVE: Tree ${treeId} with ${tree.nodes.size} nodes`);
           trees[treeId] = serializedTree as any;
+          this.treesCache[treeId] = tree;
         });
         
         // Single localStorage write for all batched updates
@@ -213,6 +218,7 @@ class ConversationTreeService {
   private forceSave(tree?: ConversationTree): void {
     if (tree) {
       this.pendingSaves.set(tree.id, tree);
+      this.treesCache[tree.id] = tree;
     }
     
     if (this.saveTimeoutId !== null) {
@@ -223,44 +229,30 @@ class ConversationTreeService {
     this.flushPendingSaves();
   }
 
-  // Get all trees from localStorage
-  getAllTrees(): Record<string, ConversationTree> {
+  // Load trees from localStorage and convert structures
+  private loadFromStorage(): Record<string, ConversationTree> {
     try {
       const stored = localStorage.getItem(this.storageKey);
       const trees = stored ? JSON.parse(stored) : {};
-      
-      // Convert arrays back to Maps
+
       Object.keys(trees).forEach(treeId => {
         const tree = trees[treeId];
-        
-        // Convert nodes to Map
+
         if (Array.isArray(tree.nodes)) {
-          console.log(`LOADING: Tree ${treeId} from localStorage array with ${tree.nodes.length} entries`);
           tree.nodes = new Map(tree.nodes);
         } else if (tree.nodes && typeof tree.nodes === 'object' && !(tree.nodes instanceof Map)) {
-          // Handle case where nodes is stored as an object but needs to be a Map
-          const nodeEntries = Object.entries(tree.nodes);
-          console.log(`LOADING: Tree ${treeId} from localStorage object with ${nodeEntries.length} entries`);
-          tree.nodes = new Map(nodeEntries);
+          tree.nodes = new Map(Object.entries(tree.nodes));
         } else if (!tree.nodes) {
-          // Handle case where nodes is null/undefined
-          console.log(`LOADING: Tree ${treeId} has null/undefined nodes, creating empty Map`);
           tree.nodes = new Map();
         }
-        
-        // Verify the conversion worked
+
         if (!(tree.nodes instanceof Map)) {
-          console.error(`CONVERSION FAILED: Tree ${treeId} nodes is still not a Map:`, typeof tree.nodes, tree.nodes);
           tree.nodes = new Map();
         }
-        
-        // Validate and fix rootNodes array only once after loading
+
         if (tree.nodes && tree.nodes.size > 0) {
           const validRootNodes = tree.rootNodes.filter((rootId: string) => tree.nodes.has(rootId));
           if (validRootNodes.length !== tree.rootNodes.length) {
-            console.log(`WARNING: Tree ${treeId} has invalid root nodes. Reconstructing...`);
-            
-            // If no valid root nodes, try to reconstruct by finding nodes without parents
             if (validRootNodes.length === 0) {
               const actualRootNodes: string[] = [];
               tree.nodes.forEach((node: TreeNode, nodeId: string) => {
@@ -269,14 +261,13 @@ class ConversationTreeService {
                 }
               });
               tree.rootNodes = actualRootNodes;
-              console.log(`Reconstructed root nodes for tree ${treeId}:`, actualRootNodes);
             } else {
               tree.rootNodes = validRootNodes;
             }
           }
         }
       });
-      
+
       return trees;
     } catch (error) {
       console.error('Error loading conversation trees:', error);
@@ -284,9 +275,28 @@ class ConversationTreeService {
     }
   }
 
+  // Get all trees including any pending unsaved changes
+  getAllTrees(): Record<string, ConversationTree> {
+    if (Object.keys(this.treesCache).length === 0) {
+      this.treesCache = this.loadFromStorage();
+    }
+
+    // Merge pending changes into cache
+    this.pendingSaves.forEach((tree, id) => {
+      this.treesCache[id] = tree;
+    });
+
+    return this.treesCache;
+  }
+
   // Get current tree
   getCurrentTree(): ConversationTree | null {
     if (!this.currentTreeId) return null;
+    // Prefer pending changes if available
+    if (this.pendingSaves.has(this.currentTreeId)) {
+      return this.pendingSaves.get(this.currentTreeId)!;
+    }
+
     const trees = this.getAllTrees();
     const tree = trees[this.currentTreeId];
     if (!tree) return null;
@@ -528,6 +538,8 @@ class ConversationTreeService {
     const trees = this.getAllTrees();
     if (trees[treeId]) {
       delete trees[treeId];
+      delete this.treesCache[treeId];
+      this.pendingSaves.delete(treeId);
       
       // Force immediate save for deletion
       const allTrees = Object.fromEntries(

@@ -211,7 +211,30 @@ const arePropsEqual = (prevProps: MessageProps, nextProps: MessageProps): boolea
   
   // Check other relevant props
   if (prevProps.isUser !== nextProps.isUser) return false;
-  
+
+  // Also compare branch navigation info to ensure badges update
+  const prevBranch = prevProps.getBranchInfo?.(prevProps.message.id);
+  const nextBranch = nextProps.getBranchInfo?.(nextProps.message.id);
+
+  const branchChanged = (
+    prev: BranchInfo | null | undefined,
+    next: BranchInfo | null | undefined
+  ): boolean => {
+    if (!prev && !next) return false;
+    if (!prev || !next) return true;
+    if (prev.hasBranches !== next.hasBranches) return true;
+    if (!prev.hasBranches && !next.hasBranches) return false;
+    if (!prev.hasBranches || !next.hasBranches) return true;
+    const prevIndex = prev.currentBranchIndex ?? -1;
+    const nextIndex = next.currentBranchIndex ?? -1;
+    return (
+      prev.branchCount !== next.branchCount ||
+      prevIndex !== nextIndex
+    );
+  };
+
+  if (branchChanged(prevBranch, nextBranch)) return false;
+
   // Functions are assumed to be stable (wrapped in useCallback)
   return true;
 };
