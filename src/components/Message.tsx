@@ -225,9 +225,11 @@ const arePropsEqual = (prevProps: MessageProps, nextProps: MessageProps): boolea
     if (prev.hasBranches !== next.hasBranches) return true;
     if (!prev.hasBranches && !next.hasBranches) return false;
     if (!prev.hasBranches || !next.hasBranches) return true;
+    const prevIndex = prev.currentBranchIndex ?? -1;
+    const nextIndex = next.currentBranchIndex ?? -1;
     return (
       prev.branchCount !== next.branchCount ||
-      prev.currentBranchIndex !== next.currentBranchIndex
+      prevIndex !== nextIndex
     );
   };
 

@@ -374,7 +374,10 @@ export const useChat = () => {
         if (message.parentId) {
           const parentBranches = conversationTreeService.getBranches(message.parentId);
           if (parentBranches.length > 1) {
-            const currentIndex = parentBranches.findIndex(b => b.id === message.id);
+            let currentIndex = parentBranches.findIndex(b => b.id === message.id);
+            if (currentIndex === -1) {
+              currentIndex = parentBranches.length - 1;
+            }
             cache.set(message.id, {
               hasBranches: true,
               branchCount: parentBranches.length,
