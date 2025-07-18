@@ -125,15 +125,37 @@ class ConversationTreeService {
 
   // Save tree to localStorage
   private saveTree(tree: ConversationTree): void {
-    const trees = this.getAllTrees();
+    // Get fresh trees to avoid mutating cached data
+    const stored = localStorage.getItem(this.storageKey);
+    const trees = stored ? JSON.parse(stored) : {};
+    
+    // Ensure tree.nodes is a Map before serializing
+    let nodesMap: Map<string, TreeNode>;
+    if (tree.nodes instanceof Map) {
+      nodesMap = tree.nodes;
+    } else if (Array.isArray(tree.nodes)) {
+      nodesMap = new Map(tree.nodes);
+    } else if (tree.nodes && typeof tree.nodes === 'object') {
+      // Handle case where nodes is an object (could be empty {})
+      const entries = Object.entries(tree.nodes) as [string, TreeNode][];
+      console.log(`Converting object with ${entries.length} entries to Map for tree ${tree.id}`);
+      nodesMap = new Map(entries);
+    } else {
+      console.log(`Creating empty Map for tree ${tree.id} - nodes was:`, typeof tree.nodes, tree.nodes);
+      nodesMap = new Map();
+    }
+    
+    // Update the tree's actual nodes reference to be the Map
+    tree.nodes = nodesMap;
     
     // Convert Map to array for serialization
     const serializedTree = {
       ...tree,
-      nodes: Array.from(tree.nodes instanceof Map ? tree.nodes : []),
+      nodes: Array.from(nodesMap.entries()),
       lastModified: new Date().toISOString()
     };
     
+    console.log(`SAVING: Tree ${tree.id} with ${nodesMap.size} nodes -> localStorage array length: ${serializedTree.nodes.length}`);
     trees[tree.id] = serializedTree as any;
     localStorage.setItem(this.storageKey, JSON.stringify(trees));
   }
@@ -146,12 +168,49 @@ class ConversationTreeService {
       
       // Convert arrays back to Maps
       Object.keys(trees).forEach(treeId => {
-        if (Array.isArray(trees[treeId].nodes)) {
-          trees[treeId].nodes = new Map(trees[treeId].nodes);
-        } else if (trees[treeId].nodes && typeof trees[treeId].nodes === 'object' && !(trees[treeId].nodes instanceof Map)) {
+        const tree = trees[treeId];
+        
+        // Convert nodes to Map
+        if (Array.isArray(tree.nodes)) {
+          console.log(`LOADING: Tree ${treeId} from localStorage array with ${tree.nodes.length} entries`);
+          tree.nodes = new Map(tree.nodes);
+        } else if (tree.nodes && typeof tree.nodes === 'object' && !(tree.nodes instanceof Map)) {
           // Handle case where nodes is stored as an object but needs to be a Map
-          const nodeEntries = Object.entries(trees[treeId].nodes);
-          trees[treeId].nodes = new Map(nodeEntries);
+          const nodeEntries = Object.entries(tree.nodes);
+          console.log(`LOADING: Tree ${treeId} from localStorage object with ${nodeEntries.length} entries`);
+          tree.nodes = new Map(nodeEntries);
+        } else if (!tree.nodes) {
+          // Handle case where nodes is null/undefined
+          console.log(`LOADING: Tree ${treeId} has null/undefined nodes, creating empty Map`);
+          tree.nodes = new Map();
+        }
+        
+        // Verify the conversion worked
+        if (!(tree.nodes instanceof Map)) {
+          console.error(`CONVERSION FAILED: Tree ${treeId} nodes is still not a Map:`, typeof tree.nodes, tree.nodes);
+          tree.nodes = new Map();
+        }
+        
+        // Validate and fix rootNodes array only once after loading
+        if (tree.nodes && tree.nodes.size > 0) {
+          const validRootNodes = tree.rootNodes.filter((rootId: string) => tree.nodes.has(rootId));
+          if (validRootNodes.length !== tree.rootNodes.length) {
+            console.log(`WARNING: Tree ${treeId} has invalid root nodes. Reconstructing...`);
+            
+            // If no valid root nodes, try to reconstruct by finding nodes without parents
+            if (validRootNodes.length === 0) {
+              const actualRootNodes: string[] = [];
+              tree.nodes.forEach((node: TreeNode, nodeId: string) => {
+                if (!node.parentId) {
+                  actualRootNodes.push(nodeId);
+                }
+              });
+              tree.rootNodes = actualRootNodes;
+              console.log(`Reconstructed root nodes for tree ${treeId}:`, actualRootNodes);
+            } else {
+              tree.rootNodes = validRootNodes;
+            }
+          }
         }
       });
       
@@ -166,7 +225,21 @@ class ConversationTreeService {
   getCurrentTree(): ConversationTree | null {
     if (!this.currentTreeId) return null;
     const trees = this.getAllTrees();
-    return trees[this.currentTreeId] || null;
+    const tree = trees[this.currentTreeId];
+    if (!tree) return null;
+    
+    // Ensure the tree's nodes is always a Map
+    if (!(tree.nodes instanceof Map)) {
+      if (Array.isArray(tree.nodes)) {
+        tree.nodes = new Map(tree.nodes);
+      } else if (tree.nodes && typeof tree.nodes === 'object') {
+        tree.nodes = new Map(Object.entries(tree.nodes));
+      } else {
+        tree.nodes = new Map();
+      }
+    }
+    
+    return tree;
   }
 
   // Add a node to the current tree
@@ -204,6 +277,17 @@ class ConversationTreeService {
       tree.rootNodes.push(completeNode.id);
     }
 
+    // Ensure tree.nodes is a Map
+    if (!(tree.nodes instanceof Map)) {
+      if (Array.isArray(tree.nodes)) {
+        tree.nodes = new Map(tree.nodes);
+      } else if (tree.nodes && typeof tree.nodes === 'object') {
+        tree.nodes = new Map(Object.entries(tree.nodes));
+      } else {
+        tree.nodes = new Map();
+      }
+    }
+
     // Add node to tree
     tree.nodes.set(completeNode.id, completeNode);
     tree.metadata.totalNodes++;
@@ -231,7 +315,16 @@ class ConversationTreeService {
   // Load a branch starting from a specific node
   loadBranch(nodeId: string, includeAncestors: boolean = true): TreeNode[] {
     const tree = this.getCurrentTree();
-    if (!tree || !tree.nodes.has(nodeId)) return [];
+    
+    if (!tree) {
+      console.log('ERROR: No current tree found');
+      return [];
+    }
+    
+    if (!tree.nodes.has(nodeId)) {
+      console.log(`ERROR: Node ${nodeId} not found in tree ${tree.id}. Available nodes:`, Array.from(tree.nodes.keys()));
+      return [];
+    }
 
     const messages: TreeNode[] = [];
     
@@ -251,6 +344,7 @@ class ConversationTreeService {
     const descendants = this.getDescendants(nodeId, 'first-child');
     messages.push(...descendants);
 
+    console.log(`Loaded branch from ${nodeId}: ${messages.length} messages`);
     return messages;
   }
 
@@ -343,11 +437,26 @@ class ConversationTreeService {
 
   // Switch to a different tree
   switchTree(treeId: string): boolean {
+    console.log(`Switching to tree: ${treeId}`);
     const trees = this.getAllTrees();
+    console.log('Available trees:', Object.keys(trees));
+    
     if (trees[treeId]) {
+      const targetTree = trees[treeId];
+      console.log(`Target tree ${treeId} - nodes size:`, targetTree.nodes?.size, 'metadata totalNodes:', targetTree.metadata?.totalNodes);
+      
+      // Check for data inconsistency
+      if (targetTree.metadata?.totalNodes > 0 && targetTree.nodes?.size === 0) {
+        console.warn(`DATA INCONSISTENCY: Tree ${treeId} metadata says ${targetTree.metadata.totalNodes} nodes but Map has ${targetTree.nodes.size} nodes`);
+        console.warn(`Root nodes:`, targetTree.rootNodes);
+      }
+      
       this.currentTreeId = treeId;
+      const switchedTree = this.getCurrentTree();
+      console.log('After switch - current tree:', switchedTree?.id, 'nodes size:', switchedTree?.nodes.size);
       return true;
     }
+    console.log('ERROR: Tree not found in available trees');
     return false;
   }
 

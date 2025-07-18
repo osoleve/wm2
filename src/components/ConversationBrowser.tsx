@@ -78,9 +78,6 @@ const ConversationBrowser: React.FC<ConversationBrowserProps> = ({
             branches: 0
           }
         };
-      }).filter(conversation => {
-        // Only show conversations that have messages or are the current conversation
-        return conversation.stats.totalMessages > 0 || conversation.id === currentTreeId;
       }).sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime());
 
       setConversations(conversationList);

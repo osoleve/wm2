@@ -69,15 +69,20 @@ export const useChat = () => {
 
   // Initialize from saved tree on mount
   useEffect(() => {
+    console.log('=== Initializing useChat ===');
     const tree = conversationTreeService.getCurrentTree();
+    console.log('Initial tree:', tree?.id, 'Root nodes:', tree?.rootNodes, 'Nodes map size:', tree?.nodes.size);
     if (tree) {
       if (tree.rootNodes.length > 0) {
         // Load the first root node's branch by default
         const firstRootNode = tree.rootNodes[0];
+        console.log('Loading initial branch from root node:', firstRootNode);
         const branch = conversationTreeService.loadBranch(firstRootNode);
+        console.log('Initial branch loaded with messages:', branch.length);
         setMessages(branch);
       } else {
         // Load empty conversation
+        console.log('Loading empty initial conversation');
         setMessages([]);
       }
       setCurrentTreeId(tree.id);
@@ -109,9 +114,14 @@ export const useChat = () => {
     };
     
     // Add to tree
-    conversationTreeService.addNode(userMessage, userMessage.parentId);
+    console.log('Adding user message to tree:', userMessage);
+    const nodeId = conversationTreeService.addNode(userMessage, userMessage.parentId);
+    console.log('User message added with ID:', nodeId);
     
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => {
+      console.log('Setting messages, previous count:', prev.length, 'new count:', prev.length + 1);
+      return [...prev, userMessage];
+    });
     setIsLoading(true);
     setError(null);
 
@@ -180,9 +190,14 @@ export const useChat = () => {
       aiResponse.children = [];
       
       // Add AI response to tree
-      conversationTreeService.addNode(aiResponse, aiResponse.parentId);
+      console.log('Adding AI response to tree:', aiResponse);
+      const responseNodeId = conversationTreeService.addNode(aiResponse, aiResponse.parentId);
+      console.log('AI response added with ID:', responseNodeId);
       
-      setMessages(prev => [...prev, aiResponse]);
+      setMessages(prev => {
+        console.log('Adding AI response to messages, previous count:', prev.length, 'new count:', prev.length + 1);
+        return [...prev, aiResponse];
+      });
       
       // Log the message exchange
       try {
@@ -371,20 +386,27 @@ export const useChat = () => {
 
   // Load a different conversation tree
   const loadTree = useCallback((treeId: string) => {
+    console.log(`=== Loading tree: ${treeId} ===`);
     if (conversationTreeService.switchTree(treeId)) {
       const tree = conversationTreeService.getCurrentTree();
+      console.log('Current tree after switch:', tree?.id, 'Root nodes:', tree?.rootNodes, 'Nodes map size:', tree?.nodes.size);
       if (tree) {
         if (tree.rootNodes.length > 0) {
           const firstRootNode = tree.rootNodes[0];
+          console.log('Loading branch from first root node:', firstRootNode);
           const branch = conversationTreeService.loadBranch(firstRootNode);
+          console.log('Branch loaded with messages:', branch.length);
           setMessages(branch);
         } else {
           // Load empty conversation
+          console.log('Loading empty conversation - no root nodes');
           setMessages([]);
         }
         setCurrentTreeId(treeId);
         setError(null); // Clear any existing errors
       }
+    } else {
+      console.log('Failed to switch to tree:', treeId);
     }
   }, []);
 

@@ -1,0 +1,118 @@
+react-dom_client.js?v=5b2c60dd:17987 Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+loggingService.ts:109 🗂️ New session initialized: session_1752800465718_v1pb9ng3f
+conversationTreeService.ts:189 Converting object to Map for tree d2060d77-4658-4721-a70d-a0e74ac03987: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree 4c70213d-b36b-4f06-90bd-56f950081775: 0 entries
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+useChat.ts:72 === Initializing useChat ===
+useChat.ts:74 Initial tree: 857060f3-80ee-4138-b5b1-4a02e2d90670 Root nodes: Array(1) Nodes map size: 2
+useChat.ts:79 Loading initial branch from root node: 525696e4-89bf-4f09-bdb6-9c0ec641da4e
+conversationTreeService.ts:358 Loaded branch from 525696e4-89bf-4f09-bdb6-9c0ec641da4e: 2 messages
+useChat.ts:81 Initial branch loaded with messages: 2
+useChat.ts:72 === Initializing useChat ===
+useChat.ts:74 Initial tree: 857060f3-80ee-4138-b5b1-4a02e2d90670 Root nodes: Array(1) Nodes map size: 2
+useChat.ts:79 Loading initial branch from root node: 525696e4-89bf-4f09-bdb6-9c0ec641da4e
+conversationTreeService.ts:358 Loaded branch from 525696e4-89bf-4f09-bdb6-9c0ec641da4e: 2 messages
+useChat.ts:81 Initial branch loaded with messages: 2
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+conversationTreeService.ts:189 Converting object to Map for tree d2060d77-4658-4721-a70d-a0e74ac03987: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree 4c70213d-b36b-4f06-90bd-56f950081775: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree 4c70213d-b36b-4f06-90bd-56f950081775: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree 857060f3-80ee-4138-b5b1-4a02e2d90670: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree 857060f3-80ee-4138-b5b1-4a02e2d90670: 0 entries
+conversationTreeService.ts:160 Saving tree a254d031-0b6d-4751-a022-b24f5a51c464 with 0 nodes (serialized array length: 0): EMPTY
+conversationTreeService.ts:160 Saving tree 24e1d969-c946-40b4-809e-adfc445805d6 with 0 nodes (serialized array length: 0): EMPTY
+useChat.ts:389 === Loading tree: 24e1d969-c946-40b4-809e-adfc445805d6 ===
+conversationTreeService.ts:451 Switching to tree: 24e1d969-c946-40b4-809e-adfc445805d6
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:453 Available trees: Array(2)
+conversationTreeService.ts:457 Target tree 24e1d969-c946-40b4-809e-adfc445805d6 - nodes size: 0 metadata totalNodes: 0
+conversationTreeService.ts:467 After switch - current tree: 24e1d969-c946-40b4-809e-adfc445805d6 nodes size: 0
+useChat.ts:392 Current tree after switch: 24e1d969-c946-40b4-809e-adfc445805d6 Root nodes: Array(1) Nodes map size: 0
+useChat.ts:402 Loading empty conversation - no root nodes
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+useChat.ts:117 Adding user message to tree: Object
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:160 Saving tree 24e1d969-c946-40b4-809e-adfc445805d6 with 1 nodes (serialized array length: 1): HAS_DATA
+useChat.ts:119 User message added with ID: 98ddd593-b8d6-4bd7-8e79-4e4fdebdc8e1
+useChat.ts:122 Setting messages, previous count: 0 new count: 1
+useChat.ts:122 Setting messages, previous count: 0 new count: 1
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+useChat.ts:193 Adding AI response to tree: Object
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:160 Saving tree 24e1d969-c946-40b4-809e-adfc445805d6 with 2 nodes (serialized array length: 2): HAS_DATA
+useChat.ts:195 AI response added with ID: 81d2c2db-7e9d-4bd2-8f8e-991b3c3890a9
+loggingService.ts:168 📝 Message logged: msg_1752800500527_qqsegh
+useChat.ts:198 Adding AI response to messages, previous count: 1 new count: 2
+useChat.ts:198 Adding AI response to messages, previous count: 1 new count: 2
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+useChat.ts:117 Adding user message to tree: Object
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:160 Saving tree 24e1d969-c946-40b4-809e-adfc445805d6 with 3 nodes (serialized array length: 3): HAS_DATA
+useChat.ts:119 User message added with ID: d4cfa075-2d2e-4210-9b64-6bf301801e5b
+useChat.ts:122 Setting messages, previous count: 2 new count: 3
+useChat.ts:122 Setting messages, previous count: 2 new count: 3
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+useChat.ts:193 Adding AI response to tree: Object
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:160 Saving tree 24e1d969-c946-40b4-809e-adfc445805d6 with 4 nodes (serialized array length: 4): HAS_DATA
+useChat.ts:195 AI response added with ID: 3c853525-d88b-4c49-a5ad-9e4cff127a21
+loggingService.ts:168 📝 Message logged: msg_1752800509079_45lvdv
+useChat.ts:198 Adding AI response to messages, previous count: 3 new count: 4
+useChat.ts:198 Adding AI response to messages, previous count: 3 new count: 4
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:160 Saving tree ba44a88c-1196-4e38-859a-60842434bc93 with 0 nodes (serialized array length: 0): EMPTY
+loggingService.ts:109 🗂️ New session initialized: session_1752800515202_dag3yhmun
+loggingService.ts:303 🔄 Session cleared, new session started
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+useChat.ts:117 Adding user message to tree: Object
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree 24e1d969-c946-40b4-809e-adfc445805d6: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree 24e1d969-c946-40b4-809e-adfc445805d6: 0 entries
+conversationTreeService.ts:160 Saving tree ba44a88c-1196-4e38-859a-60842434bc93 with 1 nodes (serialized array length: 1): HAS_DATA
+useChat.ts:119 User message added with ID: f3137657-71c4-405e-b602-1f4809be9f3e
+useChat.ts:122 Setting messages, previous count: 0 new count: 1
+useChat.ts:122 Setting messages, previous count: 0 new count: 1
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree 24e1d969-c946-40b4-809e-adfc445805d6: 0 entries
+useChat.ts:193 Adding AI response to tree: Object
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree 24e1d969-c946-40b4-809e-adfc445805d6: 0 entries
+conversationTreeService.ts:160 Saving tree ba44a88c-1196-4e38-859a-60842434bc93 with 2 nodes (serialized array length: 2): HAS_DATA
+useChat.ts:195 AI response added with ID: c8be0de7-e0d8-4332-a96d-a27c01349069
+useChat.ts:198 Adding AI response to messages, previous count: 1 new count: 2
+loggingService.ts:168 📝 Message logged: msg_1752800518459_1rnw4d
+useChat.ts:198 Adding AI response to messages, previous count: 1 new count: 2
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+conversationTreeService.ts:189 Converting object to Map for tree a254d031-0b6d-4751-a022-b24f5a51c464: 0 entries
+conversationTreeService.ts:189 Converting object to Map for tree 24e1d969-c946-40b4-809e-adfc445805d6: 0 entries
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
+Chat.tsx:158 Chat render - isLoggingDashboardOpen: false
