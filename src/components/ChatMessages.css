@@ -10,6 +10,7 @@
   scrollbar-color: var(--border-light) transparent;
   min-height: 0;
   max-height: 100%; /* Constrain to available space */
+  contain: strict; /* Prevent layout shifts affecting parent container */
 }
 
 /* Remove padding when showing empty state */
@@ -242,13 +243,12 @@
   border-bottom-left-radius: 0.5rem;
   max-width: 200px;
   margin-bottom: 1rem;
-  min-height: 48px; /* Stable height to prevent layout shifts */
+  height: 48px; /* Fixed height to prevent layout shifts */
   box-shadow: 
     var(--shadow-medium),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
-  will-change: auto; /* Optimize for dynamic addition/removal */
-  animation: fadeInTyping 0.2s ease-out;
+  will-change: transform; /* Optimize for stable animations */
 }
 
 @keyframes fadeInTyping {

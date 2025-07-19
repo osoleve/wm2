@@ -110,7 +110,11 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   }, []);
 
   const scrollToBottom = (): void => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current && chatMessagesRef.current) {
+      // Use scrollTop instead of scrollIntoView to prevent height expansion
+      const container = chatMessagesRef.current;
+      container.scrollTop = container.scrollHeight;
+    }
   };
 
   const isNearBottom = (): boolean => {
@@ -135,10 +139,10 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
       const shouldScroll = lastMessage.role === 'assistant' || isNearBottom();
       
       if (shouldScroll) {
-        // Small delay to ensure DOM has updated
-        setTimeout(() => {
+        // Use requestAnimationFrame for smooth, consistent scroll timing
+        requestAnimationFrame(() => {
           scrollToBottom();
-        }, 50);
+        });
       }
     }
   }, [messages]);
@@ -148,9 +152,10 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
     if (isLoading && messages.length > 0) {
       // When loading starts, scroll to bottom if user was near bottom
       if (isNearBottom()) {
-        setTimeout(() => {
+        // Use requestAnimationFrame for smoother scroll timing
+        requestAnimationFrame(() => {
           scrollToBottom();
-        }, 100); // Slight delay to ensure typing indicator is rendered
+        });
       }
     }
   }, [isLoading]);

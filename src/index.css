@@ -787,8 +787,8 @@ input, textarea, select {
 .ambient-light::after {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
+  top: -75%;
+  left: -75%;
   width: 200%;
   height: 200%;
   background: conic-gradient(
@@ -799,15 +799,11 @@ input, textarea, select {
     rgba(155, 143, 180, 0.02) 270deg,
     transparent 360deg
   );
-  animation: ambientRotate 30s linear infinite;
+  backdrop-filter: blur(32px);
   pointer-events: none;
   z-index: -1;
 }
 
-@keyframes ambientRotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 
 /* Philosophical Loading States */
 .thinking-indicator {

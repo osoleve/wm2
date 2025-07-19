@@ -3,9 +3,9 @@
   margin-bottom: 1.25rem;
   display: flex;
   flex-direction: column;
-  animation: messageSlide var(--animation-normal) var(--ease-out-expo);
   position: relative;
   padding-bottom: 2rem;
+  contain: layout; /* Prevent layout shifting */
 }
 
 .message-wrapper::after {
@@ -94,8 +94,9 @@
   border-radius: 1.5rem;
   position: relative;
   word-break: break-word;
-  transition: all var(--animation-fast) ease;
+  transition: transform var(--animation-fast) ease, box-shadow var(--animation-fast) ease;
   backdrop-filter: blur(10px);
+  contain: layout style; /* Prevent layout shifting during content changes */
 }
 
 /* Advanced message hover effects */
