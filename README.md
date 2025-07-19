@@ -1,91 +1,101 @@
-# React Chat App with OpenRouter
+# Wittgenstein's Monster (W.M.)
 
-A modern chat application built with React and Vite that integrates with OpenRouter API using the OpenAI SDK. This app allows you to chat with various AI models through a beautiful, responsive interface.
+A React-based AI chat application with a unique "Prism" mode that analyzes questions through 498 different theoretical perspectives.
 
 ## Features
 
-- 🤖 Multiple AI model support (GPT-3.5, GPT-4, Claude, Llama, etc.)
-- 💬 Real-time chat interface with message history
-- 🎨 Modern, responsive design with smooth animations
-- ⚡ Fast development with Vite
-- 🔄 Loading states and error handling
-- 📱 Mobile-friendly interface
+- **Multi-Model AI Chat**: Support for OpenRouter (GPT-4, Claude, Llama) and GROQ APIs
+- **Prism Mode**: Unique multi-perspective analysis using 498 theoretical frameworks
+- **Conversation Trees**: Branching conversations with edit history and version control
+- **Real-time Streaming**: Live response streaming with error recovery
+- **Responsive Design**: Mobile-first design from 320px to 4K displays
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
-
-- Node.js (v18 or higher)
-- OpenRouter API key (get one at [openrouter.ai](https://openrouter.ai/keys))
-
-### Installation
-
-1. Clone the repository or use this as a template
-2. Install dependencies:
+1. **Install dependencies**:
    ```bash
    npm install
    ```
 
-3. Set up your environment variables:
+2. **Set up environment variables**:
    ```bash
-   cp .env.example .env
-   ```
-   
-4. Edit `.env` and add your OpenRouter API key:
-   ```
-   VITE_OPENROUTER_API_KEY=your_actual_api_key_here
+   # Create .env file with your API keys
+   VITE_OPENROUTER_API_KEY=your_openrouter_key
+   VITE_GROQ_API_KEY=your_groq_key
    ```
 
-5. Start the development server:
+3. **Start development server**:
    ```bash
-   npm run dev
+   npm run dev:netlify
    ```
 
-### Available Models
+## Development Commands
 
-The app comes pre-configured with several popular models:
-- OpenAI GPT-3.5 Turbo
-- OpenAI GPT-4
-- Anthropic Claude 3 Haiku
-- Meta Llama 3 8B
+```bash
+# Development with API (recommended)
+npm run dev:netlify
 
-You can easily add more models by editing the `models` array in `src/components/ChatInput.jsx`.
+# UI-only development
+npm run dev
+
+# Build for production
+npm run build
+
+# TypeScript type checking
+npm run type-check
+
+# Testing
+npm test              # Run tests in watch mode
+npm run test:run      # Run tests once
+npm run test:coverage # Run tests with coverage
+```
+
+## Architecture
+
+### Core Technologies
+- React 19.1.0 with TypeScript
+- Vite 7.0.4 for build tooling
+- CSS Modules with custom properties
+- Netlify Functions for API proxying
+
+### Key Features
+
+**Message Tree System**: Advanced conversation management with branching paths, edit history, and UUID-based tracking.
+
+**Prism Mode**: AI-driven perspective selection from 498 theoretical frameworks with parallel processing and synthesis generation.
+
+**Dual API Architecture**: Runtime switching between OpenRouter and GROQ providers with fallback strategies.
 
 ## Project Structure
 
 ```
 src/
 ├── components/          # React components
-│   ├── Chat.jsx        # Main chat container
-│   ├── ChatInput.jsx   # Message input component
-│   ├── ChatMessages.jsx # Messages display
-│   └── Message.jsx     # Individual message component
-├── hooks/              # Custom React hooks
-│   └── useChat.js      # Chat state management
-├── services/           # API services
-│   └── chatService.js  # OpenRouter API integration
-└── App.jsx            # Main app component
+│   ├── Chat.tsx        # Main chat container
+│   ├── ChatMessages.tsx # Message rendering
+│   └── Message.tsx     # Individual messages
+├── hooks/
+│   └── useChat.ts      # Central state management
+├── services/           # API and data services
+│   ├── chatService.ts  # API integration
+│   ├── prismService.ts # Multi-perspective analysis
+│   └── conversationTreeService.ts # Tree persistence
+└── types/              # TypeScript definitions
+
+public/prism/           # 498 theoretical perspectives (read-only)
+netlify/functions/      # API proxy functions
 ```
-
-## Build for Production
-
-```bash
-npm run build
-```
-
-The built files will be in the `dist` directory.
-
-## Technologies Used
-
-- **React** - UI library
-- **Vite** - Build tool and dev server
-- **OpenAI SDK** - For OpenRouter API integration
-- **CSS Modules** - Component styling
 
 ## Contributing
 
-Feel free to submit issues and enhancement requests!
+1. Use `npm run type-check` before commits
+2. Follow existing TypeScript patterns
+3. Test components with `npm test`
+4. Never modify files in `public/prism/`
 
-## License
+## Environment Setup
 
-This project is open source and available under the [MIT License](LICENSE).
+- Requires Node.js and npm
+- API keys needed for full functionality
+- Use `npm run dev:netlify` for complete development environment
+- Character limit: 16,384 per message

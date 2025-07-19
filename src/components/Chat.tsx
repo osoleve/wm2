@@ -31,8 +31,6 @@ const Chat: React.FC = () => {
     currentTreeId
   } = useChat();
   
-  // Check if we're in development mode
-  const isDevelopment = import.meta.env.DEV;
   
   // Default chat model is Haiku
   const [provider, setProvider] = useState<Provider>('groq'); // Start with GROQ as default
@@ -158,7 +156,6 @@ const Chat: React.FC = () => {
     };
   }, [isMobileMenuOpen]);
 
-  console.log('Chat render - isLoggingDashboardOpen:', isLoggingDashboardOpen);
 
   return (
     <div className="chat-container">
@@ -167,45 +164,41 @@ const Chat: React.FC = () => {
           <h1 className={isPrismEnabled ? 'prism-enabled' : ''}>{isPrismEnabled ? 'Prism' : 'Iris'}</h1>
         </div>
         <div className="header-controls">
-          {isDevelopment && (
-            <div className="provider-toggle">
-              <span style={{ fontSize: '0.9rem', color: '#666' }}>Provider:</span>
-              <button
-                onClick={() => setProvider('openrouter')}
-                style={{ 
-                  fontWeight: provider === 'openrouter' ? 'bold' : 'normal',
-                  background: provider === 'openrouter' ? '#007acc' : 'transparent',
-                  color: provider === 'openrouter' ? 'white' : '#666',
-                  border: '1px solid #ddd',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem'
-                }}
-              >OpenRouter</button>
-              <button
-                onClick={() => setProvider('groq')}
-                style={{ 
-                  fontWeight: provider === 'groq' ? 'bold' : 'normal',
-                  background: provider === 'groq' ? '#007acc' : 'transparent',
-                  color: provider === 'groq' ? 'white' : '#666',
-                  border: '1px solid #ddd',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem'
-                }}
-              >GROQ</button>
-            </div>
-          )}
-          {isDevelopment && (
-            <div className="desktop-system-prompt-toggle">
-              <SystemPromptToggle
-                isEnabled={isSystemPromptEnabled}
-                onToggle={() => setIsSystemPromptEnabled(prev => !prev)}
-              />
-            </div>
-          )}
+          <div className="provider-toggle">
+            <span style={{ fontSize: '0.9rem', color: '#666' }}>Provider:</span>
+            <button
+              onClick={() => setProvider('openrouter')}
+              style={{ 
+                fontWeight: provider === 'openrouter' ? 'bold' : 'normal',
+                background: provider === 'openrouter' ? '#007acc' : 'transparent',
+                color: provider === 'openrouter' ? 'white' : '#666',
+                border: '1px solid #ddd',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.8rem'
+              }}
+            >OpenRouter</button>
+            <button
+              onClick={() => setProvider('groq')}
+              style={{ 
+                fontWeight: provider === 'groq' ? 'bold' : 'normal',
+                background: provider === 'groq' ? '#007acc' : 'transparent',
+                color: provider === 'groq' ? 'white' : '#666',
+                border: '1px solid #ddd',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.8rem'
+              }}
+            >GROQ</button>
+          </div>
+          <div className="desktop-system-prompt-toggle">
+            <SystemPromptToggle
+              isEnabled={isSystemPromptEnabled}
+              onToggle={() => setIsSystemPromptEnabled(prev => !prev)}
+            />
+          </div>
           <button 
             className="mobile-model-indicator"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -275,78 +268,74 @@ const Chat: React.FC = () => {
             </div>
             
             <div className="mobile-menu-content">
-              {isDevelopment && (
-                <div className="model-section">
-                  <label className="model-label">
-                    Provider
-                  </label>
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                    <button
-                      onClick={() => {
-                        setProvider('openrouter');
-                        if (window.navigator.vibrate) {
-                          window.navigator.vibrate(10);
-                        }
-                      }}
-                      style={{ 
-                        flex: 1,
-                        fontWeight: provider === 'openrouter' ? 'bold' : 'normal',
-                        background: provider === 'openrouter' ? '#007acc' : 'transparent',
-                        color: provider === 'openrouter' ? 'white' : '#666',
-                        border: '1px solid #ddd',
-                        padding: '8px 12px',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
-                    >OpenRouter</button>
-                    <button
-                      onClick={() => {
-                        setProvider('groq');
-                        if (window.navigator.vibrate) {
-                          window.navigator.vibrate(10);
-                        }
-                      }}
-                      style={{ 
-                        flex: 1,
-                        fontWeight: provider === 'groq' ? 'bold' : 'normal',
-                        background: provider === 'groq' ? '#007acc' : 'transparent',
-                        color: provider === 'groq' ? 'white' : '#666',
-                        border: '1px solid #ddd',
-                        padding: '8px 12px',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
-                    >GROQ</button>
-                  </div>
-                </div>
-              )}
-              
-              {isDevelopment && (
-                <div className="model-section">
-                  <label className="model-label">
-                    Chat Model
-                  </label>
-                  <select 
-                    value={selectedModel} 
-                    onChange={(e) => {
-                      setSelectedModel(e.target.value);
-                      // Add haptic feedback if available
+              <div className="model-section">
+                <label className="model-label">
+                  Provider
+                </label>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                  <button
+                    onClick={() => {
+                      setProvider('openrouter');
                       if (window.navigator.vibrate) {
                         window.navigator.vibrate(10);
                       }
                     }}
-                    className="model-select-mobile"
-                  >
-                    {models.map((model: Model) => (
-                      <option key={model.id} value={model.id}>
-                        {model.name}
-                      </option>
-                    ))}
-                  </select>
+                    style={{ 
+                      flex: 1,
+                      fontWeight: provider === 'openrouter' ? 'bold' : 'normal',
+                      background: provider === 'openrouter' ? '#007acc' : 'transparent',
+                      color: provider === 'openrouter' ? 'white' : '#666',
+                      border: '1px solid #ddd',
+                      padding: '8px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >OpenRouter</button>
+                  <button
+                    onClick={() => {
+                      setProvider('groq');
+                      if (window.navigator.vibrate) {
+                        window.navigator.vibrate(10);
+                      }
+                    }}
+                    style={{ 
+                      flex: 1,
+                      fontWeight: provider === 'groq' ? 'bold' : 'normal',
+                      background: provider === 'groq' ? '#007acc' : 'transparent',
+                      color: provider === 'groq' ? 'white' : '#666',
+                      border: '1px solid #ddd',
+                      padding: '8px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >GROQ</button>
                 </div>
-              )}
+              </div>
               
-              {isDevelopment && isPrismEnabled && (
+              <div className="model-section">
+                <label className="model-label">
+                  Chat Model
+                </label>
+                <select 
+                  value={selectedModel} 
+                  onChange={(e) => {
+                    setSelectedModel(e.target.value);
+                    // Add haptic feedback if available
+                    if (window.navigator.vibrate) {
+                      window.navigator.vibrate(10);
+                    }
+                  }}
+                  className="model-select-mobile"
+                >
+                  {models.map((model: Model) => (
+                    <option key={model.id} value={model.id}>
+                      {model.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {isPrismEnabled && (
                 <div className="model-section">
                   <label className="model-label">
                     Prism Analysis Model
@@ -377,14 +366,12 @@ const Chat: React.FC = () => {
                   isLoading={isLoading}
                 />
               </div>
-              {isDevelopment && (
-                <div className="mobile-prism-section">
-                  <SystemPromptToggle
-                    isEnabled={isSystemPromptEnabled}
-                    onToggle={() => setIsSystemPromptEnabled(prev => !prev)}
-                  />
-                </div>
-              )}
+              <div className="mobile-prism-section">
+                <SystemPromptToggle
+                  isEnabled={isSystemPromptEnabled}
+                  onToggle={() => setIsSystemPromptEnabled(prev => !prev)}
+                />
+              </div>
               
               {/* Additional menu actions */}
               <div className="mobile-menu-actions">

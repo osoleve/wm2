@@ -83,11 +83,8 @@ const LoggingDashboard: React.FC<LoggingDashboardProps> = ({ isOpen, onClose }) 
 
   const loadData = (): void => {
     try {
-      console.log('Loading logging data...');
       const sessionSummaries = loggingService.getAllSessionSummaries();
       const analyticsData = loggingService.getAnalytics();
-      console.log('Session summaries:', sessionSummaries);
-      console.log('Analytics data:', analyticsData);
       setSessions(sessionSummaries);
       setAnalytics(analyticsData);
     } catch (error) {

@@ -6,7 +6,6 @@ interface SimpleLoggingDashboardProps {
 }
 
 const SimpleLoggingDashboard: React.FC<SimpleLoggingDashboardProps> = ({ isOpen, onClose }) => {
-  console.log('SimpleLoggingDashboard render, isOpen:', isOpen);
   
   if (!isOpen) return null;
 
