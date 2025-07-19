@@ -2,11 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Wittgenstein's Monster (W.M.) - AI Chat Application
+## Project Overview
 
-A React-based AI chat application with a unique "Prism" mode that analyzes questions through 498 different theoretical perspectives.
+### Wittgenstein's Monster (W.M.) - AI Chat Application
+A React-based AI chat application with a unique "Prism" mode that analyzes questions through any of hundreds of analytical lenses.
+
+### Monster's Garden (TODO)
+A secondary screen the monster may share the "link" to, which displays a garden grown from L-systems. It starts with a default set of plants, but once unlocked the user may allow the monster to "tend to its garden" (add, update, or remove plants up to some number of times). The plants are stored in a local key-value store.
 
 ## Development Commands
+
+### Dev Server Setup
+There is almost certainly a server already running on port 5174, but if not, you can start it with:
 
 ```bash
 # Development with API (recommended)
@@ -14,7 +21,10 @@ npm run dev:netlify
 
 # UI-only development
 npm run dev
+```
 
+### Build and Testing
+```bash
 # Build for production
 npm run build
 
