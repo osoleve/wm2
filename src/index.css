@@ -784,7 +784,7 @@ input, textarea, select {
   overflow: hidden;
 }
 
-.ambient-light::after {
+/* .ambient-light::after {
   content: '';
   position: absolute;
   top: -75%;
@@ -802,7 +802,7 @@ input, textarea, select {
   backdrop-filter: blur(32px);
   pointer-events: none;
   z-index: -1;
-}
+} */
 
 
 /* Philosophical Loading States */
