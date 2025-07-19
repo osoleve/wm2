@@ -3,9 +3,9 @@
   margin-bottom: 1.25rem;
   display: flex;
   flex-direction: column;
+  animation: messageSlide var(--animation-normal) var(--ease-out-expo);
   position: relative;
   padding-bottom: 2rem;
-  contain: layout; /* Prevent layout shifting */
 }
 
 .message-wrapper::after {
@@ -94,9 +94,8 @@
   border-radius: 1.5rem;
   position: relative;
   word-break: break-word;
-  transition: transform var(--animation-fast) ease, box-shadow var(--animation-fast) ease;
+  transition: all var(--animation-fast) ease;
   backdrop-filter: blur(10px);
-  contain: layout style; /* Prevent layout shifting during content changes */
 }
 
 /* Advanced message hover effects */
@@ -227,7 +226,6 @@
   }
 }
 
-/* Refined Prism tabs */
 .prism-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -237,8 +235,6 @@
   border-bottom: 1px solid var(--amber-muted);
   position: relative;
 }
-
-/* Remove the old gradient effect */
 
 .prism-tab {
   background: var(--bg-secondary);
@@ -256,7 +252,6 @@
 
 .prism-tab:hover {
   background: var(--amber-light);
-  /* border color removed */
   color: var(--text-primary);
   transform: translateY(-2px) scale(1.02);
   box-shadow: 
@@ -266,7 +261,6 @@
 
 .prism-tab.active {
   background: var(--gradient-amber);
-  /* border removed */
   color: var(--bg-primary);
   font-weight: 500;
   box-shadow: 
@@ -313,8 +307,6 @@
     var(--shadow-glow-amber),
     inset 0 1px 0 var(--amber-muted);
 }
-
-/* Add this to your Message.css file */
 
 /* Luxe Prism tabs - understated prismatic elegance */
 .prism-tabs.luxe {
@@ -582,7 +574,7 @@
   white-space: pre-wrap;
   font-size: 0.9375rem;
   font-weight: 400;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.001em;
 }
 
 /* Better readability for AI responses */
@@ -605,17 +597,16 @@
   gap: 0.5rem;
   opacity: 0;
   transition: opacity var(--animation-fast) ease;
-  justify-content: center;
-  align-self: center;
-  position: absolute;
-  bottom: 0.25rem;
-  left: 50%;
-  transform: translateX(-50%);
+  justify-content: right;
+  align-self: auto;
+  position: relative;
+  /* bottom: 25%; */
+  /* left: 75%; */
+  /* transform: translateX(-50%); */
   z-index: 10;
   padding: 0.5rem;
   pointer-events: auto;
 }
-
 .message-controls.visible {
   opacity: 1;
 }
@@ -861,6 +852,23 @@
 
   .perspective-count {
     display: none; /* Hide on mobile to save space */
+  }
+}
+
+.streaming-cursor {
+  display: inline-block;
+  animation: blink 1s infinite;
+  color: var(--sage-luminous);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
   }
 }
 
