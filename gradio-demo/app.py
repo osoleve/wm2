@@ -9,13 +9,16 @@ import asyncio
 import httpx
 import gradio as gr
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 # Configuration
+HF_TOKEN = os.environ.get("HF_TOKEN", "")
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
-DEFAULT_MODEL = "moonshotai/kimi-k2"
+
+# Default models for each provider
+HF_MODEL = "Qwen/Qwen2.5-72B-Instruct"  # Free on HF Inference API
+OPENROUTER_MODEL = "moonshotai/kimi-k2"
 GROQ_MODEL = "moonshotai/kimi-k2-instruct"
 
 # All 498 theoretical lenses
@@ -195,7 +198,43 @@ def load_lens_prompt(lens_name: str, prism_dir: Optional[Path] = None) -> str:
     return get_fallback_prompt(lens_name)
 
 
-async def call_openrouter(messages: list[dict], model: str = DEFAULT_MODEL, temperature: float = 0.7) -> str:
+async def call_huggingface(messages: list[dict], model: str = HF_MODEL, temperature: float = 0.7) -> str:
+    """Make an API call to HuggingFace Inference API."""
+    # HuggingFace Inference API uses a different format
+    # Convert messages to a prompt string for text-generation models
+    # or use the chat completion endpoint for chat models
+
+    headers = {
+        "Content-Type": "application/json",
+    }
+    if HF_TOKEN:
+        headers["Authorization"] = f"Bearer {HF_TOKEN}"
+
+    async with httpx.AsyncClient(timeout=180.0) as client:
+        # Use the chat completions endpoint (OpenAI-compatible)
+        response = await client.post(
+            f"https://api-inference.huggingface.co/models/{model}/v1/chat/completions",
+            headers=headers,
+            json={
+                "model": model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": 2048,
+            }
+        )
+
+        if response.status_code == 503:
+            # Model is loading, wait and retry
+            data = response.json()
+            wait_time = data.get("estimated_time", 30)
+            raise Exception(f"Model is loading, please wait ~{int(wait_time)}s and try again")
+
+        response.raise_for_status()
+        data = response.json()
+        return data["choices"][0]["message"]["content"]
+
+
+async def call_openrouter(messages: list[dict], model: str = OPENROUTER_MODEL, temperature: float = 0.7) -> str:
     """Make an API call to OpenRouter."""
     if not OPENROUTER_API_KEY:
         raise ValueError("OPENROUTER_API_KEY not set")
@@ -242,15 +281,17 @@ async def call_groq(messages: list[dict], model: str = GROQ_MODEL, temperature: 
         return data["choices"][0]["message"]["content"]
 
 
-async def call_llm(messages: list[dict], provider: str = "openrouter", model: str = None, temperature: float = 0.7) -> str:
+async def call_llm(messages: list[dict], provider: str = "huggingface", model: str = None, temperature: float = 0.7) -> str:
     """Call the appropriate LLM provider."""
-    if provider == "groq":
+    if provider == "huggingface":
+        return await call_huggingface(messages, model or HF_MODEL, temperature)
+    elif provider == "groq":
         return await call_groq(messages, model or GROQ_MODEL, temperature)
-    else:
-        return await call_openrouter(messages, model or DEFAULT_MODEL, temperature)
+    else:  # openrouter
+        return await call_openrouter(messages, model or OPENROUTER_MODEL, temperature)
 
 
-async def select_lenses(question: str, provider: str = "openrouter", model: str = None, min_lenses: int = 5, max_lenses: int = 8) -> list[str]:
+async def select_lenses(question: str, provider: str = "huggingface", model: str = None, min_lenses: int = 5, max_lenses: int = 8) -> list[str]:
     """Use AI to select the most relevant theoretical lenses for a question."""
     selection_prompt = f"""You are a meta-analytical AI that selects the most relevant theoretical lenses for analyzing a given question or topic.
 
@@ -278,7 +319,15 @@ Your response:"""
 
     try:
         response = await call_llm(messages, provider, model)
-        selected = json.loads(response.strip())
+        # Try to extract JSON from the response
+        response_text = response.strip()
+        # Handle cases where the model wraps JSON in markdown code blocks
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
+
+        selected = json.loads(response_text)
         # Validate
         valid = [lens for lens in selected if lens in PRISM_LENSES]
         if valid:
@@ -292,7 +341,7 @@ Your response:"""
     return random.sample(PRISM_LENSES, count)
 
 
-async def generate_lens_response(question: str, lens_name: str, provider: str = "openrouter", model: str = None) -> tuple[str, str]:
+async def generate_lens_response(question: str, lens_name: str, provider: str = "huggingface", model: str = None) -> tuple[str, str]:
     """Generate a response from a single lens perspective."""
     lens_prompt = load_lens_prompt(lens_name)
 
@@ -308,7 +357,7 @@ async def generate_lens_response(question: str, lens_name: str, provider: str = 
         return lens_name, f"[Error generating {lens_name} perspective: {str(e)}]"
 
 
-async def generate_all_lens_responses(question: str, selected_lenses: list[str], provider: str = "openrouter", model: str = None) -> list[tuple[str, str]]:
+async def generate_all_lens_responses(question: str, selected_lenses: list[str], provider: str = "huggingface", model: str = None) -> list[tuple[str, str]]:
     """Generate responses from all selected lenses in parallel."""
     tasks = [
         generate_lens_response(question, lens, provider, model)
@@ -317,7 +366,7 @@ async def generate_all_lens_responses(question: str, selected_lenses: list[str],
     return await asyncio.gather(*tasks)
 
 
-async def synthesize_responses(question: str, lens_responses: list[tuple[str, str]], provider: str = "openrouter", model: str = None) -> str:
+async def synthesize_responses(question: str, lens_responses: list[tuple[str, str]], provider: str = "huggingface", model: str = None) -> str:
     """Synthesize all lens responses into a coherent final response."""
     perspectives_section = "\n\n---\n\n".join([
         f"**{lens} Perspective:**\n{response}"
@@ -340,7 +389,7 @@ Your task is to synthesize the multiple perspectives provided into a unified, ge
 
 ## Instruction
 
-Synthesize these perspectives into a coherent, insightful response. Write conversationally, weaving together the key insights without rigidly listing each perspective. Remind the reader that they can explore individual perspectives using the tabs below."""
+Synthesize these perspectives into a coherent, insightful response. Write conversationally, weaving together the key insights without rigidly listing each perspective. Remind the reader that they can explore individual perspectives using the accordion below."""
 
     messages = [
         {"role": "system", "content": synthesis_system},
@@ -350,7 +399,7 @@ Synthesize these perspectives into a coherent, insightful response. Write conver
     return await call_llm(messages, provider, model)
 
 
-async def analyze_with_prism(question: str, provider: str = "openrouter", model: str = None, progress=gr.Progress()) -> tuple[str, dict[str, str], list[str]]:
+async def analyze_with_prism(question: str, provider: str = "huggingface", model: str = None, progress=gr.Progress()) -> tuple[str, dict[str, str], list[str]]:
     """
     Main function to analyze a question through the Prism harness.
 
@@ -362,7 +411,7 @@ async def analyze_with_prism(question: str, provider: str = "openrouter", model:
     if not question.strip():
         return "Please enter a question to analyze.", {}, []
 
-    # Check API keys
+    # Check API keys for paid providers
     if provider == "openrouter" and not OPENROUTER_API_KEY:
         return "Error: OPENROUTER_API_KEY not set. Please configure it in the Space settings.", {}, []
     if provider == "groq" and not GROQ_API_KEY:
@@ -415,7 +464,7 @@ def create_interface():
             The AI selects 5-8 relevant perspectives from **498 theoretical frameworks**,
             generates responses from each, then synthesizes them into a coherent answer.
 
-            *Explore individual lens responses using the tabs below the synthesis.*
+            *Explore individual lens responses in the accordion below the synthesis.*
             """,
             elem_classes=["header-text"]
         )
@@ -430,14 +479,16 @@ def create_interface():
                 )
             with gr.Column(scale=1):
                 provider_select = gr.Dropdown(
-                    choices=["openrouter", "groq"],
-                    value="openrouter",
-                    label="API Provider"
+                    choices=["huggingface", "openrouter", "groq"],
+                    value="huggingface",
+                    label="API Provider",
+                    info="HuggingFace is free!"
                 )
                 model_input = gr.Textbox(
                     label="Model (optional)",
                     placeholder="Leave blank for default",
-                    value=""
+                    value="",
+                    info="HF default: Qwen2.5-72B-Instruct"
                 )
                 submit_btn = gr.Button("Analyze", variant="primary", size="lg")
 
@@ -455,10 +506,9 @@ def create_interface():
             elem_classes=["synthesis-box"]
         )
 
-        # Individual lens responses in tabs
+        # Individual lens responses in accordion
         gr.Markdown("## Individual Lens Responses")
 
-        # We'll use an Accordion for individual responses since tabs are dynamic
         lens_accordion = gr.Accordion("Click to expand individual lens responses", open=False)
 
         with lens_accordion:
@@ -536,7 +586,13 @@ def create_interface():
             The 498 available lenses span philosophy, social sciences, critical theory,
             cultural studies, economics, psychology, and more.
 
-            **API Keys Required:** Set `OPENROUTER_API_KEY` or `GROQ_API_KEY` in your Space settings.
+            ### API Providers
+
+            - **HuggingFace** (default): Free! Uses HF Inference API with Qwen2.5-72B-Instruct
+            - **OpenRouter**: Requires `OPENROUTER_API_KEY` secret
+            - **GROQ**: Requires `GROQ_API_KEY` secret
+
+            For HuggingFace, you can optionally set `HF_TOKEN` for higher rate limits.
             """
         )
 

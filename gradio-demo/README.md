@@ -34,31 +34,55 @@ The 498 theoretical lenses span many disciplines:
 - **Psychology**: Cognitive Theory, Attachment Theory, Positive Psychology...
 - And many more...
 
-## Setup
+## API Providers
 
-### Environment Variables
+### HuggingFace Inference API (Default - Free!)
 
-Set these secrets in your Space settings:
+The demo uses HuggingFace's free Inference API by default. No API key required!
 
-- `OPENROUTER_API_KEY`: Your OpenRouter API key (for GPT-4, Claude, Llama, etc.)
-- `GROQ_API_KEY`: Your GROQ API key (for high-performance inference)
+- **Default model**: `Qwen/Qwen2.5-72B-Instruct`
+- **Optional**: Set `HF_TOKEN` for higher rate limits
+- Works out of the box on HuggingFace Spaces
 
-At least one API key is required for the demo to function.
+### OpenRouter (Optional)
 
-### Local Development
+For access to GPT-4, Claude, and other premium models:
+- Set `OPENROUTER_API_KEY` in your Space secrets
+
+### GROQ (Optional)
+
+For high-performance inference:
+- Set `GROQ_API_KEY` in your Space secrets
+
+## Deployment to HuggingFace Spaces
+
+1. Create a new Space on HuggingFace (select Gradio SDK)
+2. Upload the contents of this directory
+3. The Space will work immediately with HuggingFace's free inference
+4. (Optional) Add API keys for other providers in Space settings
+
+## Local Development
 
 ```bash
 # Install dependencies
 pip install -r requirements.txt
 
-# Set environment variables
-export OPENROUTER_API_KEY="your-key-here"
-# or
-export GROQ_API_KEY="your-key-here"
+# Run the app (uses HuggingFace free inference by default)
+python app.py
 
-# Run the app
+# Or with your own API keys for other providers
+export OPENROUTER_API_KEY="your-key-here"
+export GROQ_API_KEY="your-key-here"
 python app.py
 ```
+
+## Custom Models
+
+You can specify a custom model in the UI:
+
+- **HuggingFace**: Any model on HF Hub with chat support, e.g., `mistralai/Mistral-7B-Instruct-v0.3`
+- **OpenRouter**: Any OpenRouter model, e.g., `anthropic/claude-sonnet-4`
+- **GROQ**: Any GROQ model, e.g., `llama3-70b-8192`
 
 ## Credits
 
