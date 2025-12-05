@@ -13,13 +13,7 @@ from typing import Optional
 
 # Configuration
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
-OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
-
-# Default models for each provider
 HF_MODEL = "Qwen/Qwen2.5-72B-Instruct"  # Free on HF Inference API
-OPENROUTER_MODEL = "moonshotai/kimi-k2"
-GROQ_MODEL = "moonshotai/kimi-k2-instruct"
 
 # All 498 theoretical lenses
 PRISM_LENSES = [
@@ -198,11 +192,9 @@ def load_lens_prompt(lens_name: str, prism_dir: Optional[Path] = None) -> str:
     return get_fallback_prompt(lens_name)
 
 
-async def call_huggingface(messages: list[dict], model: str = HF_MODEL, temperature: float = 0.7) -> str:
+async def call_llm(messages: list[dict], model: str = None, temperature: float = 0.7) -> str:
     """Make an API call to HuggingFace Inference API."""
-    # HuggingFace Inference API uses a different format
-    # Convert messages to a prompt string for text-generation models
-    # or use the chat completion endpoint for chat models
+    model = model or HF_MODEL
 
     headers = {
         "Content-Type": "application/json",
@@ -211,7 +203,6 @@ async def call_huggingface(messages: list[dict], model: str = HF_MODEL, temperat
         headers["Authorization"] = f"Bearer {HF_TOKEN}"
 
     async with httpx.AsyncClient(timeout=180.0) as client:
-        # Use the chat completions endpoint (OpenAI-compatible)
         response = await client.post(
             f"https://api-inference.huggingface.co/models/{model}/v1/chat/completions",
             headers=headers,
@@ -224,7 +215,6 @@ async def call_huggingface(messages: list[dict], model: str = HF_MODEL, temperat
         )
 
         if response.status_code == 503:
-            # Model is loading, wait and retry
             data = response.json()
             wait_time = data.get("estimated_time", 30)
             raise Exception(f"Model is loading, please wait ~{int(wait_time)}s and try again")
@@ -234,64 +224,7 @@ async def call_huggingface(messages: list[dict], model: str = HF_MODEL, temperat
         return data["choices"][0]["message"]["content"]
 
 
-async def call_openrouter(messages: list[dict], model: str = OPENROUTER_MODEL, temperature: float = 0.7) -> str:
-    """Make an API call to OpenRouter."""
-    if not OPENROUTER_API_KEY:
-        raise ValueError("OPENROUTER_API_KEY not set")
-
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        response = await client.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": "https://huggingface.co/spaces",
-            },
-            json={
-                "model": model,
-                "messages": messages,
-                "temperature": temperature,
-            }
-        )
-        response.raise_for_status()
-        data = response.json()
-        return data["choices"][0]["message"]["content"]
-
-
-async def call_groq(messages: list[dict], model: str = GROQ_MODEL, temperature: float = 0.7) -> str:
-    """Make an API call to GROQ."""
-    if not GROQ_API_KEY:
-        raise ValueError("GROQ_API_KEY not set")
-
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        response = await client.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": model,
-                "messages": messages,
-                "temperature": temperature,
-            }
-        )
-        response.raise_for_status()
-        data = response.json()
-        return data["choices"][0]["message"]["content"]
-
-
-async def call_llm(messages: list[dict], provider: str = "huggingface", model: str = None, temperature: float = 0.7) -> str:
-    """Call the appropriate LLM provider."""
-    if provider == "huggingface":
-        return await call_huggingface(messages, model or HF_MODEL, temperature)
-    elif provider == "groq":
-        return await call_groq(messages, model or GROQ_MODEL, temperature)
-    else:  # openrouter
-        return await call_openrouter(messages, model or OPENROUTER_MODEL, temperature)
-
-
-async def select_lenses(question: str, provider: str = "huggingface", model: str = None, min_lenses: int = 5, max_lenses: int = 8) -> list[str]:
+async def select_lenses(question: str, model: str = None, min_lenses: int = 5, max_lenses: int = 8) -> list[str]:
     """Use AI to select the most relevant theoretical lenses for a question."""
     selection_prompt = f"""You are a meta-analytical AI that selects the most relevant theoretical lenses for analyzing a given question or topic.
 
@@ -318,7 +251,7 @@ Your response:"""
     ]
 
     try:
-        response = await call_llm(messages, provider, model)
+        response = await call_llm(messages, model)
         # Try to extract JSON from the response
         response_text = response.strip()
         # Handle cases where the model wraps JSON in markdown code blocks
@@ -341,7 +274,7 @@ Your response:"""
     return random.sample(PRISM_LENSES, count)
 
 
-async def generate_lens_response(question: str, lens_name: str, provider: str = "huggingface", model: str = None) -> tuple[str, str]:
+async def generate_lens_response(question: str, lens_name: str, model: str = None) -> tuple[str, str]:
     """Generate a response from a single lens perspective."""
     lens_prompt = load_lens_prompt(lens_name)
 
@@ -351,22 +284,22 @@ async def generate_lens_response(question: str, lens_name: str, provider: str = 
     ]
 
     try:
-        response = await call_llm(messages, provider, model, temperature=0.9)
+        response = await call_llm(messages, model, temperature=0.9)
         return lens_name, response
     except Exception as e:
         return lens_name, f"[Error generating {lens_name} perspective: {str(e)}]"
 
 
-async def generate_all_lens_responses(question: str, selected_lenses: list[str], provider: str = "huggingface", model: str = None) -> list[tuple[str, str]]:
+async def generate_all_lens_responses(question: str, selected_lenses: list[str], model: str = None) -> list[tuple[str, str]]:
     """Generate responses from all selected lenses in parallel."""
     tasks = [
-        generate_lens_response(question, lens, provider, model)
+        generate_lens_response(question, lens, model)
         for lens in selected_lenses
     ]
     return await asyncio.gather(*tasks)
 
 
-async def synthesize_responses(question: str, lens_responses: list[tuple[str, str]], provider: str = "huggingface", model: str = None) -> str:
+async def synthesize_responses(question: str, lens_responses: list[tuple[str, str]], model: str = None) -> str:
     """Synthesize all lens responses into a coherent final response."""
     perspectives_section = "\n\n---\n\n".join([
         f"**{lens} Perspective:**\n{response}"
@@ -396,10 +329,10 @@ Synthesize these perspectives into a coherent, insightful response. Write conver
         {"role": "user", "content": synthesis_prompt}
     ]
 
-    return await call_llm(messages, provider, model)
+    return await call_llm(messages, model)
 
 
-async def analyze_with_prism(question: str, provider: str = "huggingface", model: str = None, progress=gr.Progress()) -> tuple[str, dict[str, str], list[str]]:
+async def analyze_with_prism(question: str, model: str = None, progress=gr.Progress()) -> tuple[str, dict[str, str], list[str]]:
     """
     Main function to analyze a question through the Prism harness.
 
@@ -411,21 +344,15 @@ async def analyze_with_prism(question: str, provider: str = "huggingface", model
     if not question.strip():
         return "Please enter a question to analyze.", {}, []
 
-    # Check API keys for paid providers
-    if provider == "openrouter" and not OPENROUTER_API_KEY:
-        return "Error: OPENROUTER_API_KEY not set. Please configure it in the Space settings.", {}, []
-    if provider == "groq" and not GROQ_API_KEY:
-        return "Error: GROQ_API_KEY not set. Please configure it in the Space settings.", {}, []
-
     progress(0.1, desc="Selecting relevant theoretical lenses...")
-    selected_lenses = await select_lenses(question, provider, model)
+    selected_lenses = await select_lenses(question, model)
 
     progress(0.3, desc=f"Generating {len(selected_lenses)} perspective responses...")
-    lens_responses_list = await generate_all_lens_responses(question, selected_lenses, provider, model)
+    lens_responses_list = await generate_all_lens_responses(question, selected_lenses, model)
     lens_responses = {lens: response for lens, response in lens_responses_list}
 
     progress(0.8, desc="Synthesizing perspectives...")
-    synthesis = await synthesize_responses(question, lens_responses_list, provider, model)
+    synthesis = await synthesize_responses(question, lens_responses_list, model)
 
     progress(1.0, desc="Complete!")
     return synthesis, lens_responses, selected_lenses
@@ -478,17 +405,11 @@ def create_interface():
                     max_lines=6
                 )
             with gr.Column(scale=1):
-                provider_select = gr.Dropdown(
-                    choices=["huggingface", "openrouter", "groq"],
-                    value="huggingface",
-                    label="API Provider",
-                    info="HuggingFace is free!"
-                )
                 model_input = gr.Textbox(
                     label="Model (optional)",
                     placeholder="Leave blank for default",
                     value="",
-                    info="HF default: Qwen2.5-72B-Instruct"
+                    info="Default: Qwen2.5-72B-Instruct"
                 )
                 submit_btn = gr.Button("Analyze", variant="primary", size="lg")
 
@@ -532,11 +453,11 @@ def create_interface():
                 output.append(f"### {lens}\n\n{response}\n\n---\n")
             return "\n".join(output)
 
-        async def run_analysis(question, provider, model, progress=gr.Progress()):
+        async def run_analysis(question, model, progress=gr.Progress()):
             """Run the prism analysis and return formatted results."""
             model_to_use = model if model.strip() else None
             synthesis, lens_responses, selected = await analyze_with_prism(
-                question, provider, model_to_use, progress
+                question, model_to_use, progress
             )
 
             selected_text = ", ".join(selected) if selected else "None"
@@ -552,7 +473,7 @@ def create_interface():
 
         submit_btn.click(
             fn=run_analysis,
-            inputs=[question_input, provider_select, model_input],
+            inputs=[question_input, model_input],
             outputs=[
                 synthesis_output,
                 selected_lenses_display,
@@ -565,7 +486,7 @@ def create_interface():
         # Also trigger on Enter in the question input
         question_input.submit(
             fn=run_analysis,
-            inputs=[question_input, provider_select, model_input],
+            inputs=[question_input, model_input],
             outputs=[
                 synthesis_output,
                 selected_lenses_display,
@@ -586,13 +507,8 @@ def create_interface():
             The 498 available lenses span philosophy, social sciences, critical theory,
             cultural studies, economics, psychology, and more.
 
-            ### API Providers
-
-            - **HuggingFace** (default): Free! Uses HF Inference API with Qwen2.5-72B-Instruct
-            - **OpenRouter**: Requires `OPENROUTER_API_KEY` secret
-            - **GROQ**: Requires `GROQ_API_KEY` secret
-
-            For HuggingFace, you can optionally set `HF_TOKEN` for higher rate limits.
+            **Powered by HuggingFace Inference API** (free!) using Qwen2.5-72B-Instruct.
+            Optionally set `HF_TOKEN` for higher rate limits.
             """
         )
 
